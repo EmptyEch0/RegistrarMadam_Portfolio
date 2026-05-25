@@ -14,7 +14,7 @@ export function Footer() {
               Dr. G. Jaya Suma
             </h3>
             <p className="text-primary-foreground/80 leading-relaxed max-w-md">
-             Professor with over three decades of distinguished service
+              Director of Academic Audit & Planning (DAA&P), Head of Women Empowerment Cell, and Professor with over three decades of distinguished service
               in academic administration, governance, and institutional
               leadership at premier educational institutions.
             </p>

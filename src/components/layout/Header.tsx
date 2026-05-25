@@ -61,8 +61,8 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 will-change-transform no-print",
         isScrolled
-          ? "bg-card/95 backdrop-blur-md shadow-subtle py-3 border-b border-border/40"
-          : "bg-transparent py-5"
+          ? "bg-card shadow-subtle py-3 border-b border-border/40"
+          : "bg-card py-4 border-b border-border/10"
       )}
     >
       <div className="container-wide px-6 lg:px-12">
@@ -77,7 +77,7 @@ export function Header() {
               Dr. G. Jaya Suma
             </span>
             <span className="text-xs md:text-sm text-muted-foreground tracking-wider uppercase">
-             Professor of JNTU-GV
+             DAA&P | Head of Women Empowerment Cell
             </span>
           </Link>
 

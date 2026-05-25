@@ -12,17 +12,17 @@ const ExperiencePage = () => {
     {
       year: "March 2026",
       endYear: "Present",
-      title: "Professor",
+      title: "DAA&P, Head of Women Empowerment Cell & Professor",
       institution:
-        "Department of Information Technology, JNTU-GV University College of Engineering, Vizianagaram",
-      icon: "🎓",
+        "Jawaharlal Nehru Technological University – Gurajada, Vizianagaram (JNTU-GV)",
+      icon: "🏛️",
       description:
-        "Teaching, research, and academic leadership in the Department of Information Technology.",
+        "Leading academic audit and planning initiatives, spearheading women empowerment programs, and continuing academic leadership as a Professor.",
       responsibilities: [
-        "Delivering lectures and mentoring undergraduate and postgraduate students",
-        "Guiding Ph.D. scholars and leading research initiatives in Data Mining and AI",
+        "Overseeing academic audits and strategic planning for the university",
+        "Leading the Women Empowerment Cell to promote gender equality and support women in academia",
+        "Delivering lectures and guiding Ph.D. scholars in Data Mining and AI",
         "Developing modern curricula and academic programs",
-        "Contributing to department and university-level academic committees",
       ],
     },
     {

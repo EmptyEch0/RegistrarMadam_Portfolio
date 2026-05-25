@@ -104,8 +104,7 @@ const AboutPage = () => {
                 Department of Information Technology at JNTU-GV, University
                 College of Engineering, Vizianagaram (2013–2022), and has
                 recently completed her tenure as the University Registrar of JNTU-GV 
-                (2023–2026). She is currently serving as Professor in the Department 
-                of Information Technology, JNTU-GV, Vizianagaram, Andhra Pradesh.
+                (2023–2026). She is currently serving as the Director of Academic Audit & Planning (DAA&P) and Head of Women Empowerment Cell, alongside her role as a Professor in the Department of Information Technology at JNTU-GV, Vizianagaram, Andhra Pradesh.
               </p>
 
               <p className="text-foreground/80 leading-relaxed text-[17px] hover:text-foreground transition-colors">
@@ -138,7 +137,7 @@ const AboutPage = () => {
                   — Dr. G. Jayasuma
                 </footer>
                 <div className="mt-2 text-sm text-accent tracking-wide">
-                  Professor, Dept. of IT, JNTU-GV
+                  DAA&P, Head of Women Empowerment Cell & Professor, Dept. of IT, JNTU-GV
                 </div>
               </blockquote>
             </div>

@@ -445,17 +445,17 @@ export default function QLearnPage() {
       <Header />
 
       {/* HERO SECTION */}
-      <section className="relative pt-32 pb-16 bg-gradient-to-b from-[#080d21] via-background to-background overflow-hidden border-b border-border/40">
+      <section className="relative pt-32 pb-16 bg-gradient-to-b from-cream-dark via-cream/40 to-background overflow-hidden border-b border-border/40">
         {/* Glow Effects */}
-        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-10 right-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-10 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         
         {/* Particle Grid Effect */}
         <div 
-          className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+          className="absolute inset-0 opacity-[0.04] pointer-events-none" 
           style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '36px 36px'
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.15) 1px, transparent 0)`,
+            backgroundSize: '24px 24px'
           }}
         />
 
