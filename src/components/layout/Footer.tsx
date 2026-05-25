@@ -14,7 +14,7 @@ export function Footer() {
               Dr. G. Jaya Suma
             </h3>
             <p className="text-primary-foreground/80 leading-relaxed max-w-md">
-             Registrar with over three decades of distinguished service
+             Professor with over three decades of distinguished service
               in academic administration, governance, and institutional
               leadership at premier educational institutions.
             </p>
@@ -51,7 +51,7 @@ export function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-accent mt-1 flex-shrink-0" />
                 <span className="text-primary-foreground/80 text-sm">
-                  Office of the Registrar
+                  Department of Information Technology
                   <br />
                   JNTU-GV Gurajada University
                   <br />
@@ -87,7 +87,7 @@ export function Footer() {
             </p>
 
             <p className="text-primary-foreground/60 text-sm">
-              Office of the Registrar, JNTU-GV Gurajada University
+              Department of Information Technology, JNTU-GV Gurajada University
             </p>
 
             {/* Designer Credit */}

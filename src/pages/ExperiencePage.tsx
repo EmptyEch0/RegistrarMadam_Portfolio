@@ -10,14 +10,30 @@ const ExperiencePage = () => {
      =========================== */
   const positions = [
     {
-      year: "Aug 2023",
+      year: "March 2026",
       endYear: "Present",
-      title: "Registrar",
+      title: "Professor",
+      institution:
+        "Department of Information Technology, JNTU-GV University College of Engineering, Vizianagaram",
+      icon: "🎓",
+      description:
+        "Teaching, research, and academic leadership in the Department of Information Technology.",
+      responsibilities: [
+        "Delivering lectures and mentoring undergraduate and postgraduate students",
+        "Guiding Ph.D. scholars and leading research initiatives in Data Mining and AI",
+        "Developing modern curricula and academic programs",
+        "Contributing to department and university-level academic committees",
+      ],
+    },
+    {
+      year: "Aug 2023",
+      endYear: "March 2026",
+      title: "Registrar (Former)",
       institution:
         "Jawaharlal Nehru Technological University – Gurajada, Vizianagaram (JNTU-GV)",
       icon: "🏛️",
       description:
-        "Serving as the chief administrative officer of the university, overseeing academic governance and administration.",
+        "Served as the chief administrative officer of the university, overseeing academic governance and administration.",
       responsibilities: [
         "Supervision of academic and administrative affairs",
         "Coordination with UGC, AICTE, APSCHE, and Government bodies",
@@ -27,7 +43,7 @@ const ExperiencePage = () => {
     },
     {
       year: "Jan 2013",
-      endYear: "Present",
+      endYear: "Aug 2023",
       title: "Professor & Head of the Department (Former)",
       institution:
         "Department of Information Technology, JNTU-GV University College of Engineering, Vizianagaram",
@@ -181,7 +197,7 @@ const ExperiencePage = () => {
                 <Briefcase className="w-5 h-5 text-accent" />
               </div>
               <h3 className="font-serif text-2xl font-semibold text-primary">
-                Registrar Responsibilities
+                Registrar & Administrative Responsibilities (2023 – 2026)
               </h3>
             </div>
             <ul className="list-disc pl-6 space-y-2 text-foreground/80">
@@ -313,7 +329,7 @@ const ExperiencePage = () => {
               </span>
               <br />
               <span className="text-sm">
-                Registrar, JNTU-GV, Vizianagaram
+                Professor, Department of IT, JNTU-GV, Vizianagaram
               </span>
             </footer>
           </blockquote>

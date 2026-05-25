@@ -80,7 +80,7 @@ const AboutPage = () => {
                 <div className="aspect-[3/4] rounded-lg overflow-hidden border-2 border-border bg-background shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02]">
                   <img
                     src={RegistrarImage}
-                    alt="Dr. G. Jayasuma - University Registrar"
+                    alt="Dr. G. Jayasuma - Professor of Information Technology"
                     className="w-full h-full object-cover object-top"
                     loading="lazy"
                   />
@@ -102,9 +102,10 @@ const AboutPage = () => {
                 years of experience in teaching, research, and academic
                 administration. She has served as Professor and Head of the
                 Department of Information Technology at JNTU-GV, University
-                College of Engineering, Vizianagaram (2013–2022), and is
-                currently serving as Professor in IT and Registrar of JNTU-GV,
-                Vizianagaram, Andhra Pradesh.
+                College of Engineering, Vizianagaram (2013–2022), and has
+                recently completed her tenure as the University Registrar of JNTU-GV 
+                (2023–2026). She is currently serving as Professor in the Department 
+                of Information Technology, JNTU-GV, Vizianagaram, Andhra Pradesh.
               </p>
 
               <p className="text-foreground/80 leading-relaxed text-[17px] hover:text-foreground transition-colors">
@@ -137,7 +138,7 @@ const AboutPage = () => {
                   — Dr. G. Jayasuma
                 </footer>
                 <div className="mt-2 text-sm text-accent tracking-wide">
-                  Registrar, JNTU-GV
+                  Professor, Dept. of IT, JNTU-GV
                 </div>
               </blockquote>
             </div>

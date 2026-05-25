@@ -52,7 +52,7 @@ const HomePage = () => {
             <div className="animate-slide-up">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-sm mb-6">
                 <span className="text-sm font-medium tracking-wider uppercase">
-                  Registrar
+                  Professor
                 </span>
               </div>
 
@@ -63,7 +63,7 @@ const HomePage = () => {
               </h1>
 
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
-                Administrative Officer with Nearly three decades of
+                Professor & Academic Leader with nearly three decades of
                 distinguished service in academic governance, institutional
                 leadership, and educational excellence.
               </p>
@@ -114,7 +114,7 @@ const HomePage = () => {
                 <div className="relative aspect-[3/4] rounded-sm overflow-hidden">
   <img
     src={RegistrarImage}
-    alt="Dr. G. JayaSuma - University Registrar"
+    alt="Dr. G. JayaSuma - Professor of Information Technology"
     className="w-full h-full object-cover object-top"
     loading="lazy"
   />

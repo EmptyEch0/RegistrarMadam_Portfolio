@@ -91,7 +91,7 @@ const MediaPage = () => {
         <Mail className="mx-auto text-accent" size={26} />
         <p className="mt-4 text-muted-foreground">
           For interview requests, speaking engagements, or media inquiries,
-          please contact the Office of the Registrar.
+          please contact the Department of Information Technology.
         </p>
         <a
           href="/contact"

@@ -134,7 +134,8 @@ const EducationPage = () => {
     {
       category: "Leadership Roles",
       items: [
-        "Registrar, JNTU-GV, from 03-08-2023 to till date",
+        "Professor, Department of Information Technology, JNTU-GV, from March 2026 to till date",
+        "Registrar, JNTU-GV, from 03-08-2023 to March 2026",
         "Head, Department of Information Technology, JNTUK, University College of Engineering (A), from 25th September 2014 to till date",
         "Member of College Academic Council JNTUK, University College of Engineering (A), 13-07-2017 to till date",
       ],

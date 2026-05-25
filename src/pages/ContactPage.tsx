@@ -53,7 +53,7 @@ const ContactPage = () => {
       icon: MapPin,
       title: "Office Address",
       content: [
-        " Registrar Office",
+        "Department of Information Technology",
         "JNTU-GV (Jawaharlal Nehru Technological University - Gurajada Vizianagaram)",
         "Dwarapudi, Vizianagaram",
         "Andhra Pradesh 535003, India",
@@ -258,10 +258,10 @@ const ContactPage = () => {
         <div className="container-narrow px-6 lg:px-12 text-center">
           <div className="p-6 bg-card rounded-lg border border-border shadow-md">
             <p className="text-muted-foreground text-sm leading-relaxed">
-              <strong className="text-primary">Note:</strong> For urgent matters
-              related to university administration, please contact the Registrar's
-              Office directly during office hours. All official communications
-              should be addressed to the official email address{" "}
+              <strong className="text-primary">Note:</strong> For academic inquiries,
+              research collaborations, or department matters, please contact the
+              Department of Information Technology. All official communications
+              can be sent to the official email address{" "}
               <a href="mailto:registrar@jntugv.edu.in" className="text-accent hover:underline font-medium">
                 registrar@jntugv.edu.in
               </a>

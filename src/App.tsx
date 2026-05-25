@@ -17,6 +17,7 @@ import ContactPage from "./pages/ContactPage";
 import NotFound from "./pages/NotFound";
 import LearningSymposiumPage from "@/pages/LearningSymposiumPage";
 import ScholarsPage from "@/pages/ScholarsPage";
+import QLearnPage from "./pages/QLearnPage";
 
 // ================= ADMIN COMPONENTS =================
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
@@ -58,6 +59,7 @@ export default function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/scholars" element={<ScholarsPage />} />
             <Route path="/learning-symposium" element={<LearningSymposiumPage />} />
+            <Route path="/qlearn" element={<QLearnPage />} />
 
             {/* ================= ADMIN AUTH ================= */}
             <Route path="/admin/login" element={<AdminLogin />} />
