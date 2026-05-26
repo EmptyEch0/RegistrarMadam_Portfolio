@@ -1,22 +1,13 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function ProtectedRoute() {
-  const [status, setStatus] = useState<
-    "loading" | "admin" | "unauthorized"
-  >("loading");
+  const [status, setStatus] = useState<"loading" | "admin" | "unauthorized">("loading");
 
   useEffect(() => {
-    let mounted = true;
-
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-
-      const user = data.session?.user;
-
-      if (user?.app_metadata?.role === "admin") {
+    const checkAuth = () => {
+      const isAuthenticated = localStorage.getItem("admin_authenticated") === "true";
+      if (isAuthenticated) {
         setStatus("admin");
       } else {
         setStatus("unauthorized");
@@ -24,10 +15,6 @@ export default function ProtectedRoute() {
     };
 
     checkAuth();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
 
   if (status === "loading") {

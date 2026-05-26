@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+
 import { Newspaper } from "lucide-react";
 import { GraduationCap } from "lucide-react";
 import { ClipboardList } from "lucide-react";
@@ -39,8 +39,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const logout = () => {
+    localStorage.removeItem("admin_authenticated");
     navigate("/admin/login");
   };
 

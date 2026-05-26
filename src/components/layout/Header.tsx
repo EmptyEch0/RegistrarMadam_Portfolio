@@ -77,7 +77,7 @@ export function Header() {
               Dr. G. Jaya Suma
             </span>
             <span className="text-xs md:text-sm text-muted-foreground tracking-wider uppercase">
-             DAA&P | Head of Women Empowerment Cell
+             Professor
             </span>
           </Link>
 

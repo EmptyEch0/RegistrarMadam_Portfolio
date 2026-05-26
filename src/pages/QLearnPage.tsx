@@ -46,202 +46,2192 @@ interface QuizQuestion {
   explanation: string;
 }
 
-interface TopicData {
+interface ModuleData {
   id: string;
   name: string;
-  icon: string;
-  shortDesc: string;
   description: string;
-  color: string;
-  glowColor: string;
   videos: VideoItem[];
   notes: NoteSnippet[];
   quiz: QuizQuestion[];
 }
 
-const DEFAULT_TOPICS: TopicData[] = [
+interface DomainData {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  color: string;
+  glowColor: string;
+  modules: ModuleData[];
+}
+
+const DEFAULT_DOMAINS: DomainData[] = [
   {
-    id: "intro-quantum",
-    name: "Quantum Computing Basics",
-    icon: "⚛️",
-    shortDesc: "Fundamentals of qubits, superposition, and Bloch sphere representation.",
-    description: "Explore the core physical concepts that distinguish quantum mechanics from classical computation, including representation of qubits, basic mathematical constructs, and Hilbert spaces.",
-    color: "from-blue-600 to-indigo-700",
-    glowColor: "rgba(59, 130, 246, 0.4)",
-    videos: [
+    "id": "quantum-computing",
+    "name": "Quantum Computing",
+    "icon": "\u269b\ufe0f",
+    "description": "Complete 10-module roadmap for Quantum Computing.",
+    "color": "from-blue-600 to-indigo-700",
+    "glowColor": "rgba(59, 130, 246, 0.4)",
+    "modules": [
       {
-        id: "vid-1",
-        title: "Quantum Computing for Computer Scientists",
-        url: "https://www.youtube.com/embed/F_Riqjdh2oM",
-        duration: "1h 28m",
-        description: "A comprehensive introductory talk by Microsoft Research translating quantum mechanics into basic matrix math and programming structures for computer scientists."
+        "id": "mod-1",
+        "name": "Module 1: Mathematics Foundations",
+        "description": "Topics: Linear Algebra, Complex Numbers, Vectors & Matrices, Probability Basics",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Mathematics Foundations Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Mathematics Foundations."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Mathematics Foundations Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Mathematics Foundations."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Mathematics Foundations?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Mathematics Foundations."
+          }
+        ]
       },
       {
-        id: "vid-2",
-        title: "Quantum Computing Explained Simply",
-        url: "https://www.youtube.com/embed/j13YmZ9uUeQ",
-        duration: "12m",
-        description: "A visually engaging summary of quantum physics, qubits, and how superposition enables massive parallel quantum calculations."
-      }
-    ],
-    notes: [
-      {
-        id: "note-1",
-        title: "Classical vs Quantum State Representation",
-        imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800",
-        description: "A visual comparison contrasting classical bits (restricted to 0 or 1) with quantum bits (qubits) represented as a linear combination of states |0> and |1> using Dirac Ket notation: |ψ> = α|0> + β|1>."
+        "id": "mod-2",
+        "name": "Module 2: Classical Computing Basics",
+        "description": "Topics: Bits vs Qubits, Logic Gates, Binary Systems, Computational Thinking",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Classical Computing Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Classical Computing Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Classical Computing Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Classical Computing Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Classical Computing Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Classical Computing Basics."
+          }
+        ]
       },
       {
-        id: "note-2",
-        title: "Understanding the Bloch Sphere",
-        imageUrl: "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-        description: "A geometric mapping representing single-qubit states as points on the surface of a unit sphere. Pure states populate the surface, while mixed states lie within the interior."
-      }
-    ],
-    quiz: [
-      {
-        question: "What is the fundamental unit of quantum information called?",
-        options: ["Classical Bit", "Qubit", "Quantum Byte", "Bloch Particle"],
-        correctAnswer: 1,
-        explanation: "A Qubit (Quantum Bit) is the fundamental unit of quantum information, capable of representing 0, 1, or both simultaneously."
+        "id": "mod-3",
+        "name": "Module 3: Quantum Mechanics Basics",
+        "description": "Topics: Superposition, Entanglement, Wave Functions, Measurement Theory",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Mechanics Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Mechanics Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Mechanics Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Mechanics Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Mechanics Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Mechanics Basics."
+          }
+        ]
       },
       {
-        question: "Which quantum concept describes a qubit existing in multiple states simultaneously?",
-        options: ["Entanglement", "Superposition", "Teleportation", "Coherence"],
-        correctAnswer: 1,
-        explanation: "Superposition allows a quantum system to exist in a linear combination of multiple states until it is measured and collapses into a definite state."
+        "id": "mod-4",
+        "name": "Module 4: Qubits & Quantum Gates",
+        "description": "Topics: Bloch Sphere, Pauli Gates, Hadamard Gate, Quantum Circuits",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Qubits & Quantum Gates Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Qubits & Quantum Gates."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Qubits & Quantum Gates Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Qubits & Quantum Gates."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Qubits & Quantum Gates?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Qubits & Quantum Gates."
+          }
+        ]
       },
       {
-        question: "Which geometric representation is used to visualize the state of a single qubit?",
-        options: ["Hilbert Plane", "Dirac Cylinder", "Bloch Sphere", "Euler Circle"],
-        correctAnswer: 2,
-        explanation: "The Bloch Sphere is a standard mathematical model mapping the state of a single qubit to coordinates on a three-dimensional unit sphere."
+        "id": "mod-5",
+        "name": "Module 5: Quantum Algorithms",
+        "description": "Topics: Deutsch Algorithm, Grover\u2019s Algorithm, Shor\u2019s Algorithm",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Algorithms Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Algorithms."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Algorithms Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Algorithms."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Algorithms?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Algorithms."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: Quantum Programming",
+        "description": "Topics: Python for Quantum, Qiskit, Cirq, Quantum Simulators",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Programming Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Programming."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Programming Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Programming."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Programming?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Programming."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: Quantum Hardware",
+        "description": "Topics: Quantum Processors, Superconducting Qubits, Ion Trap Systems",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Hardware Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Hardware."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Hardware Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Hardware."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Hardware?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Hardware."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: Quantum Communication",
+        "description": "Topics: Quantum Cryptography, Quantum Key Distribution, Teleportation",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Communication Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Communication."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Communication Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Communication."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Communication?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Communication."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: Quantum Machine Learning",
+        "description": "Topics: Variational Circuits, Quantum Neural Networks, Hybrid Models",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Quantum Machine Learning Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Quantum Machine Learning."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Quantum Machine Learning Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Quantum Machine Learning."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Quantum Machine Learning?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Quantum Machine Learning."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Real Projects",
+        "description": "Topics: Quantum Random Generator, Quantum Encryption App, Quantum AI Mini Project",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Real Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Real Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Real Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Real Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Real Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Real Projects."
+          }
+        ]
       }
     ]
   },
   {
-    id: "superposition-entanglement",
-    name: "Superposition & Entanglement",
-    icon: "🔗",
-    shortDesc: "Spooky action at a distance, Bell states, and quantum correlation.",
-    description: "Deep dive into the magic of quantum entanglement, understanding how multiple qubits can experience synchronized correlations that classical physics cannot explain.",
-    color: "from-indigo-600 to-purple-700",
-    glowColor: "rgba(139, 92, 246, 0.4)",
-    videos: [
+    "id": "data-science",
+    "name": "Data Science",
+    "icon": "\ud83d\udcca",
+    "description": "Complete 10-module roadmap for Data Science.",
+    "color": "from-green-600 to-emerald-700",
+    "glowColor": "rgba(16, 185, 129, 0.4)",
+    "modules": [
       {
-        id: "vid-3",
-        title: "Quantum Entanglement & Spooky Action",
-        url: "https://www.youtube.com/embed/ZuvK-ldpTfk",
-        duration: "15m",
-        description: "An exceptional documentary tracing Einstein's skepticism, Bohr's defenses, and the modern experiments proving quantum entanglement is real."
+        "id": "mod-1",
+        "name": "Module 1: Python Foundations",
+        "description": "Topics: Variables, Loops, Functions, OOP Basics",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Python Foundations Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Python Foundations."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Python Foundations Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Python Foundations."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Python Foundations?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Python Foundations."
+          }
+        ]
       },
       {
-        id: "vid-4",
-        title: "Bell's Inequality & Quantum Reality",
-        url: "https://www.youtube.com/embed/lh7p65_P0iU",
-        duration: "18m",
-        description: "A detailed visual explanation of Bell's Theorem, demonstrating mathematically why local hidden variables cannot replicate quantum statistics."
-      }
-    ],
-    notes: [
-      {
-        id: "note-3",
-        title: "EPR Paradox and Quantum Correlation",
-        imageUrl: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&q=80&w=800",
-        description: "The Einstein-Podolsky-Rosen paradox illustrated. Shows how measuring one entangled qubit instantaneously collapses the wave function of its distant partner qubit."
+        "id": "mod-2",
+        "name": "Module 2: Mathematics for DS",
+        "description": "Topics: Statistics, Probability, Linear Algebra, Calculus Basics",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Mathematics for DS Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Mathematics for DS."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Mathematics for DS Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Mathematics for DS."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Mathematics for DS?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Mathematics for DS."
+          }
+        ]
       },
       {
-        id: "note-4",
-        title: "The Four Bell States",
-        imageUrl: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800",
-        description: "Formulas representing the four maximally entangled two-qubit states. These states form a complete basis for quantum communication processes such as teleportation."
-      }
-    ],
-    quiz: [
-      {
-        question: "What did Albert Einstein famously call quantum entanglement?",
-        options: ["Spooky Action at a Distance", "Phantom Wave Correlation", "Telepathic Superposition", "Mysterious Synchronization"],
-        correctAnswer: 0,
-        explanation: "Einstein was deeply skeptical of non-locality and famously termed quantum entanglement 'Spooky Action at a Distance'."
+        "id": "mod-3",
+        "name": "Module 3: Data Handling",
+        "description": "Topics: NumPy, Pandas, CSV/Excel Handling, Data Cleaning",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Data Handling Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Data Handling."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Data Handling Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Data Handling."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Data Handling?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Data Handling."
+          }
+        ]
       },
       {
-        question: "How many qubits are involved in a standard Bell State?",
-        options: ["1 qubit", "2 qubits", "4 qubits", "Infinite qubits"],
-        correctAnswer: 1,
-        explanation: "Bell States describe the four maximally entangled quantum states of exactly two qubits."
+        "id": "mod-4",
+        "name": "Module 4: Data Visualization",
+        "description": "Topics: Matplotlib, Plotly, Seaborn, Dashboards",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Data Visualization Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Data Visualization."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Data Visualization Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Data Visualization."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Data Visualization?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Data Visualization."
+          }
+        ]
       },
       {
-        question: "If two qubits are entangled in a Bell state, what does measuring the first qubit accomplish?",
-        options: ["Nothing about the second qubit", "The exact state of the second qubit is instantaneously determined", "The state of the second qubit changes after a light-speed delay", "We only gain a 50% probability of knowing the second state"],
-        correctAnswer: 1,
-        explanation: "Entanglement links their fates perfectly; measuring the first qubit instantaneously collapses the quantum state of both qubits, locking the second one's state immediately."
+        "id": "mod-5",
+        "name": "Module 5: Exploratory Data Analysis",
+        "description": "Topics: Correlation, Feature Analysis, Missing Data, Outlier Detection",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Exploratory Data Analysis Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Exploratory Data Analysis."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Exploratory Data Analysis Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Exploratory Data Analysis."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Exploratory Data Analysis?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Exploratory Data Analysis."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: SQL & Databases",
+        "description": "Topics: SQL Queries, MySQL/PostgreSQL, Data Warehousing",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "SQL & Databases Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on SQL & Databases."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "SQL & Databases Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for SQL & Databases."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of SQL & Databases?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for SQL & Databases."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: Machine Learning Basics",
+        "description": "Topics: Regression, Classification, Clustering",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Machine Learning Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Machine Learning Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Machine Learning Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Machine Learning Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Machine Learning Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Machine Learning Basics."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: Big Data",
+        "description": "Topics: Hadoop, Spark, Distributed Systems",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Big Data Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Big Data."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Big Data Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Big Data."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Big Data?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Big Data."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: Deployment & Cloud",
+        "description": "Topics: Flask APIs, Streamlit, AWS/GCP Basics",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Deployment & Cloud Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Deployment & Cloud."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Deployment & Cloud Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Deployment & Cloud."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Deployment & Cloud?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Deployment & Cloud."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Real Projects",
+        "description": "Topics: Sales Prediction, Student Performance Analysis, Dashboard Project",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Real Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Real Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Real Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Real Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Real Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Real Projects."
+          }
+        ]
       }
     ]
   },
   {
-    id: "algorithms-crypto",
-    name: "Quantum Algorithms & Cryptography",
-    icon: "🔐",
-    shortDesc: "Shor's algorithm, Grover's search, and Quantum Key Distribution (QKD).",
-    description: "Analyze the real-world applications of quantum computing including factoring large integers, database search speedups, and secure encryption methods that resist quantum attacks.",
-    color: "from-purple-600 to-pink-700",
-    glowColor: "rgba(236, 72, 153, 0.4)",
-    videos: [
+    "id": "machine-learning",
+    "name": "Machine Learning",
+    "icon": "\ud83e\udd16",
+    "description": "Complete 10-module roadmap for Machine Learning.",
+    "color": "from-purple-600 to-fuchsia-700",
+    "glowColor": "rgba(168, 85, 247, 0.4)",
+    "modules": [
       {
-        id: "vid-5",
-        title: "Shor's Algorithm: Breaking RSA Encryption",
-        url: "https://www.youtube.com/embed/wUkM81okeyM",
-        duration: "20m",
-        description: "An intuitive explanation of how Shor's algorithm leverages period-finding and quantum Fourier transforms to factor large primes in polynomial time."
+        "id": "mod-1",
+        "name": "Module 1: Python + Math",
+        "description": "Topics: NumPy, Statistics, Probability, Linear Algebra",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Python + Math Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Python + Math."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Python + Math Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Python + Math."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Python + Math?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Python + Math."
+          }
+        ]
       },
       {
-        id: "vid-6",
-        title: "Grover's Quantum Search Algorithm Explained",
-        url: "https://www.youtube.com/embed/g_U955I-n9A",
-        duration: "14m",
-        description: "A mathematical breakdown of Grover's database search showing how amplitude amplification increases the probability of measuring the correct state."
+        "id": "mod-2",
+        "name": "Module 2: Data Preprocessing",
+        "description": "Topics: Cleaning, Encoding, Scaling, Feature Engineering",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Data Preprocessing Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Data Preprocessing."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Data Preprocessing Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Data Preprocessing."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Data Preprocessing?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Data Preprocessing."
+          }
+        ]
+      },
+      {
+        "id": "mod-3",
+        "name": "Module 3: Supervised Learning",
+        "description": "Topics: Linear Regression, Logistic Regression, Decision Trees",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Supervised Learning Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Supervised Learning."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Supervised Learning Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Supervised Learning."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Supervised Learning?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Supervised Learning."
+          }
+        ]
+      },
+      {
+        "id": "mod-4",
+        "name": "Module 4: Unsupervised Learning",
+        "description": "Topics: K-Means, PCA, Clustering",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Unsupervised Learning Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Unsupervised Learning."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Unsupervised Learning Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Unsupervised Learning."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Unsupervised Learning?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Unsupervised Learning."
+          }
+        ]
+      },
+      {
+        "id": "mod-5",
+        "name": "Module 5: Model Evaluation",
+        "description": "Topics: Accuracy, Precision, Recall, Cross Validation",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Model Evaluation Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Model Evaluation."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Model Evaluation Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Model Evaluation."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Model Evaluation?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Model Evaluation."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: Ensemble Learning",
+        "description": "Topics: Random Forest, XGBoost, Bagging, Boosting",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Ensemble Learning Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Ensemble Learning."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Ensemble Learning Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Ensemble Learning."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Ensemble Learning?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Ensemble Learning."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: Advanced ML",
+        "description": "Topics: SVM, Naive Bayes, Recommendation Systems",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Advanced ML Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Advanced ML."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Advanced ML Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Advanced ML."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Advanced ML?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Advanced ML."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: ML with Scikit-learn",
+        "description": "Topics: Pipelines, Hyperparameter Tuning, GridSearchCV",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "ML with Scikit-learn Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on ML with Scikit-learn."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "ML with Scikit-learn Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for ML with Scikit-learn."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of ML with Scikit-learn?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for ML with Scikit-learn."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: ML Deployment",
+        "description": "Topics: Flask/FastAPI, Docker Basics, APIs",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "ML Deployment Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on ML Deployment."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "ML Deployment Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for ML Deployment."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of ML Deployment?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for ML Deployment."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Projects",
+        "description": "Topics: Spam Detection, House Price Prediction, Recommendation Engine",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Projects."
+          }
+        ]
       }
-    ],
-    notes: [
+    ]
+  },
+  {
+    "id": "deep-learning",
+    "name": "Deep Learning",
+    "icon": "\ud83e\udde0",
+    "description": "Complete 10-module roadmap for Deep Learning.",
+    "color": "from-rose-600 to-red-700",
+    "glowColor": "rgba(225, 29, 72, 0.4)",
+    "modules": [
       {
-        id: "note-5",
-        title: "RSA Encryption vs Shor's Algorithm",
-        imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800",
-        description: "Comparison diagram showing classical computers taking exponential time to factor primes vs Shor's algorithm completing the factorization in polynomial time, breaking current RSA security."
+        "id": "mod-1",
+        "name": "Module 1: Neural Network Basics",
+        "description": "Topics: Perceptrons, Activation Functions, Forward Propagation",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Neural Network Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Neural Network Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Neural Network Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Neural Network Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Neural Network Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Neural Network Basics."
+          }
+        ]
       },
       {
-        id: "note-6",
-        title: "BB84 Quantum Key Distribution Protocol",
-        imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=800",
-        description: "A step-by-step schematic of how polarized photons are transmitted by Alice and measured by Bob, showing how eavesdroppers inevitably introduce measurable error rates."
+        "id": "mod-2",
+        "name": "Module 2: TensorFlow & PyTorch",
+        "description": "Topics: Tensors, GPU Training, Model Building",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "TensorFlow & PyTorch Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on TensorFlow & PyTorch."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "TensorFlow & PyTorch Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for TensorFlow & PyTorch."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of TensorFlow & PyTorch?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for TensorFlow & PyTorch."
+          }
+        ]
+      },
+      {
+        "id": "mod-3",
+        "name": "Module 3: ANN Models",
+        "description": "Topics: Dense Networks, Loss Functions, Optimizers",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "ANN Models Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on ANN Models."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "ANN Models Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for ANN Models."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of ANN Models?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for ANN Models."
+          }
+        ]
+      },
+      {
+        "id": "mod-4",
+        "name": "Module 4: CNN",
+        "description": "Topics: Image Processing, Feature Extraction, Convolution Layers",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "CNN Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on CNN."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "CNN Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for CNN."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of CNN?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for CNN."
+          }
+        ]
+      },
+      {
+        "id": "mod-5",
+        "name": "Module 5: Transfer Learning",
+        "description": "Topics: EfficientNet, ResNet, MobileNet",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Transfer Learning Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Transfer Learning."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Transfer Learning Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Transfer Learning."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Transfer Learning?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Transfer Learning."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: RNN & LSTM",
+        "description": "Topics: Sequential Data, Time Series, NLP Basics",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "RNN & LSTM Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on RNN & LSTM."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "RNN & LSTM Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for RNN & LSTM."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of RNN & LSTM?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for RNN & LSTM."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: NLP with Transformers",
+        "description": "Topics: BERT, GPT, Hugging Face",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "NLP with Transformers Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on NLP with Transformers."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "NLP with Transformers Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for NLP with Transformers."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of NLP with Transformers?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for NLP with Transformers."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: GANs & Diffusion",
+        "description": "Topics: Image Generation, Stable Diffusion, Generative AI",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "GANs & Diffusion Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on GANs & Diffusion."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "GANs & Diffusion Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for GANs & Diffusion."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of GANs & Diffusion?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for GANs & Diffusion."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: Deployment",
+        "description": "Topics: ONNX, TensorRT, Edge AI",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Deployment Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Deployment."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Deployment Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Deployment."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Deployment?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Deployment."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Projects",
+        "description": "Topics: Face Recognition, Chatbot, AI Image Generator",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Projects."
+          }
+        ]
       }
-    ],
-    quiz: [
+    ]
+  },
+  {
+    "id": "iot-internet-of-things",
+    "name": "IoT (Internet of Things)",
+    "icon": "\ud83c\udf10",
+    "description": "Complete 10-module roadmap for IoT (Internet of Things).",
+    "color": "from-cyan-600 to-blue-700",
+    "glowColor": "rgba(8, 145, 178, 0.4)",
+    "modules": [
       {
-        question: "Shor's algorithm poses a direct mathematical threat to which encryption protocol?",
-        options: ["AES-256", "RSA", "SHA-256", "Blowfish"],
-        correctAnswer: 1,
-        explanation: "RSA relies on the extreme difficulty of prime factorization. Shor's algorithm can solve prime factorization in polynomial time, bypassing RSA."
+        "id": "mod-1",
+        "name": "Module 1: Electronics Basics",
+        "description": "Topics: Voltage, Current, Sensors, Circuits",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Electronics Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Electronics Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Electronics Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Electronics Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Electronics Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Electronics Basics."
+          }
+        ]
       },
       {
-        question: "Grover's algorithm provides what level of speedup for searching unstructured databases?",
-        options: ["Logarithmic", "Linear", "Quadratic", "Exponential"],
-        correctAnswer: 2,
-        explanation: "Grover's algorithm searches an N-item unstructured database in O(sqrt(N)) evaluations, yielding a quadratic speedup over classical O(N) searches."
+        "id": "mod-2",
+        "name": "Module 2: Arduino Programming",
+        "description": "Topics: IDE Setup, LEDs, Sensors, Motors",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Arduino Programming Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Arduino Programming."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Arduino Programming Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Arduino Programming."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Arduino Programming?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Arduino Programming."
+          }
+        ]
       },
       {
-        question: "Which of the following is the first-ever proposed Quantum Key Distribution protocol?",
-        options: ["BB84", "RSA-77", "Shor-94", "Bell-64"],
-        correctAnswer: 0,
-        explanation: "BB84 was designed by Charles Bennett and Gilles Brassard in 1984 as the first protocol for secure quantum key distribution."
+        "id": "mod-3",
+        "name": "Module 3: Raspberry Pi",
+        "description": "Topics: Linux Basics, GPIO, Python Programming",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Raspberry Pi Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Raspberry Pi."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Raspberry Pi Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Raspberry Pi."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Raspberry Pi?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Raspberry Pi."
+          }
+        ]
+      },
+      {
+        "id": "mod-4",
+        "name": "Module 4: Communication Protocols",
+        "description": "Topics: WiFi, Bluetooth, MQTT, Zigbee",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Communication Protocols Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Communication Protocols."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Communication Protocols Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Communication Protocols."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Communication Protocols?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Communication Protocols."
+          }
+        ]
+      },
+      {
+        "id": "mod-5",
+        "name": "Module 5: Sensors & Devices",
+        "description": "Topics: Temperature, Motion, GPS, Camera Modules",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Sensors & Devices Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Sensors & Devices."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Sensors & Devices Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Sensors & Devices."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Sensors & Devices?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Sensors & Devices."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: Cloud IoT",
+        "description": "Topics: Firebase, AWS IoT, Azure IoT",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Cloud IoT Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Cloud IoT."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Cloud IoT Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Cloud IoT."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Cloud IoT?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Cloud IoT."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: IoT Security",
+        "description": "Topics: Encryption, Authentication, Device Security",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "IoT Security Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on IoT Security."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "IoT Security Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for IoT Security."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of IoT Security?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for IoT Security."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: Edge AI + IoT",
+        "description": "Topics: TinyML, AI on Microcontrollers, Edge Computing",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Edge AI + IoT Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Edge AI + IoT."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Edge AI + IoT Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Edge AI + IoT."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Edge AI + IoT?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Edge AI + IoT."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: Smart Systems",
+        "description": "Topics: Smart Home, Smart Agriculture, Smart Cities",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Smart Systems Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Smart Systems."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Smart Systems Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Smart Systems."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Smart Systems?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Smart Systems."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Projects",
+        "description": "Topics: Smart Door Lock, IoT Weather Station, Smart Attendance System",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Projects."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "agentic-ai",
+    "name": "Agentic AI",
+    "icon": "\ud83e\udde9",
+    "description": "Complete 10-module roadmap for Agentic AI.",
+    "color": "from-amber-500 to-orange-600",
+    "glowColor": "rgba(245, 158, 11, 0.4)",
+    "modules": [
+      {
+        "id": "mod-1",
+        "name": "Module 1: AI Foundations",
+        "description": "Topics: LLM Basics, Prompt Engineering, Transformers",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "AI Foundations Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on AI Foundations."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "AI Foundations Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for AI Foundations."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of AI Foundations?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for AI Foundations."
+          }
+        ]
+      },
+      {
+        "id": "mod-2",
+        "name": "Module 2: Python for AI Agents",
+        "description": "Topics: APIs, Async Programming, JSON Handling",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Python for AI Agents Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Python for AI Agents."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Python for AI Agents Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Python for AI Agents."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Python for AI Agents?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Python for AI Agents."
+          }
+        ]
+      },
+      {
+        "id": "mod-3",
+        "name": "Module 3: LangChain Basics",
+        "description": "Topics: Chains, Memory, Tools, Agents",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "LangChain Basics Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on LangChain Basics."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "LangChain Basics Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for LangChain Basics."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of LangChain Basics?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for LangChain Basics."
+          }
+        ]
+      },
+      {
+        "id": "mod-4",
+        "name": "Module 4: Retrieval-Augmented Generation",
+        "description": "Topics: Vector Databases, Embeddings, RAG Pipelines",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Retrieval-Augmented Generation Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Retrieval-Augmented Generation."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Retrieval-Augmented Generation Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Retrieval-Augmented Generation."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Retrieval-Augmented Generation?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Retrieval-Augmented Generation."
+          }
+        ]
+      },
+      {
+        "id": "mod-5",
+        "name": "Module 5: Autonomous Agents",
+        "description": "Topics: Planning, Reflection, Multi-step Reasoning",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Autonomous Agents Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Autonomous Agents."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Autonomous Agents Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Autonomous Agents."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Autonomous Agents?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Autonomous Agents."
+          }
+        ]
+      },
+      {
+        "id": "mod-6",
+        "name": "Module 6: Multi-Agent Systems",
+        "description": "Topics: Agent Collaboration, Communication, Task Delegation",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Multi-Agent Systems Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Multi-Agent Systems."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Multi-Agent Systems Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Multi-Agent Systems."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Multi-Agent Systems?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Multi-Agent Systems."
+          }
+        ]
+      },
+      {
+        "id": "mod-7",
+        "name": "Module 7: AI Tool Use",
+        "description": "Topics: Web Search, Code Execution, File Handling",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "AI Tool Use Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on AI Tool Use."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "AI Tool Use Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for AI Tool Use."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of AI Tool Use?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for AI Tool Use."
+          }
+        ]
+      },
+      {
+        "id": "mod-8",
+        "name": "Module 8: AI Workflows",
+        "description": "Topics: CrewAI, AutoGen, LangGraph",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "AI Workflows Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on AI Workflows."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "AI Workflows Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for AI Workflows."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of AI Workflows?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for AI Workflows."
+          }
+        ]
+      },
+      {
+        "id": "mod-9",
+        "name": "Module 9: Production AI Agents",
+        "description": "Topics: Deployment, Monitoring, Safety, Memory Systems",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Production AI Agents Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Production AI Agents."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Production AI Agents Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Production AI Agents."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Production AI Agents?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Production AI Agents."
+          }
+        ]
+      },
+      {
+        "id": "mod-10",
+        "name": "Module 10: Projects",
+        "description": "Topics: AI Research Assistant, AI Coding Agent, AI Campus Assistant Bot",
+        "videos": [
+          {
+            "id": "vid-1",
+            "title": "Projects Overview",
+            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
+            "duration": "15m",
+            "description": "An introductory video on Projects."
+          }
+        ],
+        "notes": [
+          {
+            "id": "note-1",
+            "title": "Projects Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
+            "description": "Key concepts and takeaways for Projects."
+          }
+        ],
+        "quiz": [
+          {
+            "question": "What is the core concept of Projects?",
+            "options": [
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
+            ],
+            "correctAnswer": 0,
+            "explanation": "Option A is correct for Projects."
+          }
+        ]
       }
     ]
   }
 ];
 
 export default function QLearnPage() {
-  const [topics, setTopics] = useState<TopicData[]>([]);
-  const [activeTopicIndex, setActiveTopicIndex] = useState(0);
+  const [domains, setDomains] = useState<DomainData[]>([]);
+  const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
+  const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<"videos" | "notes" | "quiz">("videos");
   
   // Carousel states for the active notes tab
@@ -276,44 +2266,45 @@ export default function QLearnPage() {
 
   // Load from local storage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("qlearn_topics");
+    const saved = localStorage.getItem("qlearn_domains");
     if (saved) {
       try {
-        setTopics(JSON.parse(saved));
+        setDomains(JSON.parse(saved));
       } catch (e) {
-        console.error("Failed parsing QLearn topics data, resetting to defaults", e);
-        setTopics(DEFAULT_TOPICS);
-        localStorage.setItem("qlearn_topics", JSON.stringify(DEFAULT_TOPICS));
+        console.error("Failed parsing QLearn domains data, resetting to defaults", e);
+        setDomains(DEFAULT_DOMAINS);
+        localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
       }
     } else {
-      setTopics(DEFAULT_TOPICS);
-      localStorage.setItem("qlearn_topics", JSON.stringify(DEFAULT_TOPICS));
+      setDomains(DEFAULT_DOMAINS);
+      localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
     }
   }, []);
 
-  // Update localStorage when topics change
-  const saveTopics = (updatedTopics: TopicData[]) => {
-    setTopics(updatedTopics);
-    localStorage.setItem("qlearn_topics", JSON.stringify(updatedTopics));
+  // Update localStorage when domains change
+  const saveDomains = (updatedDomains: DomainData[]) => {
+    setDomains(updatedDomains);
+    localStorage.setItem("qlearn_domains", JSON.stringify(updatedDomains));
   };
 
-  const activeTopic = topics[activeTopicIndex] || DEFAULT_TOPICS[0];
+  const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
+  const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
 
   // Carousel actions
   const handleNextNote = () => {
-    if (!activeTopic.notes.length) return;
-    setActiveNoteIndex((prev) => (prev + 1) % activeTopic.notes.length);
+    if (!activeModule || !activeModule.notes.length) return;
+    setActiveNoteIndex((prev) => (prev + 1) % activeModule.notes.length);
   };
 
   const handlePrevNote = () => {
-    if (!activeTopic.notes.length) return;
-    setActiveNoteIndex((prev) => (prev - 1 + activeTopic.notes.length) % activeTopic.notes.length);
+    if (!activeModule || !activeModule.notes.length) return;
+    setActiveNoteIndex((prev) => (prev - 1 + activeModule.notes.length) % activeModule.notes.length);
   };
 
   // Video Upload submit handler
   const handleVideoUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!videoTitle || !videoUrl || !videoDesc) {
+    if (!videoTitle || !videoUrl || !videoDesc || activeDomainIndex === null || !activeModule) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -336,17 +2327,25 @@ export default function QLearnPage() {
       description: videoDesc
     };
 
-    const updatedTopics = topics.map((t, idx) => {
-      if (idx === activeTopicIndex) {
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
         return {
-          ...t,
-          videos: [...t.videos, newVideo]
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                videos: [...m.videos, newVideo]
+              };
+            }
+            return m;
+          })
         };
       }
-      return t;
+      return d;
     });
 
-    saveTopics(updatedTopics);
+    saveDomains(updatedDomains);
     setVideoTitle("");
     setVideoUrl("");
     setVideoDuration("");
@@ -357,12 +2356,11 @@ export default function QLearnPage() {
   // Note Snippet Upload submit handler
   const handleNoteUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!noteTitle || !noteDesc) {
+    if (!noteTitle || !noteDesc || activeDomainIndex === null || !activeModule) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    // Default note diagram image if blank
     const fallbackImage = noteImage || "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=800";
 
     const newNote: NoteSnippet = {
@@ -372,22 +2370,30 @@ export default function QLearnPage() {
       description: noteDesc
     };
 
-    const updatedTopics = topics.map((t, idx) => {
-      if (idx === activeTopicIndex) {
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
         return {
-          ...t,
-          notes: [...t.notes, newNote]
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                notes: [...m.notes, newNote]
+              };
+            }
+            return m;
+          })
         };
       }
-      return t;
+      return d;
     });
 
-    saveTopics(updatedTopics);
+    saveDomains(updatedDomains);
     setNoteTitle("");
     setNoteImage("");
     setNoteDesc("");
     setNoteModalOpen(false);
-    setActiveNoteIndex(activeTopic.notes.length); // jump to the newly added note
+    setActiveNoteIndex(activeModule.notes.length); 
   };
 
   // Quiz interactive triggers
@@ -406,26 +2412,42 @@ export default function QLearnPage() {
   };
 
   const submitAnswer = () => {
-    if (selectedOption === null || answerSubmitted) return;
+    if (selectedOption === null || answerSubmitted || !activeModule) return;
     setAnswerSubmitted(true);
-    if (selectedOption === activeTopic.quiz[currentQuestionIndex].correctAnswer) {
+    if (selectedOption === activeModule.quiz[currentQuestionIndex].correctAnswer) {
       setQuizScore((prev) => prev + 1);
     }
   };
 
   const nextQuestion = () => {
+    if (!activeModule) return;
     setSelectedOption(null);
     setAnswerSubmitted(false);
-    if (currentQuestionIndex + 1 < activeTopic.quiz.length) {
+    if (currentQuestionIndex + 1 < activeModule.quiz.length) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       setQuizFinished(true);
     }
   };
 
-  // Switch topic handler
-  const handleTopicSwitch = (idx: number) => {
-    setActiveTopicIndex(idx);
+  // Switch domain handler
+  const handleDomainSelect = (idx: number) => {
+    setActiveDomainIndex(idx);
+    setActiveModuleIndex(0);
+    setActiveTab("videos");
+    setQuizStarted(false);
+    setQuizFinished(false);
+  };
+  
+  // Back to domains
+  const handleBackToDomains = () => {
+    setActiveDomainIndex(null);
+    setActiveModuleIndex(0);
+  };
+
+  // Switch module handler
+  const handleModuleSwitch = (idx: number) => {
+    setActiveModuleIndex(idx);
     setActiveNoteIndex(0);
     setActiveTab("videos");
     setQuizStarted(false);
@@ -435,9 +2457,9 @@ export default function QLearnPage() {
   // Quiz score badging logic
   const getBadge = (score: number, total: number) => {
     const pct = (score / total) * 100;
-    if (pct >= 90) return { title: "Quantum Master 🏆", desc: "Astounding! You have a profound command of quantum physics." };
-    if (pct >= 60) return { title: "Quantum Scholar 🎓", desc: "Excellent work! You possess high-level scientific intuition." };
-    return { title: "Quantum Explorer ⚛️", desc: "Keep exploring! You are beginning an amazing journey into the subatomic world." };
+    if (pct >= 90) return { title: "Domain Master 🏆", desc: "Astounding! You have a profound command of this domain." };
+    if (pct >= 60) return { title: "Scholar 🎓", desc: "Excellent work! You possess high-level scientific intuition." };
+    return { title: "Explorer ⚛️", desc: "Keep exploring! You are beginning an amazing journey." };
   };
 
   return (
@@ -446,11 +2468,9 @@ export default function QLearnPage() {
 
       {/* HERO SECTION */}
       <section className="relative pt-32 pb-16 bg-gradient-to-b from-cream-dark via-cream/40 to-background overflow-hidden border-b border-border/40">
-        {/* Glow Effects */}
         <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute -bottom-10 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
         
-        {/* Particle Grid Effect */}
         <div 
           className="absolute inset-0 opacity-[0.04] pointer-events-none" 
           style={{
@@ -471,15 +2491,14 @@ export default function QLearnPage() {
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tight leading-tight">
               QLearn
               <span className="text-accent block text-2xl md:text-3xl font-sans mt-2 font-medium tracking-normal">
-                Quantum Computing & Physics Learning Center
+                Advanced Technology Learning Center
               </span>
             </h1>
             
             <div className="w-24 h-1 bg-accent rounded-full my-6" />
 
             <p className="text-lg text-muted-foreground max-w-2xl">
-              An interactive visual laboratory curated by <strong className="text-foreground">Dr. G. Jaya Suma</strong>. 
-              Explore video seminars, download conceptual notes snippets, and test your understanding with custom physics quizzes.
+              An interactive visual laboratory. Explore domains like Quantum Computing, Data Science, AI, and more.
             </p>
           </div>
         </div>
@@ -489,544 +2508,457 @@ export default function QLearnPage() {
       <section className="flex-1 py-12 bg-background relative z-10">
         <div className="container-wide px-6 lg:px-12">
           
-          <div className="grid lg:grid-cols-4 gap-8">
-            
-            {/* LEFT COLUMN: TOPICS INDEX */}
-            <div className="lg:col-span-1 space-y-4">
-              <h3 className="font-serif text-lg font-semibold text-primary px-1 mb-2">
-                Quantum Syllabus Modules
-              </h3>
-              <div className="space-y-3">
-                {topics.map((topic, index) => {
-                  const isActive = index === activeTopicIndex;
-                  return (
-                    <button
-                      key={topic.id}
-                      onClick={() => handleTopicSwitch(index)}
-                      className={`w-full text-left p-5 rounded-lg border transition-all duration-300 transform hover:-translate-y-0.5 ${
-                        isActive
-                          ? "bg-card border-accent shadow-lg shadow-accent/5 ring-1 ring-accent/30"
-                          : "bg-card/40 border-border hover:border-accent/40 hover:bg-card"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-2xl">{topic.icon}</span>
-                        <h4 className="font-serif font-semibold text-primary leading-tight">
-                          {topic.name}
-                        </h4>
+          {activeDomainIndex === null ? (
+            // DOMAINS GRID VIEW
+            <div className="space-y-8">
+              <div className="text-center">
+                <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
+                <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap.</p>
+              </div>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {domains.map((domain, idx) => (
+                  <div
+                    key={domain.id}
+                    onClick={() => handleDomainSelect(idx)}
+                    className="cursor-pointer card-institutional overflow-hidden group hover:shadow-2xl hover:border-accent/40 transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    <div className={`h-2 bg-gradient-to-r ${domain.color}`} />
+                    <div className="p-6 space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                        {domain.icon}
                       </div>
-                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                        {topic.shortDesc}
+                      <h3 className="font-serif text-2xl font-bold text-primary group-hover:text-accent transition-colors">
+                        {domain.name}
+                      </h3>
+                      <p className="text-muted-foreground text-sm line-clamp-3">
+                        {domain.description}
                       </p>
-                      
-                      {/* Interactive indicator */}
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="text-[10px] tracking-wider uppercase text-accent font-semibold flex items-center gap-1">
-                          Active Module <ChevronRightSquare size={10} className={isActive ? "translate-x-1 transition-transform" : ""} />
+                      <div className="pt-4 border-t border-border flex items-center justify-between">
+                        <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                          10 Modules
                         </span>
-                        <span className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono">
-                          {topic.videos.length} vids · {topic.notes.length} slides
-                        </span>
+                        <ChevronRight className="text-accent group-hover:translate-x-1 transition-transform" size={18} />
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Informational Widget */}
-              <div className="p-5 rounded-lg border border-border bg-gradient-to-br from-accent/5 to-transparent">
-                <h4 className="font-semibold text-sm mb-2 text-primary flex items-center gap-1.5">
-                  <Award size={16} className="text-accent" /> Professional Notice
-                </h4>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  These materials correspond to the PG Syllabus in advanced computer science, quantum modeling, and cryptographic systems.
-                </p>
-              </div>
-            </div>
-
-            {/* RIGHT COLUMN: ACTIVE TOPIC CONTENT */}
-            <div className="lg:col-span-3 space-y-6">
-              
-              {/* Active Topic Banner Card */}
-              <div className={`p-8 rounded-xl bg-gradient-to-r ${activeTopic.color} text-white shadow-xl relative overflow-hidden`}>
-                {/* Decorative glowing sphere */}
-                <div 
-                  className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-2xl opacity-60"
-                  style={{ backgroundColor: activeTopic.glowColor }}
-                />
-                
-                <div className="relative z-10 space-y-3 max-w-2xl">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl bg-white/10 p-2 rounded-lg backdrop-blur-md">
-                      {activeTopic.icon}
-                    </span>
-                    <div>
-                      <span className="text-xs tracking-widest uppercase font-semibold text-white/70">
-                        Selected Course Module
-                      </span>
-                      <h2 className="text-2xl md:text-3xl font-serif font-bold">
-                        {activeTopic.name}
-                      </h2>
                     </div>
                   </div>
-                  <p className="text-sm text-white/90 leading-relaxed pt-2">
-                    {activeTopic.description}
-                  </p>
-                </div>
+                ))}
               </div>
-
-              {/* ACTION MENU TABS & UPLOAD BUTTONS */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border gap-4 pb-1">
-                {/* Tab switchers */}
-                <div className="flex gap-2">
-                  {[
-                    { id: "videos", label: "Video Seminars", icon: Video },
-                    { id: "notes", label: "Lecture Notes", icon: BookOpen },
-                    { id: "quiz", label: "Take Quiz", icon: Award }
-                  ].map((tab) => {
-                    const TabIcon = tab.icon;
-                    const isActive = activeTab === tab.id;
+            </div>
+          ) : (
+            // MODULES VIEW
+            <div className="grid lg:grid-cols-4 gap-8">
+              
+              {/* LEFT COLUMN: MODULES INDEX */}
+              <div className="lg:col-span-1 space-y-4">
+                <button 
+                  onClick={handleBackToDomains}
+                  className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-accent transition-colors mb-2"
+                >
+                  <ArrowLeft size={16} /> Back to Domains
+                </button>
+                <h3 className="font-serif text-lg font-semibold text-primary px-1 mb-2">
+                  {activeDomain?.name} Modules
+                </h3>
+                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+                  {activeDomain?.modules.map((module, index) => {
+                    const isActive = index === activeModuleIndex;
                     return (
                       <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 ${
+                        key={module.id}
+                        onClick={() => handleModuleSwitch(index)}
+                        className={`w-full text-left p-4 rounded-lg border transition-all duration-300 ${
                           isActive
-                            ? "border-accent text-accent bg-accent/5"
-                            : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                            ? "bg-card border-accent shadow-md shadow-accent/5 ring-1 ring-accent/30 scale-100"
+                            : "bg-card/40 border-border hover:border-accent/40 hover:bg-card"
                         }`}
                       >
-                        <TabIcon size={16} />
-                        {tab.label}
+                        <h4 className={`font-serif font-semibold leading-tight ${isActive ? "text-accent" : "text-primary"}`}>
+                          {module.name}
+                        </h4>
+                        <p className="text-xs text-muted-foreground leading-relaxed mt-1 line-clamp-2">
+                          {module.description}
+                        </p>
                       </button>
                     );
                   })}
                 </div>
-
-                {/* Upload action hooks (contextual) */}
-                <div className="flex gap-2">
-                  {activeTab === "videos" && (
-                    <Button 
-                      variant="hero" 
-                      size="sm"
-                      onClick={() => setVideoModalOpen(true)}
-                      className="flex items-center gap-2 text-xs"
-                    >
-                      <Plus size={14} /> Upload Video
-                    </Button>
-                  )}
-                  {activeTab === "notes" && (
-                    <Button 
-                      variant="hero" 
-                      size="sm"
-                      onClick={() => setNoteModalOpen(true)}
-                      className="flex items-center gap-2 text-xs"
-                    >
-                      <Plus size={14} /> Add Notes Slide
-                    </Button>
-                  )}
-                </div>
               </div>
 
-              {/* CONTENT PANEL */}
-              <div className="min-h-[400px]">
+              {/* RIGHT COLUMN: ACTIVE MODULE CONTENT */}
+              <div className="lg:col-span-3 space-y-6">
                 
-                {/* 1. VIDEOS TAB */}
-                {activeTab === "videos" && (
-                  <div className="space-y-6">
-                    {activeTopic.videos.length === 0 ? (
-                      <div className="text-center py-16 border border-dashed border-border rounded-xl">
-                        <Video size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
-                        <p className="text-muted-foreground font-medium">No videos found for this topic.</p>
-                        <p className="text-xs text-muted-foreground/75 mt-1">Be the first to upload a video lecture above!</p>
+                {/* Active Module Banner */}
+                {activeModule && (
+                  <div className={`p-8 rounded-xl bg-gradient-to-r ${activeDomain?.color} text-white shadow-xl relative overflow-hidden`}>
+                    <div 
+                      className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-2xl opacity-60"
+                      style={{ backgroundColor: activeDomain?.glowColor }}
+                    />
+                    
+                    <div className="relative z-10 space-y-3 max-w-2xl">
+                      <div className="flex items-center gap-3">
+                        <span className="text-3xl bg-white/10 p-2 rounded-lg backdrop-blur-md">
+                          {activeDomain?.icon}
+                        </span>
+                        <div>
+                          <span className="text-xs tracking-widest uppercase font-semibold text-white/70">
+                            {activeDomain?.name}
+                          </span>
+                          <h2 className="text-2xl md:text-3xl font-serif font-bold">
+                            {activeModule.name}
+                          </h2>
+                        </div>
                       </div>
-                    ) : (
-                      <div className="grid md:grid-cols-2 gap-6">
-                        {activeTopic.videos.map((vid) => (
-                          <div 
-                            key={vid.id}
-                            className="card-institutional p-5 flex flex-col justify-between group hover:border-accent/40 hover:shadow-xl transition-all duration-300"
-                          >
-                            <div>
-                              {/* Dummy thumbnail container */}
-                              <div className="relative aspect-video bg-slate-900 rounded-lg overflow-hidden border border-border/80 mb-4 flex items-center justify-center">
-                                <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-indigo-900/20 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                                
-                                {/* Abstract graphics */}
-                                <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center border border-accent/40 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
-                                  <Play className="w-6 h-6 text-accent fill-accent ml-0.5" />
-                                </div>
-                                <span className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] text-white font-mono font-semibold">
-                                  {vid.duration}
-                                </span>
-                              </div>
-
-                              <h3 className="font-serif text-lg font-bold text-primary group-hover:text-accent transition-colors leading-snug mb-2">
-                                {vid.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-4">
-                                {vid.description}
-                              </p>
-                            </div>
-
-                            <div className="border-t border-border/40 pt-4 flex items-center justify-between">
-                              <span className="text-xs text-muted-foreground font-mono">
-                                Seminar Lecture Video
-                              </span>
-                              <Button 
-                                variant="hero-outline" 
-                                size="xs"
-                                onClick={() => {
-                                  setActivePlayVideoUrl(vid.url);
-                                  setActivePlayVideoTitle(vid.title);
-                                }}
-                                className="flex items-center gap-1.5 text-xs py-1.5"
-                              >
-                                Play Lecture <ExternalLink size={12} />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                      <p className="text-sm text-white/90 leading-relaxed pt-2">
+                        {activeModule.description}
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                {/* 2. NOTES CAROUSEL TAB */}
-                {activeTab === "notes" && (
-                  <div className="space-y-6">
-                    {activeTopic.notes.length === 0 ? (
-                      <div className="text-center py-16 border border-dashed border-border rounded-xl">
-                        <BookOpen size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
-                        <p className="text-muted-foreground font-medium">No notes snippets found for this topic.</p>
-                        <p className="text-xs text-muted-foreground/75 mt-1">Upload note sheets or slides to start the deck!</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        {/* Custom visual carousel */}
-                        <div className="relative bg-card border border-border rounded-xl p-6 md:p-10 shadow-lg">
-                          
-                          <div className="grid md:grid-cols-12 gap-8 items-center">
-                            
-                            {/* Slide image block */}
-                            <div className="md:col-span-5 relative group">
-                              <div className="relative aspect-square bg-slate-900 rounded-lg overflow-hidden border border-border shadow-inner flex items-center justify-center">
-                                <img 
-                                  src={activeTopic.notes[activeNoteIndex].imageUrl} 
-                                  alt={activeTopic.notes[activeNoteIndex].title}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                />
-                                {/* Overlay gradient */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
-                                
-                                {/* Zoom Lightbox button */}
-                                <button 
-                                  onClick={() => setLightboxOpen(true)}
-                                  className="absolute top-2 right-2 p-2 bg-black/70 hover:bg-accent rounded text-white opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm"
-                                  title="View Fullscreen"
-                                >
-                                  <Maximize2 size={16} />
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Slide description details */}
-                            <div className="md:col-span-7 space-y-4">
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
-                                Note Sheet {activeNoteIndex + 1} of {activeTopic.notes.length}
-                              </div>
-
-                              <h3 className="font-serif text-2xl font-bold text-primary">
-                                {activeTopic.notes[activeNoteIndex].title}
-                              </h3>
-                              <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
-                                {activeTopic.notes[activeNoteIndex].description}
-                              </p>
-                              
-                              {/* Conceptual Warning Info */}
-                              <div className="p-4 bg-muted/50 rounded-lg border border-border text-xs text-muted-foreground leading-relaxed">
-                                <strong className="text-foreground font-semibold block mb-1">Study Advice:</strong>
-                                Review the mathematical equations in detail. Dirac matrix symbols, superposition amplitudes, and vector space dimensions represent vital topics in PG evaluation.
-                              </div>
-                            </div>
-
-                          </div>
-
-                          {/* Navigation buttons */}
-                          <div className="absolute top-1/2 -left-4 -translate-y-1/2">
+                {/* TABS */}
+                {activeModule && (
+                  <>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border gap-4 pb-1">
+                      <div className="flex gap-2">
+                        {[
+                          { id: "videos", label: "Video Seminars", icon: Video },
+                          { id: "notes", label: "Lecture Notes", icon: BookOpen },
+                          { id: "quiz", label: "Take Quiz", icon: Award }
+                        ].map((tab) => {
+                          const TabIcon = tab.icon;
+                          const isActive = activeTab === tab.id;
+                          return (
                             <button
-                              onClick={handlePrevNote}
-                              className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
+                              key={tab.id}
+                              onClick={() => setActiveTab(tab.id as any)}
+                              className={`flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 ${
+                                isActive
+                                  ? "border-accent text-accent bg-accent/5"
+                                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                              }`}
                             >
-                              <ChevronLeft size={24} />
+                              <TabIcon size={16} />
+                              {tab.label}
                             </button>
-                          </div>
-                          <div className="absolute top-1/2 -right-4 -translate-y-1/2">
-                            <button
-                              onClick={handleNextNote}
-                              className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
-                            >
-                              <ChevronRight size={24} />
-                            </button>
-                          </div>
-
-                        </div>
-
-                        {/* Thumbnail indicator strip below carousel */}
-                        <div className="flex flex-wrap items-center justify-center gap-3">
-                          {activeTopic.notes.map((note, index) => {
-                            const isActive = index === activeNoteIndex;
-                            return (
-                              <button
-                                key={note.id}
-                                onClick={() => setActiveNoteIndex(index)}
-                                className={`w-16 h-16 rounded overflow-hidden border-2 transition-all duration-300 ${
-                                  isActive
-                                    ? "border-accent scale-110 shadow-md shadow-accent/20"
-                                    : "border-border opacity-65 hover:opacity-100 hover:scale-105"
-                                }`}
-                              >
-                                <img src={note.imageUrl} alt={note.title} className="w-full h-full object-cover" />
-                              </button>
-                            );
-                          })}
-                        </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-                )}
 
-                {/* 3. INTERACTIVE QUIZ TAB */}
-                {activeTab === "quiz" && (
-                  <div className="max-w-2xl mx-auto">
-                    {!quizStarted ? (
-                      /* Start Panel */
-                      <div className="card-institutional p-8 text-center space-y-6 animate-fade-in">
-                        <div className="w-16 h-16 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent text-3xl">
-                          🏆
-                        </div>
-                        <div className="space-y-2">
-                          <h3 className="font-serif text-2xl font-bold text-primary">
-                            Test Your Quantum Intuition
-                          </h3>
-                          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
-                            A curated {activeTopic.quiz.length}-question multiple-choice quiz designed by Dr. G. Jaya Suma to validate your core comprehension of <strong>{activeTopic.name}</strong>.
-                          </p>
-                        </div>
-                        
-                        <div className="p-4 bg-muted rounded-lg text-left max-w-sm mx-auto space-y-2 text-xs">
-                          <div className="flex items-center gap-2 text-primary font-semibold">
-                            <HelpCircle size={14} className="text-accent" /> Quiz Standards:
-                          </div>
-                          <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-                            <li>Instant scoring feedback on selection.</li>
-                            <li>Detailed scientific explanations included.</li>
-                            <li>Earn special badges of achievement.</li>
-                          </ul>
-                        </div>
-
-                        <Button 
-                          variant="hero" 
-                          size="lg" 
-                          onClick={startQuiz}
-                          className="px-8 font-semibold text-sm transform hover:scale-105 transition-all duration-300"
-                        >
-                          Start Topic Quiz
-                        </Button>
-                      </div>
-                    ) : quizFinished ? (
-                      /* Final Score Panel */
-                      <div className="card-institutional p-8 text-center space-y-6 animate-fade-in">
-                        <div className="w-20 h-20 bg-accent/10 border-2 border-accent/20 rounded-full flex items-center justify-center mx-auto">
-                          <span className="text-4xl">👑</span>
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <span className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
-                            Quiz Completion
-                          </span>
-                          <h3 className="font-serif text-3xl font-bold text-primary">
-                            Excellent! Module Completed
-                          </h3>
-                        </div>
-
-                        {/* Circular Score Badge */}
-                        <div className="w-32 h-32 rounded-full border-4 border-accent flex flex-col items-center justify-center mx-auto bg-accent/5 shadow-lg shadow-accent/5">
-                          <span className="text-3xl font-extrabold text-primary">
-                            {quizScore} / {activeTopic.quiz.length}
-                          </span>
-                          <span className="text-[10px] tracking-wider uppercase text-accent font-semibold mt-1">
-                            Correct
-                          </span>
-                        </div>
-
-                        {/* Achievement Badge */}
-                        <div className="p-5 bg-muted/60 rounded-lg max-w-md mx-auto border border-border">
-                          <h4 className="font-semibold text-accent text-lg mb-1">
-                            {getBadge(quizScore, activeTopic.quiz.length).title}
-                          </h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed">
-                            {getBadge(quizScore, activeTopic.quiz.length).desc}
-                          </p>
-                        </div>
-
-                        <div className="flex justify-center gap-3 pt-2">
-                          <Button 
-                            variant="hero-outline" 
-                            size="sm" 
-                            onClick={startQuiz}
-                            className="flex items-center gap-2"
-                          >
-                            <RotateCcw size={14} /> Retake Quiz
-                          </Button>
+                      <div className="flex gap-2">
+                        {activeTab === "videos" && (
                           <Button 
                             variant="hero" 
-                            size="sm" 
-                            onClick={() => {
-                              // go to next topic, or reset
-                              const nextIdx = (activeTopicIndex + 1) % topics.length;
-                              handleTopicSwitch(nextIdx);
-                            }}
+                            size="sm"
+                            onClick={() => setVideoModalOpen(true)}
+                            className="flex items-center gap-2 text-xs"
                           >
-                            Next Course Module
+                            <Plus size={14} /> Upload Video
                           </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Active Question Panel */
-                      <div className="card-institutional p-6 md:p-8 space-y-6 animate-fade-in">
-                        
-                        {/* Progress Header */}
-                        <div className="flex items-center justify-between border-b border-border pb-4">
-                          <div>
-                            <span className="text-xs text-accent uppercase font-bold tracking-wider">
-                              Assessment Mode
-                            </span>
-                            <h4 className="font-serif text-lg font-semibold text-primary">
-                              Question {currentQuestionIndex + 1} of {activeTopic.quiz.length}
-                            </h4>
-                          </div>
-                          <span className="text-sm font-mono bg-muted px-2.5 py-1 rounded text-muted-foreground font-semibold">
-                            Score: {quizScore}
-                          </span>
-                        </div>
-
-                        {/* Progress Bar */}
-                        <div className="w-full bg-muted rounded-full h-1.5">
-                          <div 
-                            className="bg-accent h-1.5 rounded-full transition-all duration-500" 
-                            style={{ width: `${((currentQuestionIndex + 1) / activeTopic.quiz.length) * 100}%` }}
-                          />
-                        </div>
-
-                        {/* Question Text */}
-                        <div className="space-y-4">
-                          <h3 className="font-serif text-xl md:text-2xl font-bold text-primary leading-snug">
-                            {activeTopic.quiz[currentQuestionIndex].question}
-                          </h3>
-                          
-                          {/* Options Choice Grid */}
-                          <div className="grid gap-3 pt-2">
-                            {activeTopic.quiz[currentQuestionIndex].options.map((option, idx) => {
-                              const isSelected = selectedOption === idx;
-                              const isCorrect = idx === activeTopic.quiz[currentQuestionIndex].correctAnswer;
-                              
-                              let buttonStyles = "border-border bg-card/50 hover:bg-card hover:border-accent/40";
-                              if (isSelected && !answerSubmitted) {
-                                buttonStyles = "border-accent bg-accent/5 ring-1 ring-accent/30";
-                              } else if (answerSubmitted) {
-                                if (isCorrect) {
-                                  buttonStyles = "border-green-500 bg-green-500/10 text-green-700 dark:text-green-400";
-                                } else if (isSelected) {
-                                  buttonStyles = "border-red-500 bg-red-500/10 text-red-700 dark:text-red-400";
-                                } else {
-                                  buttonStyles = "border-border opacity-50";
-                                }
-                              }
-
-                              return (
-                                <button
-                                  key={idx}
-                                  onClick={() => handleOptionSelect(idx)}
-                                  disabled={answerSubmitted}
-                                  className={`w-full text-left p-4 rounded-lg border flex items-center justify-between transition-all duration-200 ${buttonStyles}`}
-                                >
-                                  <span className="text-sm md:text-base font-semibold flex items-center gap-3">
-                                    <span className="w-6 h-6 rounded-full bg-muted/80 flex items-center justify-center text-xs font-mono border border-border">
-                                      {String.fromCharCode(65 + idx)}
-                                    </span>
-                                    {option}
-                                  </span>
-                                  
-                                  {/* Answer Submitted Feedback Icons */}
-                                  {answerSubmitted && isCorrect && <CheckCircle2 size={18} className="text-green-500 flex-shrink-0" />}
-                                  {answerSubmitted && isSelected && !isCorrect && <XCircle size={18} className="text-red-500 flex-shrink-0" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {/* Explanation Box */}
-                        {answerSubmitted && (
-                          <div className={`p-5 rounded-lg border animate-slide-up ${
-                            selectedOption === activeTopic.quiz[currentQuestionIndex].correctAnswer
-                              ? "bg-green-500/5 border-green-500/20"
-                              : "bg-red-500/5 border-red-500/20"
-                          }`}>
-                            <h5 className="font-semibold text-sm mb-1 text-primary flex items-center gap-1.5">
-                              {selectedOption === activeTopic.quiz[currentQuestionIndex].correctAnswer ? (
-                                <span className="text-green-500">Correct Explanation 💡</span>
-                              ) : (
-                                <span className="text-red-500">Concept Clarification 💡</span>
-                              )}
-                            </h5>
-                            <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
-                              {activeTopic.quiz[currentQuestionIndex].explanation}
-                            </p>
-                          </div>
                         )}
+                        {activeTab === "notes" && (
+                          <Button 
+                            variant="hero" 
+                            size="sm"
+                            onClick={() => setNoteModalOpen(true)}
+                            className="flex items-center gap-2 text-xs"
+                          >
+                            <Plus size={14} /> Add Notes Slide
+                          </Button>
+                        )}
+                      </div>
+                    </div>
 
-                        {/* Action buttons */}
-                        <div className="flex justify-end gap-3 border-t border-border/40 pt-5">
-                          {!answerSubmitted ? (
-                            <Button
-                              variant="hero"
-                              size="sm"
-                              onClick={submitAnswer}
-                              disabled={selectedOption === null}
-                              className="px-6 font-semibold"
-                            >
-                              Submit Answer
-                            </Button>
+                    {/* CONTENT PANEL */}
+                    <div className="min-h-[400px]">
+                      
+                      {/* VIDEOS TAB */}
+                      {activeTab === "videos" && (
+                        <div className="space-y-6">
+                          {activeModule.videos.length === 0 ? (
+                            <div className="text-center py-16 border border-dashed border-border rounded-xl">
+                              <Video size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
+                              <p className="text-muted-foreground font-medium">No videos found for this topic.</p>
+                            </div>
                           ) : (
-                            <Button
-                              variant="hero"
-                              size="sm"
-                              onClick={nextQuestion}
-                              className="px-6 font-semibold flex items-center gap-1"
-                            >
-                              {currentQuestionIndex + 1 === activeTopic.quiz.length ? "Finish Quiz" : "Next Question"}
-                            </Button>
+                            <div className="grid md:grid-cols-2 gap-6">
+                              {activeModule.videos.map((vid) => (
+                                <div 
+                                  key={vid.id}
+                                  className="card-institutional p-5 flex flex-col justify-between group hover:border-accent/40 hover:shadow-xl transition-all duration-300"
+                                >
+                                  <div>
+                                    <div className="relative aspect-video bg-slate-900 rounded-lg overflow-hidden border border-border/80 mb-4 flex items-center justify-center">
+                                      <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-indigo-900/20 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                                      <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center border border-accent/40 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                                        <Play className="w-6 h-6 text-accent fill-accent ml-0.5" />
+                                      </div>
+                                      <span className="absolute bottom-2 right-2 bg-black/80 px-2 py-0.5 rounded text-[10px] text-white font-mono font-semibold">
+                                        {vid.duration}
+                                      </span>
+                                    </div>
+                                    <h3 className="font-serif text-lg font-bold text-primary group-hover:text-accent transition-colors leading-snug mb-2">
+                                      {vid.title}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed mb-4">
+                                      {vid.description}
+                                    </p>
+                                  </div>
+                                  <div className="border-t border-border/40 pt-4 flex items-center justify-between">
+                                    <span className="text-xs text-muted-foreground font-mono">
+                                      Seminar Lecture Video
+                                    </span>
+                                    <Button 
+                                      variant="hero-outline" 
+                                      size="xs"
+                                      onClick={() => {
+                                        setActivePlayVideoUrl(vid.url);
+                                        setActivePlayVideoTitle(vid.title);
+                                      }}
+                                      className="flex items-center gap-1.5 text-xs py-1.5"
+                                    >
+                                      Play Lecture <ExternalLink size={12} />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </div>
+                      )}
 
-                      </div>
-                    )}
-                  </div>
+                      {/* NOTES TAB */}
+                      {activeTab === "notes" && (
+                        <div className="space-y-6">
+                          {activeModule.notes.length === 0 ? (
+                            <div className="text-center py-16 border border-dashed border-border rounded-xl">
+                              <BookOpen size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
+                              <p className="text-muted-foreground font-medium">No notes snippets found for this topic.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-6">
+                              <div className="relative bg-card border border-border rounded-xl p-6 md:p-10 shadow-lg">
+                                <div className="grid md:grid-cols-12 gap-8 items-center">
+                                  <div className="md:col-span-5 relative group">
+                                    <div className="relative aspect-square bg-slate-900 rounded-lg overflow-hidden border border-border shadow-inner flex items-center justify-center">
+                                      <img 
+                                        src={activeModule.notes[activeNoteIndex].imageUrl} 
+                                        alt={activeModule.notes[activeNoteIndex].title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      <button 
+                                        onClick={() => setLightboxOpen(true)}
+                                        className="absolute top-2 right-2 p-2 bg-black/70 hover:bg-accent rounded text-white opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm"
+                                        title="View Fullscreen"
+                                      >
+                                        <Maximize2 size={16} />
+                                      </button>
+                                    </div>
+                                  </div>
+
+                                  <div className="md:col-span-7 space-y-4">
+                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
+                                      Note Sheet {activeNoteIndex + 1} of {activeModule.notes.length}
+                                    </div>
+                                    <h3 className="font-serif text-2xl font-bold text-primary">
+                                      {activeModule.notes[activeNoteIndex].title}
+                                    </h3>
+                                    <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
+                                      {activeModule.notes[activeNoteIndex].description}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="absolute top-1/2 -left-4 -translate-y-1/2">
+                                  <button
+                                    onClick={handlePrevNote}
+                                    className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
+                                  >
+                                    <ChevronLeft size={24} />
+                                  </button>
+                                </div>
+                                <div className="absolute top-1/2 -right-4 -translate-y-1/2">
+                                  <button
+                                    onClick={handleNextNote}
+                                    className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
+                                  >
+                                    <ChevronRight size={24} />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* QUIZ TAB */}
+                      {activeTab === "quiz" && (
+                        <div className="max-w-2xl mx-auto">
+                          {!quizStarted ? (
+                            <div className="card-institutional p-8 text-center space-y-6 animate-fade-in">
+                              <div className="w-16 h-16 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent text-3xl">
+                                🏆
+                              </div>
+                              <div className="space-y-2">
+                                <h3 className="font-serif text-2xl font-bold text-primary">
+                                  Test Your Intuition
+                                </h3>
+                                <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                                  A curated {activeModule.quiz.length}-question multiple-choice quiz designed to validate your core comprehension of <strong>{activeModule.name}</strong>.
+                                </p>
+                              </div>
+                              
+                              <Button 
+                                variant="hero" 
+                                size="lg" 
+                                onClick={startQuiz}
+                                className="px-8 font-semibold text-sm transform hover:scale-105 transition-all duration-300"
+                              >
+                                Start Topic Quiz
+                              </Button>
+                            </div>
+                          ) : quizFinished ? (
+                            <div className="card-institutional p-8 text-center space-y-6 animate-fade-in">
+                              <div className="w-20 h-20 bg-accent/10 border-2 border-accent/20 rounded-full flex items-center justify-center mx-auto">
+                                <span className="text-4xl">👑</span>
+                              </div>
+                              <div className="space-y-1">
+                                <h3 className="font-serif text-3xl font-bold text-primary">
+                                  Module Completed
+                                </h3>
+                              </div>
+                              <div className="w-32 h-32 rounded-full border-4 border-accent flex flex-col items-center justify-center mx-auto bg-accent/5 shadow-lg shadow-accent/5">
+                                <span className="text-3xl font-extrabold text-primary">
+                                  {quizScore} / {activeModule.quiz.length}
+                                </span>
+                              </div>
+                              <div className="p-5 bg-muted/60 rounded-lg max-w-md mx-auto border border-border">
+                                <h4 className="font-semibold text-accent text-lg mb-1">
+                                  {getBadge(quizScore, activeModule.quiz.length).title}
+                                </h4>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                  {getBadge(quizScore, activeModule.quiz.length).desc}
+                                </p>
+                              </div>
+                              <div className="flex justify-center gap-3 pt-2">
+                                <Button 
+                                  variant="hero-outline" 
+                                  size="sm" 
+                                  onClick={startQuiz}
+                                >
+                                  <RotateCcw size={14} className="mr-2"/> Retake Quiz
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="card-institutional p-6 md:p-8 space-y-6 animate-fade-in">
+                              <div className="flex items-center justify-between border-b border-border pb-4">
+                                <div>
+                                  <span className="text-xs text-accent uppercase font-bold tracking-wider">
+                                    Assessment Mode
+                                  </span>
+                                  <h4 className="font-serif text-lg font-semibold text-primary">
+                                    Question {currentQuestionIndex + 1} of {activeModule.quiz.length}
+                                  </h4>
+                                </div>
+                                <span className="text-sm font-mono bg-muted px-2.5 py-1 rounded text-muted-foreground font-semibold">
+                                  Score: {quizScore}
+                                </span>
+                              </div>
+                              <div className="space-y-4">
+                                <h3 className="font-serif text-xl md:text-2xl font-bold text-primary leading-snug">
+                                  {activeModule.quiz[currentQuestionIndex].question}
+                                </h3>
+                                <div className="grid gap-3 pt-2">
+                                  {activeModule.quiz[currentQuestionIndex].options.map((option, idx) => {
+                                    const isSelected = selectedOption === idx;
+                                    const isCorrect = idx === activeModule.quiz[currentQuestionIndex].correctAnswer;
+                                    
+                                    let buttonStyles = "border-border bg-card/50 hover:bg-card hover:border-accent/40";
+                                    if (isSelected && !answerSubmitted) {
+                                      buttonStyles = "border-accent bg-accent/5 ring-1 ring-accent/30";
+                                    } else if (answerSubmitted) {
+                                      if (isCorrect) {
+                                        buttonStyles = "border-green-500 bg-green-500/10 text-green-700 dark:text-green-400";
+                                      } else if (isSelected) {
+                                        buttonStyles = "border-red-500 bg-red-500/10 text-red-700 dark:text-red-400";
+                                      } else {
+                                        buttonStyles = "border-border opacity-50";
+                                      }
+                                    }
+
+                                    return (
+                                      <button
+                                        key={idx}
+                                        onClick={() => handleOptionSelect(idx)}
+                                        disabled={answerSubmitted}
+                                        className={`w-full text-left p-4 rounded-lg border flex items-center justify-between transition-all duration-200 ${buttonStyles}`}
+                                      >
+                                        <span className="text-sm md:text-base font-semibold flex items-center gap-3">
+                                          <span className="w-6 h-6 rounded-full bg-muted/80 flex items-center justify-center text-xs font-mono border border-border">
+                                            {String.fromCharCode(65 + idx)}
+                                          </span>
+                                          {option}
+                                        </span>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              {answerSubmitted && (
+                                <div className={`p-5 rounded-lg border animate-slide-up ${
+                                  selectedOption === activeModule.quiz[currentQuestionIndex].correctAnswer
+                                    ? "bg-green-500/5 border-green-500/20"
+                                    : "bg-red-500/5 border-red-500/20"
+                                }`}>
+                                  <h5 className="font-semibold text-sm mb-1 text-primary flex items-center gap-1.5">
+                                    {selectedOption === activeModule.quiz[currentQuestionIndex].correctAnswer ? (
+                                      <span className="text-green-500">Correct Explanation 💡</span>
+                                    ) : (
+                                      <span className="text-red-500">Concept Clarification 💡</span>
+                                    )}
+                                  </h5>
+                                  <p className="text-xs md:text-sm text-muted-foreground leading-relaxed">
+                                    {activeModule.quiz[currentQuestionIndex].explanation}
+                                  </p>
+                                </div>
+                              )}
+                              <div className="flex justify-end gap-3 border-t border-border/40 pt-5">
+                                {!answerSubmitted ? (
+                                  <Button
+                                    variant="hero"
+                                    size="sm"
+                                    onClick={submitAnswer}
+                                    disabled={selectedOption === null}
+                                  >
+                                    Submit Answer
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="hero"
+                                    size="sm"
+                                    onClick={nextQuestion}
+                                  >
+                                    {currentQuestionIndex + 1 === activeModule.quiz.length ? "Finish Quiz" : "Next Question"}
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
-
               </div>
-
             </div>
-
-          </div>
-
+          )}
         </div>
       </section>
 
       {/* LIGHTBOX NOTE IMAGE MODAL */}
-      {lightboxOpen && activeTopic.notes[activeNoteIndex] && (
+      {lightboxOpen && activeModule && activeModule.notes[activeNoteIndex] && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-6 animate-fade-in">
           <button 
             onClick={() => setLightboxOpen(false)}
@@ -1034,16 +2966,15 @@ export default function QLearnPage() {
           >
             <X size={24} />
           </button>
-          
           <div className="max-w-4xl max-h-[85vh] w-full flex flex-col items-center justify-center">
             <img 
-              src={activeTopic.notes[activeNoteIndex].imageUrl} 
-              alt={activeTopic.notes[activeNoteIndex].title} 
+              src={activeModule.notes[activeNoteIndex].imageUrl} 
+              alt={activeModule.notes[activeNoteIndex].title} 
               className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
             />
             <div className="text-center text-white mt-4 max-w-2xl px-4">
-              <h3 className="font-serif text-xl font-bold">{activeTopic.notes[activeNoteIndex].title}</h3>
-              <p className="text-xs text-gray-300 mt-1">{activeTopic.notes[activeNoteIndex].description}</p>
+              <h3 className="font-serif text-xl font-bold">{activeModule.notes[activeNoteIndex].title}</h3>
+              <p className="text-xs text-gray-300 mt-1">{activeModule.notes[activeNoteIndex].description}</p>
             </div>
           </div>
         </div>
@@ -1259,7 +3190,6 @@ export default function QLearnPage() {
           </div>
         </div>
       )}
-
       <Footer />
     </div>
   );

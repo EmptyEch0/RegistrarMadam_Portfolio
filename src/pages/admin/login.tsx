@@ -1,93 +1,34 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
-  const navigatedRef = useRef(false);
 
-  const [checking, setChecking] = useState(true);
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  // ✅ ENV-AWARE redirect URL (FIXED 🔥)
-  const redirectUrl = import.meta.env.PROD
-    ? "https://jayasumaofficial.vercel.app/admin/login"
-    : "http://localhost:8081/admin/login";
-
-  // ✅ 1. Check existing session ONCE on mount
   useEffect(() => {
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      const user = data.session?.user;
-
-      if (user?.app_metadata?.role === "admin") {
-        navigatedRef.current = true;
-        navigate("/admin/dashboard", { replace: true });
-      } else {
-        setChecking(false);
-      }
-    };
-
-    checkSession();
+    if (localStorage.getItem("admin_authenticated") === "true") {
+      navigate("/admin/dashboard", { replace: true });
+    }
   }, [navigate]);
 
-  // ✅ 2. Listen ONLY for real SIGNED_IN events
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (
-        event === "SIGNED_IN" &&
-        !navigatedRef.current &&
-        session?.user?.app_metadata?.role === "admin"
-      ) {
-        navigatedRef.current = true;
-        navigate("/admin/dashboard", { replace: true });
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, [navigate]);
-
-  // ✅ 3. Send magic link to LOGIN page (NOT dashboard)
-  const handleMagicLogin = async (e: React.FormEvent) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setMessage("");
-    setLoading(true);
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectUrl,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
+    if (password === "GJS@1905") {
+      localStorage.setItem("admin_authenticated", "true");
+      navigate("/admin/dashboard", { replace: true });
     } else {
-      setMessage("Magic link sent! Check your email 📩");
+      setError("Invalid password");
     }
-
-    setLoading(false);
   };
-
-  // 🔄 Loading spinner while session is being checked
-  if (checking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <form
-        onSubmit={handleMagicLogin}
+        onSubmit={handleLogin}
         className="w-full max-w-md rounded bg-white p-6 shadow"
       >
         <h1 className="mb-6 text-center text-xl font-semibold">
@@ -95,26 +36,23 @@ export default function AdminLogin() {
         </h1>
 
         {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
-        {message && <p className="mb-3 text-sm text-green-600">{message}</p>}
 
         <input
-          type="email"
+          type="password"
           required
-          placeholder="Admin email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter Admin Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="mb-4 w-full rounded border px-3 py-2"
         />
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full rounded bg-blue-600 py-2 text-white disabled:opacity-60"
+          className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700 transition-colors"
         >
-          {loading ? "Sending..." : "Send Magic Link"}
+          Login
         </button>
       </form>
     </div>
   );
 }
-
