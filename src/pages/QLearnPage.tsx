@@ -38,6 +38,8 @@ interface NoteSnippet {
   title: string;
   imageUrl: string;
   description: string;
+  docUrl?: string;
+  embedUrl?: string;
 }
 
 interface PptItem {
@@ -1550,10 +1552,12 @@ const DEFAULT_DOMAINS: DomainData[] = [
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "Electronics Basics Notes",
+            "id": "note-iot-unit1",
+            "title": "Unit 1: 4th Year B.Tech IoT Resource Notes",
             "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Electronics Basics."
+            "description": "Comprehensive resource notes document covering Unit 1 topics for 4th Year B.Tech IoT.",
+            "docUrl": "https://docs.google.com/document/d/1ZaMRQws02NVIJ07k-u9rcZyoagAbvO7J/edit?usp=sharing&ouid=116710741773817925660&rtpof=true&sd=true",
+            "embedUrl": "https://drive.google.com/file/d/1ZaMRQws02NVIJ07k-u9rcZyoagAbvO7J/preview"
           }
         ],
         "ppts": [
@@ -2347,6 +2351,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   ...mod,
                   name: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.name : mod.name,
                   description: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.description : mod.description,
+                  notes: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.notes : mod.notes,
                   ppts: [...defaultMod.ppts, ...userCustomPpts]
                 };
               }
@@ -2923,36 +2928,95 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                   </div>
 
                                   <div className="md:col-span-7 space-y-4">
-                                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
-                                      Note Sheet {activeNoteIndex + 1} of {activeModule.notes.length}
-                                    </div>
-                                    <h3 className="font-serif text-2xl font-bold text-primary">
-                                      {activeModule.notes[activeNoteIndex].title}
-                                    </h3>
-                                    <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
-                                      {activeModule.notes[activeNoteIndex].description}
-                                    </p>
-                                  </div>
-                                </div>
+                                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
+                                       Note Sheet {activeNoteIndex + 1} of {activeModule.notes.length}
+                                     </div>
+                                     <h3 className="font-serif text-2xl font-bold text-primary">
+                                       {activeModule.notes[activeNoteIndex].title}
+                                     </h3>
+                                     <p className="text-sm md:text-base text-foreground/80 leading-relaxed">
+                                       {activeModule.notes[activeNoteIndex].description}
+                                     </p>
 
-                                <div className="absolute top-1/2 -left-4 -translate-y-1/2">
-                                  <button
-                                    onClick={handlePrevNote}
-                                    className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
-                                  >
-                                    <ChevronLeft size={24} />
-                                  </button>
-                                </div>
-                                <div className="absolute top-1/2 -right-4 -translate-y-1/2">
-                                  <button
-                                    onClick={handleNextNote}
-                                    className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
-                                  >
-                                    <ChevronRight size={24} />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
+                                     {activeModule.notes[activeNoteIndex].docUrl && (
+                                       <div className="pt-2 flex flex-wrap gap-2">
+                                         <a
+                                           href={activeModule.notes[activeNoteIndex].docUrl}
+                                           target="_blank"
+                                           rel="noopener noreferrer"
+                                           className="inline-flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg bg-accent text-white hover:bg-accent/90 transition-all font-semibold shadow-sm"
+                                         >
+                                           Open Resource Document Notes <ExternalLink size={12} />
+                                         </a>
+                                         {activeModule.notes[activeNoteIndex].embedUrl && (
+                                           <Button
+                                             variant="hero-outline"
+                                             size="sm"
+                                             onClick={() => setFullscreenPpt({
+                                               id: activeModule.notes[activeNoteIndex].id,
+                                               title: activeModule.notes[activeNoteIndex].title,
+                                               pptUrl: activeModule.notes[activeNoteIndex].docUrl || "",
+                                               embedUrl: activeModule.notes[activeNoteIndex].embedUrl || "",
+                                               description: activeModule.notes[activeNoteIndex].description
+                                             })}
+                                             className="flex items-center gap-1.5 text-xs py-2"
+                                           >
+                                             <Maximize2 size={13} /> Fullscreen Notes
+                                           </Button>
+                                         )}
+                                       </div>
+                                     )}
+                                   </div>
+                                 </div>
+
+                                 <div className="absolute top-1/2 -left-4 -translate-y-1/2">
+                                   <button
+                                     onClick={handlePrevNote}
+                                     className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
+                                   >
+                                     <ChevronLeft size={24} />
+                                   </button>
+                                 </div>
+                                 <div className="absolute top-1/2 -right-4 -translate-y-1/2">
+                                   <button
+                                     onClick={handleNextNote}
+                                     className="w-10 h-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center text-primary hover:border-accent hover:text-accent hover:scale-110 active:scale-95 transition-all duration-200"
+                                   >
+                                     <ChevronRight size={24} />
+                                   </button>
+                                 </div>
+                               </div>
+
+                               {/* Embedded Document Viewer for Resource Notes if docUrl exists */}
+                               {activeModule.notes[activeNoteIndex].embedUrl && (
+                                 <div className="bg-card border border-border/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md">
+                                   <div className="p-4 bg-muted/60 border-b border-border flex items-center justify-between">
+                                     <div className="flex items-center gap-2">
+                                       <BookOpen className="w-5 h-5 text-accent" />
+                                       <h4 className="font-serif font-bold text-sm text-primary">
+                                         {activeModule.notes[activeNoteIndex].title} - Interactive Document Viewer
+                                       </h4>
+                                     </div>
+                                     <a
+                                       href={activeModule.notes[activeNoteIndex].docUrl}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="text-xs text-accent hover:underline flex items-center gap-1 font-semibold"
+                                     >
+                                       Open Document <ExternalLink size={12} />
+                                     </a>
+                                   </div>
+                                   <div className="relative w-full aspect-[16/9] min-h-[440px] md:min-h-[500px] bg-slate-950">
+                                     <iframe
+                                       src={activeModule.notes[activeNoteIndex].embedUrl}
+                                       title={activeModule.notes[activeNoteIndex].title}
+                                       className="w-full h-full border-0"
+                                       allowFullScreen
+                                     />
+                                   </div>
+                                 </div>
+                               )}
+                             </div>
                           )}
                         </div>
                       )}
