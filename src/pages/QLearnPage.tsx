@@ -1537,8 +1537,8 @@ const DEFAULT_DOMAINS: DomainData[] = [
     "modules": [
       {
         "id": "mod-1",
-        "name": "Module 1: Electronics Basics",
-        "description": "Topics: Voltage, Current, Sensors, Circuits",
+        "name": "Module 1: Unit 1 (4th Year B.Tech)",
+        "description": "Topics: Unit 1 4th Year B.Tech IoT Architecture, Voltage, Current, Sensors, Circuits",
         "videos": [
           {
             "id": "vid-1",
@@ -1554,6 +1554,16 @@ const DEFAULT_DOMAINS: DomainData[] = [
             "title": "Electronics Basics Notes",
             "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
             "description": "Key concepts and takeaways for Electronics Basics."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-iot-unit1",
+            "title": "Unit 1: 4th Year B.Tech IoT Presentation Slides",
+            "pptUrl": "https://docs.google.com/presentation/d/1o2oU9JwiQlJHIuvCLhqPq7-u-27D5rUK/edit?usp=sharing&ouid=116710741773817925660&rtpof=true&sd=true",
+            "embedUrl": "https://docs.google.com/presentation/d/1o2oU9JwiQlJHIuvCLhqPq7-u-27D5rUK/embed?start=false&loop=false&delayms=3000",
+            "description": "Comprehensive Unit 1 presentation slides for 4th Year B.Tech IoT (Internet of Things) course.",
+            "slideCount": "Course Slides"
           }
         ],
         "quiz": [
@@ -2320,12 +2330,35 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [activePlayVideoUrl, setActivePlayVideoUrl] = useState<string | null>(null);
   const [activePlayVideoTitle, setActivePlayVideoTitle] = useState("");
 
-  // Load from local storage on mount
+  // Load from local storage on mount and sync default PPTs
   useEffect(() => {
     const saved = localStorage.getItem("qlearn_domains");
     if (saved) {
       try {
-        setDomains(JSON.parse(saved));
+        const parsed: DomainData[] = JSON.parse(saved);
+        const updated = parsed.map((domain) => {
+          const defaultDomain = DEFAULT_DOMAINS.find((d) => d.id === domain.id);
+          if (!defaultDomain) return domain;
+          return {
+            ...domain,
+            modules: domain.modules.map((mod) => {
+              const defaultMod = defaultDomain.modules.find((m) => m.id === mod.id);
+              if (defaultMod && defaultMod.ppts && defaultMod.ppts.length > 0) {
+                const existingIds = new Set((mod.ppts || []).map((p) => p.id));
+                const missingPpts = defaultMod.ppts.filter((p) => !existingIds.has(p.id));
+                return {
+                  ...mod,
+                  name: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.name : mod.name,
+                  description: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.description : mod.description,
+                  ppts: [...(mod.ppts || []), ...missingPpts]
+                };
+              }
+              return mod;
+            })
+          };
+        });
+        setDomains(updated);
+        localStorage.setItem("qlearn_domains", JSON.stringify(updated));
       } catch (e) {
         console.error("Failed parsing QLearn domains data, resetting to defaults", e);
         setDomains(DEFAULT_DOMAINS);
