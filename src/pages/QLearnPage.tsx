@@ -1561,7 +1561,7 @@ const DEFAULT_DOMAINS: DomainData[] = [
             "id": "ppt-iot-unit1",
             "title": "Unit 1: 4th Year B.Tech IoT Presentation Slides",
             "pptUrl": "https://docs.google.com/presentation/d/1o2oU9JwiQlJHIuvCLhqPq7-u-27D5rUK/edit?usp=sharing&ouid=116710741773817925660&rtpof=true&sd=true",
-            "embedUrl": "https://docs.google.com/presentation/d/1o2oU9JwiQlJHIuvCLhqPq7-u-27D5rUK/embed?start=false&loop=false&delayms=3000",
+            "embedUrl": "https://drive.google.com/file/d/1o2oU9JwiQlJHIuvCLhqPq7-u-27D5rUK/preview",
             "description": "Comprehensive Unit 1 presentation slides for 4th Year B.Tech IoT (Internet of Things) course.",
             "slideCount": "Course Slides"
           }
@@ -2264,16 +2264,12 @@ const getEmbeddablePptUrl = (url: string): string => {
   if (!url) return "";
   const trimmed = url.trim();
 
-  // Google Slides
-  if (trimmed.includes("docs.google.com/presentation")) {
-    const base = trimmed.split("/edit")[0].split("/view")[0].split("/pub")[0].split("/mobilebasic")[0];
-    return `${base}/embed?start=false&loop=false&delayms=3000`;
-  }
+  // Extract Google Doc/Drive File ID
+  const docIdMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const docId = docIdMatch ? docIdMatch[1] : null;
 
-  // Google Drive File
-  if (trimmed.includes("drive.google.com/file")) {
-    const base = trimmed.split("/view")[0].split("/preview")[0];
-    return `${base}/preview`;
+  if (docId) {
+    return `https://drive.google.com/file/d/${docId}/preview`;
   }
 
   // Direct PPT or PDF files via Office viewer
@@ -2344,13 +2340,14 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
             modules: domain.modules.map((mod) => {
               const defaultMod = defaultDomain.modules.find((m) => m.id === mod.id);
               if (defaultMod && defaultMod.ppts && defaultMod.ppts.length > 0) {
-                const existingIds = new Set((mod.ppts || []).map((p) => p.id));
-                const missingPpts = defaultMod.ppts.filter((p) => !existingIds.has(p.id));
+                const userCustomPpts = (mod.ppts || []).filter(
+                  (p) => !defaultMod.ppts!.some((defP) => defP.id === p.id)
+                );
                 return {
                   ...mod,
                   name: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.name : mod.name,
                   description: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.description : mod.description,
-                  ppts: [...(mod.ppts || []), ...missingPpts]
+                  ppts: [...defaultMod.ppts, ...userCustomPpts]
                 };
               }
               return mod;
