@@ -12,11 +12,20 @@ import {
   GraduationCap,
   Calendar,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 // Section configuration with colors and metadata
 const sections = [
+  { 
+    title: "QLearn Hub", 
+    path: "/admin/qlearn", 
+    icon: Sparkles, 
+    color: "text-amber-500",
+    bgGradient: "from-amber-400/20 to-yellow-400/20",
+    count: null
+  },
   { 
     title: "Major Awards", 
     path: "/admin/major-awards", 

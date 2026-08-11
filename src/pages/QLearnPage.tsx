@@ -19,7 +19,8 @@ import {
   RotateCcw,
   Upload,
   ExternalLink,
-  ChevronRightSquare
+  ChevronRightSquare,
+  Presentation
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -39,6 +40,15 @@ interface NoteSnippet {
   description: string;
 }
 
+interface PptItem {
+  id: string;
+  title: string;
+  pptUrl: string;
+  embedUrl: string;
+  description: string;
+  slideCount?: string;
+}
+
 interface QuizQuestion {
   question: string;
   options: string[];
@@ -52,6 +62,7 @@ interface ModuleData {
   description: string;
   videos: VideoItem[];
   notes: NoteSnippet[];
+  ppts?: PptItem[];
   quiz: QuizQuestion[];
 }
 
@@ -93,6 +104,16 @@ const DEFAULT_DOMAINS: DomainData[] = [
             "title": "Mathematics Foundations Notes",
             "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
             "description": "Key concepts and takeaways for Mathematics Foundations."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-1",
+            "title": "Mathematics Foundations & Linear Algebra Slides",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Comprehensive presentation slides covering Linear Algebra, Complex Vectors & Matrices.",
+            "slideCount": "15 Slides"
           }
         ],
         "quiz": [
@@ -2228,15 +2249,45 @@ const DEFAULT_DOMAINS: DomainData[] = [
   }
 ];
 
-export default function QLearnPage() {
+// Helper to convert PPT / Google Drive URLs into embeddable view links
+const getEmbeddablePptUrl = (url: string): string => {
+  if (!url) return "";
+  const trimmed = url.trim();
+
+  // Google Slides
+  if (trimmed.includes("docs.google.com/presentation")) {
+    const base = trimmed.split("/edit")[0].split("/view")[0].split("/pub")[0].split("/mobilebasic")[0];
+    return `${base}/embed?start=false&loop=false&delayms=3000`;
+  }
+
+  // Google Drive File
+  if (trimmed.includes("drive.google.com/file")) {
+    const base = trimmed.split("/view")[0].split("/preview")[0];
+    return `${base}/preview`;
+  }
+
+  // Direct PPT or PDF files via Office viewer
+  if (trimmed.endsWith(".ppt") || trimmed.endsWith(".pptx") || trimmed.endsWith(".pdf")) {
+    return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(trimmed)}`;
+  }
+
+  return trimmed;
+};
+
+export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: boolean } = {}) {
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "quiz">("videos");
-  
+  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz">("videos");
+
   // Carousel states for the active notes tab
   const [activeNoteIndex, setActiveNoteIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  // PPT Presentation states
+  const [activePptIndex, setActivePptIndex] = useState(0);
+  const [pptModalOpen, setPptModalOpen] = useState(false);
+  const [fullscreenPpt, setFullscreenPpt] = useState<PptItem | null>(null);
 
   // Quiz states
   const [quizStarted, setQuizStarted] = useState(false);
@@ -2259,6 +2310,11 @@ export default function QLearnPage() {
   const [noteTitle, setNoteTitle] = useState("");
   const [noteImage, setNoteImage] = useState("");
   const [noteDesc, setNoteDesc] = useState("");
+
+  const [pptTitle, setPptTitle] = useState("");
+  const [pptUrl, setPptUrl] = useState("");
+  const [pptSlideCount, setPptSlideCount] = useState("");
+  const [pptDesc, setPptDesc] = useState("");
 
   // Video lecture player modal
   const [activePlayVideoUrl, setActivePlayVideoUrl] = useState<string | null>(null);
@@ -2289,6 +2345,20 @@ export default function QLearnPage() {
 
   const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
   const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
+
+  // Active PPT Decks for the current module (provides fallback deck so every module has interactive slides)
+  const activeModulePpts: PptItem[] = (activeModule?.ppts && activeModule.ppts.length > 0)
+    ? activeModule.ppts
+    : [
+        {
+          id: `ppt-default-${activeModule?.id || 'mod'}`,
+          title: `${activeModule?.name || 'Topic'} Presentation Slides`,
+          pptUrl: "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+          embedUrl: "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+          description: `Comprehensive presentation slide deck covering key concepts and principles of ${activeModule?.name || 'this topic'}.`,
+          slideCount: "Presentation Deck"
+        }
+      ];
 
   // Carousel actions
   const handleNextNote = () => {
@@ -2396,6 +2466,52 @@ export default function QLearnPage() {
     setActiveNoteIndex(activeModule.notes.length); 
   };
 
+  // PPT Upload submit handler
+  const handlePptUploadSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pptTitle || !pptUrl || !pptDesc || activeDomainIndex === null || !activeModule) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    const embedUrl = getEmbeddablePptUrl(pptUrl);
+
+    const newPpt: PptItem = {
+      id: `ppt-${Date.now()}`,
+      title: pptTitle,
+      pptUrl: pptUrl,
+      embedUrl: embedUrl,
+      description: pptDesc,
+      slideCount: pptSlideCount || "Slides Deck"
+    };
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                ppts: [...(m.ppts || []), newPpt]
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return d;
+    });
+
+    saveDomains(updatedDomains);
+    setPptTitle("");
+    setPptUrl("");
+    setPptSlideCount("");
+    setPptDesc("");
+    setPptModalOpen(false);
+    setActivePptIndex((activeModule.ppts || []).length);
+  };
+
   // Quiz interactive triggers
   const startQuiz = () => {
     setQuizStarted(true);
@@ -2434,6 +2550,8 @@ export default function QLearnPage() {
   const handleDomainSelect = (idx: number) => {
     setActiveDomainIndex(idx);
     setActiveModuleIndex(0);
+    setActiveNoteIndex(0);
+    setActivePptIndex(0);
     setActiveTab("videos");
     setQuizStarted(false);
     setQuizFinished(false);
@@ -2443,12 +2561,15 @@ export default function QLearnPage() {
   const handleBackToDomains = () => {
     setActiveDomainIndex(null);
     setActiveModuleIndex(0);
+    setActiveNoteIndex(0);
+    setActivePptIndex(0);
   };
 
   // Switch module handler
   const handleModuleSwitch = (idx: number) => {
     setActiveModuleIndex(idx);
     setActiveNoteIndex(0);
+    setActivePptIndex(0);
     setActiveTab("videos");
     setQuizStarted(false);
     setQuizFinished(false);
@@ -2619,11 +2740,12 @@ export default function QLearnPage() {
                 {/* TABS */}
                 {activeModule && (
                   <>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border gap-4 pb-1">
-                      <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/80 gap-4 pb-3">
+                      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
                         {[
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
+                          { id: "ppts", label: "PPT & Drive Slides", icon: Presentation },
                           { id: "quiz", label: "Take Quiz", icon: Award }
                         ].map((tab) => {
                           const TabIcon = tab.icon;
@@ -2632,41 +2754,54 @@ export default function QLearnPage() {
                             <button
                               key={tab.id}
                               onClick={() => setActiveTab(tab.id as any)}
-                              className={`flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 ${
+                              className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
                                 isActive
-                                  ? "border-accent text-accent bg-accent/5"
-                                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
+                                  ? "bg-card text-accent shadow-md shadow-accent/10 ring-1 ring-accent/30 font-bold transform scale-[1.01]"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-card/60"
                               }`}
                             >
-                              <TabIcon size={16} />
-                              {tab.label}
+                              <TabIcon size={18} className={isActive ? "text-accent" : "text-muted-foreground"} />
+                              <span className="whitespace-nowrap">{tab.label}</span>
                             </button>
                           );
                         })}
                       </div>
 
-                      <div className="flex gap-2">
-                        {activeTab === "videos" && (
-                          <Button 
-                            variant="hero" 
-                            size="sm"
-                            onClick={() => setVideoModalOpen(true)}
-                            className="flex items-center gap-2 text-xs"
-                          >
-                            <Plus size={14} /> Upload Video
-                          </Button>
-                        )}
-                        {activeTab === "notes" && (
-                          <Button 
-                            variant="hero" 
-                            size="sm"
-                            onClick={() => setNoteModalOpen(true)}
-                            className="flex items-center gap-2 text-xs"
-                          >
-                            <Plus size={14} /> Add Notes Slide
-                          </Button>
-                        )}
-                      </div>
+                      {/* Admin upload controls (ONLY rendered when accessed inside protected Admin Portal) */}
+                      {isAdminPortal && (
+                        <div className="flex gap-2">
+                          {activeTab === "videos" && (
+                            <Button 
+                              variant="hero" 
+                              size="sm"
+                              onClick={() => setVideoModalOpen(true)}
+                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                            >
+                              <Plus size={14} /> Upload Video
+                            </Button>
+                          )}
+                          {activeTab === "notes" && (
+                            <Button 
+                              variant="hero" 
+                              size="sm"
+                              onClick={() => setNoteModalOpen(true)}
+                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                            >
+                              <Plus size={14} /> Add Notes Slide
+                            </Button>
+                          )}
+                          {activeTab === "ppts" && (
+                            <Button 
+                              variant="hero" 
+                              size="sm"
+                              onClick={() => setPptModalOpen(true)}
+                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                            >
+                              <Plus size={14} /> Upload PPT / Drive Link
+                            </Button>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* CONTENT PANEL */}
@@ -2789,6 +2924,138 @@ export default function QLearnPage() {
                               </div>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* PPTS & DRIVE SLIDES TAB */}
+                      {activeTab === "ppts" && (
+                        <div className="space-y-6">
+                          <div className="space-y-6">
+                            {/* Presentation Interactive Viewer Card */}
+                            <div className="bg-card border border-border/80 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-md">
+                              
+                              {/* Glassmorphic Viewer Header */}
+                              <div className="p-4 md:p-5 bg-gradient-to-r from-card via-card/95 to-accent/5 border-b border-border/80 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <span className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 text-accent font-bold shadow-sm border border-accent/20">
+                                    <Presentation size={22} />
+                                  </span>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <span className="px-2 py-0.5 text-[10px] uppercase font-bold tracking-wider rounded-full bg-accent/10 text-accent border border-accent/20">
+                                        Interactive Presentation
+                                      </span>
+                                    </div>
+                                    <h3 className="font-serif text-lg md:text-xl font-bold text-primary leading-snug">
+                                      {activeModulePpts[activePptIndex]?.title}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                                      {activeModulePpts[activePptIndex]?.description || "Drive Slide Presentation"}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {activeModulePpts[activePptIndex]?.slideCount && (
+                                    <span className="text-xs font-semibold px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-accent shadow-xs">
+                                      {activeModulePpts[activePptIndex].slideCount}
+                                    </span>
+                                  )}
+                                  <a
+                                    href={activeModulePpts[activePptIndex]?.pptUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 text-xs px-3.5 py-2 rounded-lg bg-muted/80 hover:bg-muted text-foreground transition-all duration-200 border border-border font-medium shadow-xs"
+                                  >
+                                    Open Drive <ExternalLink size={12} />
+                                  </a>
+                                  <Button
+                                    variant="hero"
+                                    size="sm"
+                                    onClick={() => setFullscreenPpt(activeModulePpts[activePptIndex])}
+                                    className="flex items-center gap-2 text-xs py-2 px-4 font-semibold shadow-md hover:shadow-accent/25 hover:scale-[1.03] transition-all duration-300"
+                                  >
+                                    <Maximize2 size={15} /> Maximize Presentation
+                                  </Button>
+                                </div>
+                              </div>
+
+                              {/* Responsive Full HD Frame Container */}
+                              <div className="relative w-full aspect-[16/9] min-h-[440px] md:min-h-[520px] bg-slate-950 flex items-center justify-center border-y border-border/40">
+                                <iframe
+                                  src={activeModulePpts[activePptIndex]?.embedUrl}
+                                  title={activeModulePpts[activePptIndex]?.title}
+                                  className="w-full h-full border-0"
+                                  allowFullScreen
+                                />
+                              </div>
+
+                              {/* Controls & Slide Switcher Footer */}
+                              <div className="p-4 bg-muted/40 border-t border-border flex flex-wrap items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                  <Button
+                                    variant="hero-outline"
+                                    size="xs"
+                                    disabled={activePptIndex === 0}
+                                    onClick={() => setActivePptIndex((prev) => Math.max(0, prev - 1))}
+                                    className="flex items-center gap-1 text-xs"
+                                  >
+                                    <ChevronLeft size={14} /> Prev Deck
+                                  </Button>
+                                  <span className="text-xs text-muted-foreground font-semibold px-3 py-1 rounded bg-card border border-border font-mono shadow-xs">
+                                    Deck {activePptIndex + 1} of {activeModulePpts.length}
+                                  </span>
+                                  <Button
+                                    variant="hero-outline"
+                                    size="xs"
+                                    disabled={activePptIndex >= activeModulePpts.length - 1}
+                                    onClick={() => setActivePptIndex((prev) => Math.min(activeModulePpts.length - 1, prev + 1))}
+                                    className="flex items-center gap-1 text-xs"
+                                  >
+                                    Next Deck <ChevronRight size={14} />
+                                  </Button>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground font-medium italic">
+                                    💡 Use slide arrows inside window to change pages, or click Maximize for full screen
+                                  </span>
+                                </div>
+                              </div>
+
+                            </div>
+
+                            {/* Multiple PPT Decks Selector Grid */}
+                            {activeModulePpts.length > 1 && (
+                              <div className="space-y-3 pt-2">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                  <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
+                                  Available Slide Decks ({activeModulePpts.length})
+                                </h4>
+                                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                  {activeModulePpts.map((ppt, pIdx) => (
+                                    <div
+                                      key={ppt.id}
+                                      onClick={() => setActivePptIndex(pIdx)}
+                                      className={`cursor-pointer p-4 rounded-xl border transition-all duration-300 flex items-start gap-3 transform hover:-translate-y-0.5 ${
+                                        pIdx === activePptIndex
+                                          ? "bg-accent/10 border-accent shadow-md ring-1 ring-accent/30"
+                                          : "bg-card border-border hover:border-accent/40 hover:shadow-md"
+                                      }`}
+                                    >
+                                      <div className={`p-2 rounded-lg ${pIdx === activePptIndex ? "bg-accent text-white" : "bg-muted text-muted-foreground"}`}>
+                                        <Presentation className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <h4 className="font-semibold text-sm line-clamp-1">{ppt.title}</h4>
+                                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{ppt.description}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       )}
 
@@ -3183,6 +3450,155 @@ export default function QLearnPage() {
                   size="sm"
                 >
                   Add Slide
+                </Button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* FULLSCREEN PPT / PRESENTATION LIGHTBOX MODAL */}
+      {fullscreenPpt && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col animate-fade-in">
+          {/* Fullscreen Header */}
+          <div className="p-4 bg-black/80 border-b border-white/10 flex items-center justify-between text-white backdrop-blur-md">
+            <div className="flex items-center gap-3">
+              <span className="p-2 rounded bg-accent/20 text-accent font-bold">
+                <Presentation size={20} />
+              </span>
+              <div>
+                <h3 className="font-serif text-lg font-bold text-white leading-snug">
+                  {fullscreenPpt.title}
+                </h3>
+                <p className="text-xs text-gray-400 line-clamp-1">
+                  Presentation Fullscreen View • {fullscreenPpt.description}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <a
+                href={fullscreenPpt.pptUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/20"
+              >
+                Open Drive <ExternalLink size={12} />
+              </a>
+              <button
+                onClick={() => setFullscreenPpt(null)}
+                className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                title="Exit Fullscreen View"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Main Fullscreen Iframe */}
+          <div className="flex-1 w-full bg-black flex items-center justify-center p-2 md:p-6">
+            <iframe
+              src={fullscreenPpt.embedUrl}
+              title={fullscreenPpt.title}
+              className="w-full h-full rounded-lg border border-white/10 shadow-2xl"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DIALOG: DYNAMIC PPT UPLOAD */}
+      {pptModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative bg-card border border-border w-full max-w-md rounded-xl shadow-2xl overflow-hidden animate-slide-up">
+            
+            <div className="p-5 border-b border-border/80 flex items-center justify-between">
+              <h3 className="font-serif text-lg font-semibold text-primary flex items-center gap-2">
+                <Upload size={18} className="text-accent" /> Upload PPT / Drive Presentation Link
+              </h3>
+              <button 
+                onClick={() => setPptModalOpen(false)}
+                className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handlePptUploadSubmit} className="p-5 space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Presentation Title *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Quantum Gates & Linear Algebra PPT"
+                  value={pptTitle}
+                  onChange={(e) => setPptTitle(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  PPT / Drive Link * (Google Slides, Drive PDF/PPT, OneDrive)
+                </label>
+                <input 
+                  type="url" 
+                  required
+                  placeholder="e.g. https://docs.google.com/presentation/d/.../edit"
+                  value={pptUrl}
+                  onChange={(e) => setPptUrl(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+                <span className="text-[10px] text-muted-foreground leading-normal block">
+                  Paste Google Drive presentation share link or view link. It will automatically be converted to an interactive embed.
+                </span>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Slide Count / Pages (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. 12 Slides or 24 Pages"
+                  value={pptSlideCount}
+                  onChange={(e) => setPptSlideCount(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Short Description *
+                </label>
+                <textarea 
+                  required
+                  rows={3}
+                  placeholder="Brief description of topics covered in this presentation slide deck..."
+                  value={pptDesc}
+                  onChange={(e) => setPptDesc(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3">
+                <Button 
+                  type="button" 
+                  variant="hero-outline" 
+                  size="sm" 
+                  onClick={() => setPptModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="hero" 
+                  size="sm"
+                >
+                  Upload Presentation
                 </Button>
               </div>
             </form>

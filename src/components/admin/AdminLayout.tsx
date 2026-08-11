@@ -24,6 +24,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: Home },
+  { label: "QLearn Hub", to: "/admin/qlearn", icon: Sparkles },
   { label: "Major Awards", to: "/admin/major-awards", icon: Award },
   { label: "Academic Governance", to: "/admin/academic-governance", icon: BookOpen },
   { label: "Committee Roles", to: "/admin/committee-roles", icon: Users },

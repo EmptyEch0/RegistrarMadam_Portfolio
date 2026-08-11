@@ -37,6 +37,8 @@ import AdminMedia from "./pages/admin/media";
 import ScholarsAdmin from "./pages/admin/Scholars";
 import DailyActivitiesAdmin from "./pages/admin/daily-activities";
 
+import AdminQLearn from "./pages/admin/qlearn";
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -79,6 +81,7 @@ export default function App() {
               <Route path="workshops-organized" element={<WorkshopsOrganizedAdmin />} />
               <Route path="media" element={<AdminMedia />} />
               <Route path="scholars" element={<ScholarsAdmin />} />
+              <Route path="qlearn" element={<AdminQLearn />} />
 
               {/* ✅ DAILY ACTIVITIES */}
               <Route path="daily-activities" element={<DailyActivitiesAdmin />} />
