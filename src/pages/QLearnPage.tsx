@@ -1572,15 +1572,70 @@ const DEFAULT_DOMAINS: DomainData[] = [
         ],
         "quiz": [
           {
-            "question": "What is the core concept of Electronics Basics?",
+            "question": "What is the primary role of the MQTT protocol in IoT architecture?",
             "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
+              "Lightweight Publish/Subscribe messaging protocol designed for constrained networks and low-bandwidth devices",
+              "Heavyweight Synchronous Remote Procedure Call (RPC) for high-performance computing",
+              "Direct P2P Video Streaming and Multi-media distribution protocol",
+              "Relational database query protocol for edge servers"
             ],
             "correctAnswer": 0,
-            "explanation": "Option A is correct for Electronics Basics."
+            "explanation": "MQTT is a lightweight publish-subscribe messaging protocol ideal for IoT sensors operating in low bandwidth or constrained environments."
+          },
+          {
+            "question": "Which layer of the standard IoT architecture is directly responsible for capturing data from physical sensors and actuators?",
+            "options": [
+              "Application Layer",
+              "Perception / Physical Sensing Layer",
+              "Network / Transport Layer",
+              "Business & Analytics Layer"
+            ],
+            "correctAnswer": 1,
+            "explanation": "The Perception (or Sensing) Layer consists of sensors, RFID tags, and actuators that physically detect and gather environmental data."
+          },
+          {
+            "question": "In 4th Year B.Tech IoT systems, what is the primary function of an IoT Gateway?",
+            "options": [
+              "To supply electrical voltage directly to external microcontrollers",
+              "To translate communication protocols, aggregate sensor data, and bridge edge devices to the Cloud",
+              "To execute complex deep learning model training on raw sensor nodes",
+              "To replace physical microprocessors with virtual cloud machines"
+            ],
+            "correctAnswer": 1,
+            "explanation": "An IoT Gateway acts as a bridge between local sensor networks and the internet/cloud, handling protocol conversion, filtering, and data transmission."
+          },
+          {
+            "question": "Which wireless communication technology is specifically optimized for low-power, long-range (LoRaWAN) outdoor IoT deployments?",
+            "options": [
+              "High-speed Wi-Fi 6 (802.11ax)",
+              "LoRa (Long Range RF)",
+              "USB 3.1 SuperSpeed",
+              "Ethernet CAT6"
+            ],
+            "correctAnswer": 1,
+            "explanation": "LoRa (Long Range) enables long-range transmissions (up to 15+ km) with low power consumption, making it ideal for smart agriculture and remote sensors."
+          },
+          {
+            "question": "What does GPIO stand for on IoT hardware platforms like Raspberry Pi and ESP32?",
+            "options": [
+              "General Purpose Input/Output",
+              "Graphical Processing and Input Operations",
+              "Global Positioning and Internet Output",
+              "General Protocol for IoT Operations"
+            ],
+            "correctAnswer": 0,
+            "explanation": "GPIO stands for General Purpose Input/Output pins, which allow microcontrollers to interface with digital sensors, switches, LEDs, and relays."
+          },
+          {
+            "question": "Why is Edge/Fog Computing heavily integrated into modern IoT deployments?",
+            "options": [
+              "To eliminate the need for physical sensors entirely",
+              "To process critical sensor data near the source, reducing network latency and bandwidth consumption",
+              "To replace cloud data storage with paper logs",
+              "To prevent microcontrollers from using electrical power"
+            ],
+            "correctAnswer": 1,
+            "explanation": "Edge and Fog computing perform real-time data processing and analytics locally near IoT devices, reducing latency, cloud bandwidth costs, and network dependence."
           }
         ]
       },
@@ -2352,6 +2407,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   name: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.name : mod.name,
                   description: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.description : mod.description,
                   notes: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.notes : mod.notes,
+                  quiz: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.quiz : mod.quiz,
                   ppts: [...defaultMod.ppts, ...userCustomPpts]
                 };
               }
@@ -3085,35 +3141,29 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               </div>
 
                               {/* Controls & Slide Switcher Footer */}
-                              <div className="p-4 bg-muted/40 border-t border-border flex flex-wrap items-center justify-between gap-4">
-                                <div className="flex items-center gap-2">
-                                  <Button
-                                    variant="hero-outline"
-                                    size="xs"
+                              <div className="p-4 bg-card border-t border-border flex flex-wrap items-center justify-between gap-3 shadow-inner">
+                                <div className="flex items-center gap-2.5">
+                                  <button
                                     disabled={activePptIndex === 0}
                                     onClick={() => setActivePptIndex((prev) => Math.max(0, prev - 1))}
-                                    className="flex items-center gap-1 text-xs"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border bg-muted/80 hover:bg-accent hover:text-accent-foreground text-foreground text-xs font-semibold disabled:opacity-40 disabled:pointer-events-none transition-all shadow-xs"
                                   >
                                     <ChevronLeft size={14} /> Prev Deck
-                                  </Button>
-                                  <span className="text-xs text-muted-foreground font-semibold px-3 py-1 rounded bg-card border border-border font-mono shadow-xs">
+                                  </button>
+                                  <span className="text-xs text-primary font-bold px-3.5 py-2 rounded-lg bg-accent/10 border border-accent/20 font-mono shadow-xs">
                                     Deck {activePptIndex + 1} of {activeModulePpts.length}
                                   </span>
-                                  <Button
-                                    variant="hero-outline"
-                                    size="xs"
+                                  <button
                                     disabled={activePptIndex >= activeModulePpts.length - 1}
                                     onClick={() => setActivePptIndex((prev) => Math.min(activeModulePpts.length - 1, prev + 1))}
-                                    className="flex items-center gap-1 text-xs"
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border bg-muted/80 hover:bg-accent hover:text-accent-foreground text-foreground text-xs font-semibold disabled:opacity-40 disabled:pointer-events-none transition-all shadow-xs"
                                   >
                                     Next Deck <ChevronRight size={14} />
-                                  </Button>
+                                  </button>
                                 </div>
 
-                                <div className="flex items-center gap-2">
-                                  <span className="text-xs text-muted-foreground font-medium italic">
-                                    💡 Use slide arrows inside window to change pages, or click Maximize for full screen
-                                  </span>
+                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                                  <span className="text-accent font-bold">💡 Tip:</span> Use slide arrows inside window to change pages, or click Maximize for full screen.
                                 </div>
                               </div>
 
