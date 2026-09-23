@@ -140,15 +140,82 @@ export default function ScholarsAdmin() {
 
   /* ---------------- SAVE (ADD / UPDATE) ---------------- */
   const handleSave = async (formData: any) => {
-    const studentName = formData.student_name || formData.scholar_name || formData.name || "";
-    const titleVal = formData.project_title || formData.thesis_title || formData.title || "";
-    const yearVal = formData.academic_year || formData.awarded_year || formData.year || "";
-    const rollVal = formData.roll_number || formData.roll || "";
-    const deptVal = formData.department || formData.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE");
-    const univVal = formData.university ? formData.university.trim() : "";
+    const studentName = (formData.student_name || formData.scholar_name || formData.name || "").trim();
+    const titleVal = (formData.project_title || formData.thesis_title || formData.title || "").trim();
+    const yearVal = (formData.academic_year || formData.awarded_year || formData.year || "").trim();
+    const rollVal = (formData.roll_number || formData.roll || "").trim();
+    const deptVal = (formData.department || formData.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE")).trim();
+    const univVal = formData.university ? formData.university.trim() : null;
+    const guideVal = formData.guide_name ? formData.guide_name.trim() : "Dr. G. Jaya Suma";
 
+    let cloudSaved = false;
+    let errorMessage = "";
+
+    // 1. Build precise schema payload for Supabase
+    let dbPayload: Record<string, any> = {};
+    if (type === "phd") {
+      dbPayload = {
+        scholar_name: studentName,
+        roll_number: rollVal || null,
+        thesis_title: titleVal,
+        department: deptVal,
+        university: univVal,
+        awarded_year: !isNaN(Number(yearVal)) ? Number(yearVal) : parseInt(yearVal, 10) || 2024,
+      };
+    } else if (type === "mtech") {
+      dbPayload = {
+        student_name: studentName,
+        roll_number: rollVal || null,
+        thesis_title: titleVal,
+        department: deptVal,
+        academic_year: yearVal,
+        university: univVal,
+        guide_name: guideVal,
+      };
+    } else {
+      // btech and mca share the same schema
+      dbPayload = {
+        student_name: studentName,
+        roll_number: rollVal || null,
+        project_title: titleVal,
+        department: deptVal,
+        academic_year: yearVal,
+        university: univVal,
+        guide_name: guideVal,
+      };
+    }
+
+    // 2. Save to Supabase
+    try {
+      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
+        const table = TABLE_MAP[type];
+        const isUUID = editing?.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(editing.id);
+
+        if (isUUID) {
+          const { error } = await supabase.from(table).update(dbPayload).eq("id", editing.id);
+          if (!error) {
+            cloudSaved = true;
+          } else {
+            console.error("Supabase update error:", error);
+            errorMessage = error.message;
+          }
+        } else {
+          const { error } = await supabase.from(table).insert(dbPayload);
+          if (!error) {
+            cloudSaved = true;
+          } else {
+            console.error("Supabase insert error:", error);
+            errorMessage = error.message;
+          }
+        }
+      }
+    } catch (sbErr: any) {
+      console.warn("Supabase save exception:", sbErr);
+      errorMessage = sbErr?.message || "Failed to reach database";
+    }
+
+    // 3. Fallback sync to localStorage for offline cache
     const newItemId = editing?.id || `scholar-${Date.now()}`;
-
     const normalizedRecord = {
       id: newItemId,
       name: studentName,
@@ -164,56 +231,34 @@ export default function ScholarsAdmin() {
       year: yearVal,
       academic_year: yearVal,
       awarded_year: type === "phd" && !isNaN(Number(yearVal)) ? Number(yearVal) : yearVal,
-      guide_name: formData.guide_name || "",
+      guide_name: guideVal,
       university: univVal,
       type: type,
       created_at: editing?.created_at || new Date().toISOString(),
       ...formData,
     };
 
-    let cloudSaved = false;
-
-    // 1. Save to Supabase if reachable
-    try {
-      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        const table = TABLE_MAP[type];
-        const payload = { ...formData };
-        if (type === "phd" && payload.awarded_year && !isNaN(Number(payload.awarded_year))) {
-          payload.awarded_year = Number(payload.awarded_year);
-        }
-        if (payload.university !== undefined) {
-          payload.university = payload.university ? payload.university.trim() : null;
-        }
-
-        if (editing?.id) {
-          const { error } = await supabase.from(table).update(payload).eq("id", editing.id);
-          if (!error) cloudSaved = true;
-        } else {
-          const { error } = await supabase.from(table).insert(payload);
-          if (!error) cloudSaved = true;
-        }
-      }
-    } catch (sbErr) {
-      console.warn("Supabase save not reachable, syncing to local storage:", sbErr);
-    }
-
-    // 2. Always sync to localStorage
     const allStored = getStoredScholars();
     const existingIndex = allStored.findIndex((item) => item.id === newItemId);
-
     if (existingIndex >= 0) {
       allStored[existingIndex] = { ...allStored[existingIndex], ...normalizedRecord };
     } else {
       allStored.unshift(normalizedRecord);
     }
-
     saveStoredScholars(allStored);
 
-    showNotification(
-      editing
-        ? `${TYPE_LABELS[type]} updated successfully! ${cloudSaved ? "(Synced with Cloud)" : "(Saved to Local Cache)"}`
-        : `${TYPE_LABELS[type]} added successfully! ${cloudSaved ? "(Synced with Cloud)" : "(Saved to Local Cache)"}`
-    );
+    if (cloudSaved) {
+      showNotification(
+        editing
+          ? `${TYPE_LABELS[type]} updated in Cloud! (Synced across all devices)`
+          : `${TYPE_LABELS[type]} added to Cloud! (Synced across all devices)`
+      );
+    } else {
+      showNotification(
+        `${TYPE_LABELS[type]} saved to local cache. (Cloud error: ${errorMessage || "Check database table"})`,
+        true
+      );
+    }
 
     setShowForm(false);
     setEditing(null);
@@ -222,11 +267,23 @@ export default function ScholarsAdmin() {
 
   /* ---------------- DELETE ---------------- */
   const handleDelete = async (row: any) => {
-    if (!confirm(`Delete scholar "${row.name || row.student_name || row.scholar_name}"?`)) return;
+    const scholarDisplayName = row.name || row.student_name || row.scholar_name || "this scholar";
+    if (!confirm(`Delete scholar "${scholarDisplayName}"?`)) return;
 
     try {
       if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        await supabase.from(TABLE_MAP[type]).delete().eq("id", row.id);
+        const table = TABLE_MAP[type];
+        const isUUID = row.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(row.id);
+
+        if (isUUID) {
+          await supabase.from(table).delete().eq("id", row.id);
+        } else {
+          const colName = type === "phd" ? "scholar_name" : "student_name";
+          const nameVal = row.scholar_name || row.student_name || row.name;
+          if (nameVal && nameVal !== "Scholar") {
+            await supabase.from(table).delete().eq(colName, nameVal);
+          }
+        }
       }
     } catch (e) {
       console.warn("Could not delete from cloud:", e);
