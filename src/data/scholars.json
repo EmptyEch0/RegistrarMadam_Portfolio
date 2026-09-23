@@ -74,7 +74,6 @@
     "roll": "18021F0012",
     "title": "Cloud-Based Intelligent Healthcare Record Management and Predictive Diagnosis System",
     "dept": "MCA",
-    "university": "JNTUK, Kakinada",
     "year": "2021-2022",
     "type": "mca"
   },
@@ -84,7 +83,6 @@
     "roll": "19021F0024",
     "title": "Real-Time Fraud Detection in Digital Banking Transactions using Ensemble Machine Learning",
     "dept": "MCA",
-    "university": "JNTUK, Kakinada",
     "year": "2022-2023",
     "type": "mca"
   },
@@ -94,7 +92,6 @@
     "roll": "20021F0008",
     "title": "Deep Learning Powered Automated Resume Screening and Candidate Profiling System",
     "dept": "MCA",
-    "university": "JNTUK, Kakinada",
     "year": "2023-2024",
     "type": "mca"
   },
@@ -104,7 +101,6 @@
     "roll": "21021F0019",
     "title": "Secure Decentralized Student Credential Verification Platform using Blockchain Technology",
     "dept": "MCA",
-    "university": "JNTUK, Kakinada",
     "year": "2024-2025",
     "type": "mca"
   },
@@ -114,7 +110,6 @@
     "roll": "17022D5804",
     "title": "Optimized Resource Allocation and Dynamic Load Balancing in Heterogeneous Cloud Computing Environments",
     "dept": "CSE",
-    "university": "JNTUK, Kakinada",
     "year": "2019-2020",
     "type": "mtech"
   },
@@ -124,7 +119,6 @@
     "roll": "18022D5811",
     "title": "Privacy-Preserving Data Mining Approaches for Distributed Electronic Health Records",
     "dept": "CSE",
-    "university": "JNTUK, Kakinada",
     "year": "2020-2021",
     "type": "mtech"
   },
@@ -134,37 +128,51 @@
     "roll": "20022D5803",
     "title": "Graph Convolutional Neural Networks for Real-Time Anomaly Detection in Complex Social Networks",
     "dept": "CSE",
-    "university": "JNTUK, Kakinada",
     "year": "2022-2023",
     "type": "mtech"
   },
   {
     "id": "btech-1",
-    "name": "Ch. Rohith & Team",
-    "roll": "19021A0501",
-    "title": "IoT and Deep Learning Framework for Automated Smart Agriculture Soil & Crop Health Monitoring",
-    "dept": "CSE",
-    "university": "JNTUK, Kakinada",
-    "year": "2022-2023",
+    "name": "Rishitha Reddy | B. Sowmya | R. Deepak | D. Pushpa Leela",
+    "roll": "22VV1A1257 | 22VV1A1208 | 22VV1A1255 | 22VV1A1217",
+    "title": "Care Connect: Automated Patient Remote Monitoring System",
+    "dept": "Information Technology",
+    "year": "2026",
     "type": "btech"
   },
   {
     "id": "btech-2",
-    "name": "K. Akhil & Team",
-    "roll": "20021A0518",
-    "title": "AI-Driven Real-time Urban Traffic Density Analysis and Adaptive Signal Control System",
-    "dept": "CSE",
-    "university": "JNTUK, Kakinada",
-    "year": "2023-2024",
+    "name": "MD. Masoodulla Shariff | B. Shanmukh Sai Sravan | Nagabathula Pragath | Pilli Rajesh",
+    "roll": "22VV1A1238 | 22VV1A1202 | 22VV1A1241 | 22VV1A1251",
+    "title": "LearnFlow: AI-Driven Personalized Education Platform",
+    "dept": "Information Technology",
+    "year": "2026",
     "type": "btech"
   },
   {
     "id": "btech-3",
+    "name": "Ch. Rohith & Team",
+    "roll": "19021A0501",
+    "title": "IoT and Deep Learning Framework for Automated Smart Agriculture Soil & Crop Health Monitoring",
+    "dept": "CSE",
+    "year": "2022-2023",
+    "type": "btech"
+  },
+  {
+    "id": "btech-4",
+    "name": "K. Akhil & Team",
+    "roll": "20021A0518",
+    "title": "AI-Driven Real-time Urban Traffic Density Analysis and Adaptive Signal Control System",
+    "dept": "CSE",
+    "year": "2023-2024",
+    "type": "btech"
+  },
+  {
+    "id": "btech-5",
     "name": "P. Sneha & Team",
     "roll": "21021A0532",
     "title": "Multimodal Sentiment Analysis on E-Learning Platforms using Transformer Architectures",
     "dept": "CSE",
-    "university": "JNTUK, Kakinada",
     "year": "2024-2025",
     "type": "btech"
   }

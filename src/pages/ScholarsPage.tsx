@@ -44,55 +44,119 @@ export default function ScholarsPage() {
     const fetchScholars = async () => {
       setIsLoading(true);
       try {
-        // 1. Check local storage overrides / admin additions first
+        const jsonByType = (t: ScholarType): Scholar[] =>
+          (scholarsJSON as Scholar[]).filter((s) => s.type === t);
+
         const localSaved = localStorage.getItem("portfolio_scholars_data");
-        let initialList: Scholar[] = localSaved ? JSON.parse(localSaved) : (scholarsJSON as Scholar[]);
+        let localParsed: Scholar[] = [];
+        if (localSaved) {
+          try {
+            localParsed = JSON.parse(localSaved);
+          } catch (e) {
+            console.warn("Could not parse local scholars data", e);
+          }
+        }
 
         if (!isSupabaseEnabled) {
-          setScholars(initialList);
+          setScholars(localParsed.length > 0 ? localParsed : (scholarsJSON as Scholar[]));
           return;
         }
 
-        // 2. Try fetching from Supabase scholars table
-        try {
-          const { data, error } = await supabase
-            .from("scholars")
-            .select("*")
-            .order("year", { ascending: false });
+        // Fetch from all individual scholar tables in Supabase in parallel
+        const [phdRes, mcaRes, mtechRes, btechRes] = await Promise.allSettled([
+          supabase.from("phd_scholars_awarded").select("*").order("awarded_year", { ascending: false }),
+          supabase.from("mca_scholars").select("*").order("academic_year", { ascending: false }),
+          supabase.from("mtech_scholars").select("*").order("academic_year", { ascending: false }),
+          supabase.from("btech_scholars").select("*").order("academic_year", { ascending: false }),
+        ]);
 
-          if (!error && data && data.length > 0) {
-            const normalizedData: Scholar[] = data.map((item: any) => ({
-              id: item.id,
-              name: item.name || item.student_name || item.scholar_name || "Scholar",
-              roll: item.roll || item.roll_number || "-",
-              title: item.title || item.project_title || item.thesis_title || "Project / Thesis",
-              dept: item.dept || item.department || "CSE",
-              year: item.year || item.academic_year || item.awarded_year || "-",
-              type: (item.type || "phd").toLowerCase() as ScholarType,
-              university: item.university,
-              guide_name: item.guide_name,
-            }));
-
-            // Merge with local storage if any unique IDs exist
-            const merged = [...normalizedData];
-            if (localSaved) {
-              const localParsed: Scholar[] = JSON.parse(localSaved);
-              localParsed.forEach((l) => {
-                if (!merged.some((m) => m.id === l.id || (m.roll === l.roll && m.roll !== "-"))) {
-                  merged.push(l);
-                }
-              });
-            }
-
-            setScholars(merged);
-            return;
-          }
-        } catch (sbErr) {
-          console.warn("Supabase scholars query error:", sbErr);
+        // 1. Ph.D Scholars
+        let phdList: Scholar[] = [];
+        if (phdRes.status === "fulfilled" && !phdRes.value.error && phdRes.value.data && phdRes.value.data.length > 0) {
+          phdList = phdRes.value.data.map((item: any) => ({
+            id: item.id,
+            name: item.scholar_name || item.student_name || item.name || "Ph.D Scholar",
+            roll: item.roll_number || item.roll || "-",
+            title: item.thesis_title || item.project_title || item.title || "-",
+            dept: item.department || item.dept || "CSE",
+            year: String(item.awarded_year || item.academic_year || item.year || "-"),
+            type: "phd" as ScholarType,
+            university: item.university ? item.university.trim() : undefined,
+            guide_name: item.guide_name || undefined,
+          }));
+        } else {
+          phdList = jsonByType("phd");
         }
 
-        // Fallback to local / json
-        setScholars(initialList);
+        // 2. MCA Scholars
+        let mcaList: Scholar[] = [];
+        if (mcaRes.status === "fulfilled" && !mcaRes.value.error && mcaRes.value.data && mcaRes.value.data.length > 0) {
+          mcaList = mcaRes.value.data.map((item: any) => ({
+            id: item.id,
+            name: item.student_name || item.scholar_name || item.name || "MCA Scholar",
+            roll: item.roll_number || item.roll || "-",
+            title: item.project_title || item.thesis_title || item.title || "-",
+            dept: item.department || item.dept || "MCA",
+            year: String(item.academic_year || item.awarded_year || item.year || "-"),
+            type: "mca" as ScholarType,
+            university: item.university ? item.university.trim() : undefined,
+            guide_name: item.guide_name || undefined,
+          }));
+        } else {
+          mcaList = jsonByType("mca");
+        }
+
+        // 3. M.Tech Scholars
+        let mtechList: Scholar[] = [];
+        if (mtechRes.status === "fulfilled" && !mtechRes.value.error && mtechRes.value.data && mtechRes.value.data.length > 0) {
+          mtechList = mtechRes.value.data.map((item: any) => ({
+            id: item.id,
+            name: item.student_name || item.scholar_name || item.name || "M.Tech Scholar",
+            roll: item.roll_number || item.roll || "-",
+            title: item.thesis_title || item.project_title || item.title || "-",
+            dept: item.department || item.dept || "CSE",
+            year: String(item.academic_year || item.awarded_year || item.year || "-"),
+            type: "mtech" as ScholarType,
+            university: item.university ? item.university.trim() : undefined,
+            guide_name: item.guide_name || undefined,
+          }));
+        } else {
+          mtechList = jsonByType("mtech");
+        }
+
+        // 4. B.Tech Scholars
+        let btechList: Scholar[] = [];
+        if (btechRes.status === "fulfilled" && !btechRes.value.error && btechRes.value.data && btechRes.value.data.length > 0) {
+          btechList = btechRes.value.data.map((item: any) => ({
+            id: item.id,
+            name: item.student_name || item.scholar_name || item.name || "Student Team",
+            roll: item.roll_number || item.roll || "-",
+            title: item.project_title || item.thesis_title || item.title || "-",
+            dept: item.department || item.dept || "Information Technology",
+            year: String(item.academic_year || item.awarded_year || item.year || "-"),
+            type: "btech" as ScholarType,
+            university: item.university ? item.university.trim() : undefined,
+            guide_name: item.guide_name || undefined,
+          }));
+        } else {
+          btechList = jsonByType("btech");
+        }
+
+        const combined = [...phdList, ...mcaList, ...mtechList, ...btechList];
+
+        // Also merge any locally created items if saved offline with unique ID
+        if (localParsed.length > 0) {
+          localParsed.forEach((l) => {
+            if (
+              l.id?.startsWith("scholar-") &&
+              !combined.some((c) => c.id === l.id || (c.roll === l.roll && c.roll !== "-"))
+            ) {
+              combined.push(l);
+            }
+          });
+        }
+
+        setScholars(combined);
       } catch (err) {
         console.warn("Loading scholars from fallback JSON", err);
         setScholars(scholarsJSON as Scholar[]);
@@ -200,7 +264,7 @@ export default function ScholarsPage() {
                       <p className="text-xs text-muted-foreground mt-1">
                         {s.roll && s.roll !== "-" ? `${s.roll} • ` : ""}
                         {s.dept || "CSE"} • {s.year}
-                        {s.university ? ` • ${s.university}` : ""}
+                        {s.university && s.university.trim() !== "" ? ` • ${s.university}` : ""}
                       </p>
                     </div>
 

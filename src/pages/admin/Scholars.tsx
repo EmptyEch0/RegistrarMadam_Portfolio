@@ -30,7 +30,7 @@ const TAB_BUTTONS: { key: ScholarType; label: string }[] = [
 ];
 
 export default function ScholarsAdmin() {
-  const [type, setType] = useState<ScholarType>("mca");
+  const [type, setType] = useState<ScholarType>("phd");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -61,6 +61,7 @@ export default function ScholarsAdmin() {
       department: item.dept,
       academic_year: item.year,
       awarded_year: item.year,
+      university: item.university || "",
     }));
   };
 
@@ -82,27 +83,20 @@ export default function ScholarsAdmin() {
     // 1. Try Supabase
     try {
       if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        // Try specific table first
+        const orderColumn = type === "phd" ? "awarded_year" : "academic_year";
         const { data: tableData, error: tableError } = await supabase
           .from(TABLE_MAP[type])
           .select("*")
-          .order("created_at", { ascending: false });
+          .order(orderColumn, { ascending: false });
 
         if (!tableError && tableData && tableData.length > 0) {
           itemsForType = tableData;
           fetchedFromCloud = true;
-        } else {
-          // Fallback to unified scholars table
-          const { data: unifiedData, error: unifiedError } = await supabase
-            .from("scholars")
-            .select("*")
-            .eq("type", type)
-            .order("year", { ascending: false });
 
-          if (!unifiedError && unifiedData && unifiedData.length > 0) {
-            itemsForType = unifiedData;
-            fetchedFromCloud = true;
-          }
+          // Update local cache for this category so everything is synced
+          const allStored = getStoredScholars();
+          const otherTypes = allStored.filter((item) => (item.type || "").toLowerCase() !== type.toLowerCase());
+          saveStoredScholars([...tableData.map((d: any) => ({ ...d, type })), ...otherTypes]);
         }
       }
     } catch (err) {
@@ -115,7 +109,7 @@ export default function ScholarsAdmin() {
       itemsForType = allLocal.filter((item) => (item.type || "").toLowerCase() === type.toLowerCase());
     }
 
-    // Normalize all items so columns always display
+    // Normalize all items so columns always display cleanly
     const normalized = itemsForType.map((item, index) => ({
       id: item.id || `${type}-${index + 1}`,
       ...item,
@@ -127,11 +121,12 @@ export default function ScholarsAdmin() {
       project_title: item.project_title || item.thesis_title || item.title || "-",
       thesis_title: item.thesis_title || item.project_title || item.title || "-",
       title: item.title || item.project_title || item.thesis_title || "-",
-      department: item.department || item.dept || "CSE",
-      dept: item.dept || item.department || "CSE",
+      department: item.department || item.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE"),
+      dept: item.dept || item.department || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE"),
       academic_year: item.academic_year || item.awarded_year || item.year || "-",
       awarded_year: item.awarded_year || item.academic_year || item.year || "-",
       year: item.year || item.academic_year || item.awarded_year || "-",
+      university: item.university || "",
       type: type,
     }));
 
@@ -149,7 +144,8 @@ export default function ScholarsAdmin() {
     const titleVal = formData.project_title || formData.thesis_title || formData.title || "";
     const yearVal = formData.academic_year || formData.awarded_year || formData.year || "";
     const rollVal = formData.roll_number || formData.roll || "";
-    const deptVal = formData.department || formData.dept || "CSE";
+    const deptVal = formData.department || formData.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE");
+    const univVal = formData.university ? formData.university.trim() : "";
 
     const newItemId = editing?.id || `scholar-${Date.now()}`;
 
@@ -167,9 +163,9 @@ export default function ScholarsAdmin() {
       department: deptVal,
       year: yearVal,
       academic_year: yearVal,
-      awarded_year: yearVal,
+      awarded_year: type === "phd" && !isNaN(Number(yearVal)) ? Number(yearVal) : yearVal,
       guide_name: formData.guide_name || "",
-      university: formData.university || "JNTUK, Kakinada",
+      university: univVal,
       type: type,
       created_at: editing?.created_at || new Date().toISOString(),
       ...formData,
@@ -181,44 +177,27 @@ export default function ScholarsAdmin() {
     try {
       if (supabase && import.meta.env.VITE_SUPABASE_URL) {
         const table = TABLE_MAP[type];
-        if (editing?.id) {
-          const { error } = await supabase.from(table).update(formData).eq("id", editing.id);
-          if (!error) cloudSaved = true;
-        } else {
-          const { error } = await supabase.from(table).insert(formData);
-          if (!error) cloudSaved = true;
+        const payload = { ...formData };
+        if (type === "phd" && payload.awarded_year && !isNaN(Number(payload.awarded_year))) {
+          payload.awarded_year = Number(payload.awarded_year);
+        }
+        if (payload.university !== undefined) {
+          payload.university = payload.university ? payload.university.trim() : null;
         }
 
-        // Also attempt unified scholars table
-        try {
-          if (editing?.id) {
-            await supabase.from("scholars").update({
-              name: studentName,
-              roll: rollVal,
-              title: titleVal,
-              dept: deptVal,
-              year: yearVal,
-              type: type,
-            }).eq("id", editing.id);
-          } else {
-            await supabase.from("scholars").insert({
-              name: studentName,
-              roll: rollVal,
-              title: titleVal,
-              dept: deptVal,
-              year: yearVal,
-              type: type,
-            });
-          }
-        } catch (e) {
-          // ignore if table doesn't exist
+        if (editing?.id) {
+          const { error } = await supabase.from(table).update(payload).eq("id", editing.id);
+          if (!error) cloudSaved = true;
+        } else {
+          const { error } = await supabase.from(table).insert(payload);
+          if (!error) cloudSaved = true;
         }
       }
     } catch (sbErr) {
       console.warn("Supabase save not reachable, syncing to local storage:", sbErr);
     }
 
-    // 2. Always sync to localStorage so portfolio is always updated immediately
+    // 2. Always sync to localStorage
     const allStored = getStoredScholars();
     const existingIndex = allStored.findIndex((item) => item.id === newItemId);
 
@@ -248,7 +227,6 @@ export default function ScholarsAdmin() {
     try {
       if (supabase && import.meta.env.VITE_SUPABASE_URL) {
         await supabase.from(TABLE_MAP[type]).delete().eq("id", row.id);
-        await supabase.from("scholars").delete().eq("id", row.id);
       }
     } catch (e) {
       console.warn("Could not delete from cloud:", e);
@@ -265,21 +243,22 @@ export default function ScholarsAdmin() {
 
   /* ---------------- FORM FIELDS BY TYPE ---------------- */
   const fieldsByType: Record<ScholarType, AdminField[]> = {
+    phd: [
+      { name: "scholar_name", label: "Ph.D Scholar Name", type: "text", required: true, placeholder: "e.g. Dr. RVS Lalitha" },
+      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 09022P0544" },
+      { name: "thesis_title", label: "Ph.D Thesis Title", type: "text", required: true, placeholder: "e.g. Vehicular Ad Hoc Networks..." },
+      { name: "department", label: "Department", type: "text", placeholder: "CSE" },
+      { name: "university", label: "University / Institution", type: "text", placeholder: "e.g. JNTU-GV, JNTUK, etc." },
+      { name: "awarded_year", label: "Awarded Year", type: "text", required: true, placeholder: "e.g. 2023" },
+    ],
     mca: [
       { name: "student_name", label: "Student Name / Team", type: "text", required: true, placeholder: "e.g. K. Sravani" },
       { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 18021F0012" },
       { name: "project_title", label: "MCA Project / Thesis Title", type: "text", required: true, placeholder: "e.g. Cloud-Based Intelligent Healthcare..." },
       { name: "department", label: "Department", type: "text", placeholder: "MCA / CSE" },
       { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2023-2024" },
+      { name: "university", label: "College / University (Optional)", type: "text", placeholder: "Leave empty or enter institution" },
       { name: "guide_name", label: "Guide / Coordinator Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
-    ],
-    btech: [
-      { name: "student_name", label: "Student Name / Team", type: "text", required: true, placeholder: "e.g. Ch. Rohith & Team" },
-      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 19021A0501" },
-      { name: "project_title", label: "B.Tech Project Title", type: "text", required: true, placeholder: "e.g. IoT and Deep Learning Framework..." },
-      { name: "department", label: "Department", type: "text", placeholder: "CSE / IT" },
-      { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2023-2024" },
-      { name: "guide_name", label: "Guide Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
     ],
     mtech: [
       { name: "student_name", label: "Student Name", type: "text", required: true, placeholder: "e.g. G. Rajesh" },
@@ -287,28 +266,30 @@ export default function ScholarsAdmin() {
       { name: "thesis_title", label: "M.Tech Thesis Title", type: "text", required: true, placeholder: "e.g. Optimized Resource Allocation..." },
       { name: "department", label: "Department", type: "text", placeholder: "CSE / IT" },
       { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2022-2023" },
+      { name: "university", label: "College / University (Optional)", type: "text", placeholder: "Leave empty or enter institution" },
       { name: "guide_name", label: "Guide Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
     ],
-    phd: [
-      { name: "scholar_name", label: "Ph.D Scholar Name", type: "text", required: true, placeholder: "e.g. Dr. RVS Lalitha" },
-      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 09022P0544" },
-      { name: "thesis_title", label: "Ph.D Thesis Title", type: "text", required: true, placeholder: "e.g. Vehicular Ad Hoc Networks..." },
-      { name: "department", label: "Department", type: "text", placeholder: "CSE" },
-      { name: "university", label: "University", type: "text", placeholder: "JNTUK, Kakinada" },
-      { name: "awarded_year", label: "Awarded Year", type: "text", required: true, placeholder: "e.g. 2023" },
+    btech: [
+      { name: "student_name", label: "Student Name(s) / Team", type: "text", required: true, placeholder: "e.g. Rishitha Reddy | B. Sowmya | ..." },
+      { name: "roll_number", label: "Roll Number(s)", type: "text", placeholder: "e.g. 22VV1A1257 | 22VV1A1208 | ..." },
+      { name: "project_title", label: "B.Tech Project Title", type: "text", required: true, placeholder: "e.g. Care Connect: Automated Patient..." },
+      { name: "department", label: "Department", type: "text", placeholder: "Information Technology" },
+      { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2026" },
+      { name: "university", label: "College / University (Optional)", type: "text", placeholder: "Leave empty or enter institution" },
+      { name: "guide_name", label: "Guide Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
     ],
   };
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columnsByType: Record<ScholarType, any[]> = {
-    mca: [
-      { key: "student_name", label: "Student Name" },
+    phd: [
+      { key: "scholar_name", label: "Scholar Name" },
       { key: "roll_number", label: "Roll No" },
-      { key: "project_title", label: "Project Title" },
-      { key: "academic_year", label: "Year" },
-      { key: "department", label: "Department" },
+      { key: "thesis_title", label: "Thesis Title" },
+      { key: "awarded_year", label: "Awarded Year" },
+      { key: "university", label: "University" },
     ],
-    btech: [
+    mca: [
       { key: "student_name", label: "Student Name" },
       { key: "roll_number", label: "Roll No" },
       { key: "project_title", label: "Project Title" },
@@ -322,12 +303,12 @@ export default function ScholarsAdmin() {
       { key: "academic_year", label: "Year" },
       { key: "department", label: "Department" },
     ],
-    phd: [
-      { key: "scholar_name", label: "Scholar Name" },
+    btech: [
+      { key: "student_name", label: "Student Name" },
       { key: "roll_number", label: "Roll No" },
-      { key: "thesis_title", label: "Thesis Title" },
-      { key: "awarded_year", label: "Awarded Year" },
-      { key: "university", label: "University" },
+      { key: "project_title", label: "Project Title" },
+      { key: "academic_year", label: "Year" },
+      { key: "department", label: "Department" },
     ],
   };
 
@@ -335,9 +316,9 @@ export default function ScholarsAdmin() {
   const getEditingInitialData = () => {
     if (!editing) {
       return {
-        department: "CSE",
+        department: type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE",
         guide_name: "Dr. G. Jaya Suma",
-        university: "JNTUK, Kakinada",
+        university: "",
       };
     }
     return {
@@ -347,11 +328,11 @@ export default function ScholarsAdmin() {
       roll_number: editing.roll_number || editing.roll || "",
       project_title: editing.project_title || editing.thesis_title || editing.title || "",
       thesis_title: editing.thesis_title || editing.project_title || editing.title || "",
-      department: editing.department || editing.dept || "CSE",
+      department: editing.department || editing.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE"),
       academic_year: editing.academic_year || editing.awarded_year || editing.year || "",
       awarded_year: editing.awarded_year || editing.academic_year || editing.year || "",
       guide_name: editing.guide_name || "Dr. G. Jaya Suma",
-      university: editing.university || "JNTUK, Kakinada",
+      university: editing.university || "",
     };
   };
 
