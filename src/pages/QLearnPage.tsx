@@ -20,7 +20,8 @@ import {
   Upload,
   ExternalLink,
   ChevronRightSquare,
-  Presentation
+  Presentation,
+  Puzzle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -2343,7 +2344,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz">("videos");
+  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz" | "puzzles">("videos");
 
   // Carousel states for the active notes tab
   const [activeNoteIndex, setActiveNoteIndex] = useState(0);
@@ -2832,12 +2833,13 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 {activeModule && (
                   <>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/80 gap-4 pb-3">
-                      <div className="w-full grid grid-cols-2 sm:grid-cols-4 gap-3 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
+                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
                         {[
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
                           { id: "ppts", label: "PPT & Drive Slides", icon: Presentation },
-                          { id: "quiz", label: "Take Quiz", icon: Award }
+                          { id: "quiz", label: "Take Quiz", icon: Award },
+                          { id: "puzzles", label: "Puzzles", icon: Puzzle }
                         ].map((tab) => {
                           const TabIcon = tab.icon;
                           const isActive = activeTab === tab.id;
@@ -3357,6 +3359,14 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               </div>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* PUZZLES TAB */}
+                      {activeTab === "puzzles" && (
+                        <div className="text-center py-16 border border-dashed border-border rounded-xl">
+                          <Puzzle size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
+                          <p className="text-muted-foreground font-medium">Puzzles for this topic are coming soon.</p>
                         </div>
                       )}
                     </div>
