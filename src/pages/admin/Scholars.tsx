@@ -145,7 +145,7 @@ export default function ScholarsAdmin() {
     const yearVal = (formData.academic_year || formData.awarded_year || formData.year || "").trim();
     const rollVal = (formData.roll_number || formData.roll || "").trim();
     const deptVal = (formData.department || formData.dept || (type === "mca" ? "MCA" : type === "btech" ? "Information Technology" : "CSE")).trim();
-    const univVal = formData.university ? formData.university.trim() : null;
+    const univVal = formData.university ? formData.university.trim() : "";
     const guideVal = formData.guide_name ? formData.guide_name.trim() : "Dr. G. Jaya Suma";
 
     let cloudSaved = false;
