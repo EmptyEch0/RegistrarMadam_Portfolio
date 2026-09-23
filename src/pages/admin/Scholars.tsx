@@ -156,7 +156,7 @@ export default function ScholarsAdmin() {
     if (type === "phd") {
       dbPayload = {
         scholar_name: studentName,
-        roll_number: rollVal || null,
+        roll_number: rollVal || "",
         thesis_title: titleVal,
         department: deptVal,
         university: univVal,
@@ -165,7 +165,7 @@ export default function ScholarsAdmin() {
     } else if (type === "mtech") {
       dbPayload = {
         student_name: studentName,
-        roll_number: rollVal || null,
+        roll_number: rollVal || "",
         thesis_title: titleVal,
         department: deptVal,
         academic_year: yearVal,
@@ -176,7 +176,7 @@ export default function ScholarsAdmin() {
       // btech and mca share the same schema
       dbPayload = {
         student_name: studentName,
-        roll_number: rollVal || null,
+        roll_number: rollVal || "",
         project_title: titleVal,
         department: deptVal,
         academic_year: yearVal,
