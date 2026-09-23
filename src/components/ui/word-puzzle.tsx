@@ -1,6 +1,18 @@
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle } from "lucide-react";
+import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User } from "lucide-react";
+import { PuzzleLeaderboard, submitPuzzleScore, formatTime } from "@/components/ui/puzzle-leaderboard";
+
+const PLAYER_NAME_KEY = "qlearn_puzzle_player_name";
+
+const readSavedName = () => {
+  try {
+    return localStorage.getItem(PLAYER_NAME_KEY) || "";
+  } catch {
+    return "";
+  }
+};
 
 export interface WordPuzzleData {
   id: string;
@@ -90,8 +102,6 @@ const buildPuzzle = (words: string[]): PuzzleLayout => {
 
 const sameCells = (a: number[], b: number[]) => a.length === b.length && a.every((cell, i) => cell === b[i]);
 
-const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
-
 export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   const [layout, setLayout] = useState<PuzzleLayout>(() => buildPuzzle(puzzle.words));
   const [found, setFound] = useState<string[]>([]);
@@ -101,6 +111,14 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   const [lastFound, setLastFound] = useState<PlacedWord | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [started, setStarted] = useState(false);
+
+  // Player name (asked in a pop-up before each game) and leaderboard submission
+  const [playerName, setPlayerName] = useState("");
+  const [nameInput, setNameInput] = useState(readSavedName);
+  const [namePromptOpen, setNamePromptOpen] = useState(true);
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [savedScoreId, setSavedScoreId] = useState<string | null>(null);
+  const [leaderboardRefresh, setLeaderboardRefresh] = useState(0);
 
   const draggingRef = useRef(false);
   const selectionRef = useRef<number[]>([]);
@@ -130,6 +148,10 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const cell = cellAt(e.clientX, e.clientY);
+    if (!playerName) {
+      setNamePromptOpen(true);
+      return;
+    }
     if (cell === null || !letters[cell] || isComplete || foundCellColor.has(cell)) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     draggingRef.current = true;
@@ -177,7 +199,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
 
   const giveHint = () => {
     const candidates = placed.filter((p) => !found.includes(p.answer) && !hints.includes(p.cells[0]));
-    if (candidates.length === 0) return;
+    if (candidates.length === 0 || !playerName) return;
     setStarted(true);
     setHints((prev) => [...prev, randomItem(candidates).cells[0]]);
     setMessage({ ok: true, text: "A glowing letter marks where a hidden word begins." });
@@ -191,174 +213,292 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
     setLastFound(null);
     setSeconds(0);
     setStarted(false);
+    setSaveState("idle");
     updateSelection([]);
+    setNameInput(playerName || readSavedName());
+    setPlayerName("");
+    setNamePromptOpen(true);
   };
+
+  const confirmName = (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = nameInput.trim().slice(0, 30);
+    if (!name) return;
+    setPlayerName(name);
+    setNameInput(name);
+    setNamePromptOpen(false);
+    try {
+      localStorage.setItem(PLAYER_NAME_KEY, name);
+    } catch {
+      // Remembering the name is only a convenience
+    }
+  };
+
+  const saveScore = async () => {
+    setSaveState("saving");
+    try {
+      const id = await submitPuzzleScore(puzzle.id, playerName, seconds, hints.length);
+      setSavedScoreId(id);
+      setSaveState("saved");
+      setLeaderboardRefresh((n) => n + 1);
+    } catch (err) {
+      console.error("Failed saving puzzle score", err);
+      setSaveState("error");
+    }
+  };
+
+  // Save the score automatically as soon as the puzzle is solved
+  useEffect(() => {
+    if (isComplete && playerName && saveState === "idle") saveScore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isComplete, playerName, saveState]);
 
   const centre = (cell: number) => `${(cell % size) + 0.5},${Math.floor(cell / size) + 0.5}`;
   const hintsLeft = placed.some((p) => !found.includes(p.answer) && !hints.includes(p.cells[0]));
 
   return (
-    <div className="card-institutional p-6 md:p-8 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="w-14 h-14 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent">
-          <Puzzle size={26} />
-        </div>
-        <h3 className="font-serif text-2xl font-bold text-primary">{puzzle.title}</h3>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Drag across connected letters (up, down, left or right) to find all {placed.length} hidden words.
-        </p>
-      </div>
-
-      {/* Status bar */}
-      <div className="flex flex-wrap items-center justify-center gap-3 text-xs md:text-sm font-semibold">
-        <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border">
-          <CheckCircle2 size={15} className="text-accent" /> {found.length} / {placed.length} found
-        </span>
-        <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border font-mono">
-          <Timer size={15} className="text-accent" /> {formatTime(seconds)}
-        </span>
-        <Button variant="outline" size="sm" onClick={giveHint} disabled={isComplete || !hintsLeft} className="flex items-center gap-1.5">
-          <Lightbulb size={15} /> Hint
-        </Button>
-        <Button variant="outline" size="sm" onClick={newPuzzle} className="flex items-center gap-1.5">
-          <RotateCcw size={15} /> New Puzzle
-        </Button>
-      </div>
-
-      <div className="grid md:grid-cols-[1fr_220px] gap-8 items-start">
-        {/* Letter grid */}
-        <div className="w-full max-w-md mx-auto">
-          {/* Preview of the word being traced (or the word just found, in its colour) */}
-          <div className="min-h-[3.25rem] mb-3 px-2 py-2 rounded-xl border border-dashed border-border bg-card/60 flex flex-wrap items-center justify-center gap-1">
-            {selection.length > 0 ? (
-              selection.map((c, i) => (
-                <span
-                  key={i}
-                  className="w-7 h-8 rounded-md bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold shadow-sm animate-fade-in"
-                >
-                  {letters[c]}
-                </span>
-              ))
-            ) : lastFound ? (
-              lastFound.answer.split("").map((letter, i) => (
-                <span
-                  key={i}
-                  className="w-7 h-8 rounded-md text-white flex items-center justify-center text-sm font-bold shadow-sm"
-                  style={{ backgroundColor: lastFound.color }}
-                >
-                  {letter}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs text-muted-foreground">Drag across the letters: your word appears here</span>
-            )}
+    <div className="space-y-8">
+      <div className="card-institutional p-6 md:p-8 space-y-6 animate-fade-in">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <div className="w-14 h-14 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent">
+            <Puzzle size={26} />
           </div>
-          <div
-            className="relative aspect-square select-none touch-none rounded-2xl bg-muted/60 border border-border/80 shadow-inner"
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
-            role="application"
-            aria-label={`${puzzle.title} letter grid`}
-          >
-            {/* Lines joining the letters of found words and the current drag */}
-            <svg viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 w-full h-full pointer-events-none">
-              {foundWords.map((p) => (
-                <polyline
-                  key={p.answer}
-                  points={p.cells.map(centre).join(" ")}
-                  fill="none"
-                  stroke={p.color}
-                  strokeOpacity={0.45}
-                  strokeWidth={0.3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              ))}
-              {selection.length > 1 && (
-                <polyline
-                  points={selection.map(centre).join(" ")}
-                  fill="none"
-                  stroke="hsl(var(--accent))"
-                  strokeOpacity={0.5}
-                  strokeWidth={0.3}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
-            </svg>
-
-            <div className="relative grid w-full h-full" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
-              {letters.map((letter, cell) => {
-                const colour = foundCellColor.get(cell);
-                const isSelected = selection.includes(cell);
-                const isHint = hints.includes(cell) && !colour;
-                if (!letter) return <div key={cell} />;
-                return (
-                  <div key={cell} data-cell={cell} className="flex items-center justify-center cursor-pointer">
-                    <span
-                      className={`w-[76%] h-[76%] rounded-full flex items-center justify-center text-sm sm:text-lg font-bold transition-all duration-150 ${
-                        colour
-                          ? "text-white shadow-sm"
-                          : isSelected
-                          ? "bg-accent text-accent-foreground scale-110 shadow-md"
-                          : "bg-card text-foreground border border-border/70 hover:border-accent/60"
-                      } ${isHint ? "ring-2 ring-amber-400 ring-offset-1 animate-pulse" : ""}`}
-                      style={colour ? { backgroundColor: colour } : undefined}
-                    >
-                      {letter}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div className="min-h-[2.5rem] mt-3 text-center text-sm font-medium">
-            {message && <span className={message.ok ? "text-green-600" : "text-red-500"}>{message.text}</span>}
-          </div>
-        </div>
-
-        {/* Word list */}
-        <div className="space-y-2">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Key Words</h4>
-          {placed.map((p) => {
-            const isFound = found.includes(p.answer);
-            return (
-              <div
-                key={p.answer}
-                className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-l-4 text-sm transition-colors ${
-                  isFound ? "text-white font-semibold" : "bg-card text-muted-foreground"
-                }`}
-                style={isFound ? { backgroundColor: p.color, borderColor: p.color } : { borderLeftColor: p.color }}
-              >
-                <span className="flex items-center gap-2">
-                  {!isFound && <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />}
-                  <span className={isFound ? "" : "font-mono tracking-widest"}>
-                    {isFound ? p.label : p.label.replace(/[A-Za-z]/g, "_")}
-                  </span>
-                </span>
-                <span className="text-[11px] opacity-80">{p.answer.length}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Completion */}
-      {isComplete && (
-        <div className="text-center p-6 rounded-xl bg-accent/10 border border-accent/30 space-y-3 animate-slide-up">
-          <div className="text-4xl">🎉</div>
-          <h4 className="font-serif text-xl font-bold text-primary">Puzzle solved!</h4>
-          <p className="text-sm text-muted-foreground">
-            You found all {placed.length} key words in {formatTime(seconds)}
-            {hints.length > 0 ? ` using ${hints.length} hint${hints.length > 1 ? "s" : ""}` : " without any hints"}.
+          <h3 className="font-serif text-2xl font-bold text-primary">{puzzle.title}</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Drag across connected letters (up, down, left or right) to find all {placed.length} hidden words.
           </p>
-          <Button variant="hero" size="sm" onClick={newPuzzle}>
-            Play Again
+        </div>
+
+        {/* Status bar */}
+        <div className="flex flex-wrap items-center justify-center gap-3 text-xs md:text-sm font-semibold">
+          {playerName && (
+            <button
+              type="button"
+              onClick={() => setNamePromptOpen(true)}
+              disabled={isComplete}
+              title="Change name"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-primary hover:bg-accent/20 transition-colors disabled:hover:bg-accent/10"
+            >
+              <User size={15} className="text-accent" /> Playing as <span className="max-w-[10rem] truncate">{playerName}</span>
+            </button>
+          )}
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border">
+            <CheckCircle2 size={15} className="text-accent" /> {found.length} / {placed.length} found
+          </span>
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border font-mono">
+            <Timer size={15} className="text-accent" /> {formatTime(seconds)}
+          </span>
+          <Button variant="outline" size="sm" onClick={giveHint} disabled={isComplete || !hintsLeft || !playerName} className="flex items-center gap-1.5">
+            <Lightbulb size={15} /> Hint
+          </Button>
+          <Button variant="outline" size="sm" onClick={newPuzzle} className="flex items-center gap-1.5">
+            <RotateCcw size={15} /> New Puzzle
           </Button>
         </div>
+
+        <div className="grid md:grid-cols-[1fr_220px] gap-8 items-start">
+          {/* Letter grid */}
+          <div className="w-full max-w-md mx-auto">
+            {/* Preview of the word being traced (or the word just found, in its colour) */}
+            <div className="min-h-[3.25rem] mb-3 px-2 py-2 rounded-xl border border-dashed border-border bg-card/60 flex flex-wrap items-center justify-center gap-1">
+              {selection.length > 0 ? (
+                selection.map((c, i) => (
+                  <span
+                    key={i}
+                    className="w-7 h-8 rounded-md bg-accent text-accent-foreground flex items-center justify-center text-sm font-bold shadow-sm animate-fade-in"
+                  >
+                    {letters[c]}
+                  </span>
+                ))
+              ) : lastFound ? (
+                lastFound.answer.split("").map((letter, i) => (
+                  <span
+                    key={i}
+                    className="w-7 h-8 rounded-md text-white flex items-center justify-center text-sm font-bold shadow-sm"
+                    style={{ backgroundColor: lastFound.color }}
+                  >
+                    {letter}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted-foreground">Drag across the letters: your word appears here</span>
+              )}
+            </div>
+            <div
+              className="relative aspect-square select-none touch-none rounded-2xl bg-muted/60 border border-border/80 shadow-inner"
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerUp}
+              role="application"
+              aria-label={`${puzzle.title} letter grid`}
+            >
+              {!playerName && !namePromptOpen && (
+                <div className="absolute inset-0 z-10 rounded-2xl bg-background/70 backdrop-blur-[2px] flex items-center justify-center">
+                  <Button variant="hero" size="sm" onClick={() => setNamePromptOpen(true)} className="flex items-center gap-1.5">
+                    <User size={15} /> Enter your name to start
+                  </Button>
+                </div>
+              )}
+              {/* Lines joining the letters of found words and the current drag */}
+              <svg viewBox={`0 0 ${size} ${size}`} className="absolute inset-0 w-full h-full pointer-events-none">
+                {foundWords.map((p) => (
+                  <polyline
+                    key={p.answer}
+                    points={p.cells.map(centre).join(" ")}
+                    fill="none"
+                    stroke={p.color}
+                    strokeOpacity={0.45}
+                    strokeWidth={0.3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                ))}
+                {selection.length > 1 && (
+                  <polyline
+                    points={selection.map(centre).join(" ")}
+                    fill="none"
+                    stroke="hsl(var(--accent))"
+                    strokeOpacity={0.5}
+                    strokeWidth={0.3}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                )}
+              </svg>
+
+              <div className="relative grid w-full h-full" style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
+                {letters.map((letter, cell) => {
+                  const colour = foundCellColor.get(cell);
+                  const isSelected = selection.includes(cell);
+                  const isHint = hints.includes(cell) && !colour;
+                  if (!letter) return <div key={cell} />;
+                  return (
+                    <div key={cell} data-cell={cell} className="flex items-center justify-center cursor-pointer">
+                      <span
+                        className={`w-[76%] h-[76%] rounded-full flex items-center justify-center text-sm sm:text-lg font-bold transition-all duration-150 ${
+                          colour
+                            ? "text-white shadow-sm"
+                            : isSelected
+                            ? "bg-accent text-accent-foreground scale-110 shadow-md"
+                            : "bg-card text-foreground border border-border/70 hover:border-accent/60"
+                        } ${isHint ? "ring-2 ring-amber-400 ring-offset-1 animate-pulse" : ""}`}
+                        style={colour ? { backgroundColor: colour } : undefined}
+                      >
+                        {letter}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="min-h-[2.5rem] mt-3 text-center text-sm font-medium">
+              {message && <span className={message.ok ? "text-green-600" : "text-red-500"}>{message.text}</span>}
+            </div>
+          </div>
+
+          {/* Word list */}
+          <div className="space-y-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">Key Words</h4>
+            {placed.map((p) => {
+              const isFound = found.includes(p.answer);
+              return (
+                <div
+                  key={p.answer}
+                  className={`flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-l-4 text-sm transition-colors ${
+                    isFound ? "text-white font-semibold" : "bg-card text-muted-foreground"
+                  }`}
+                  style={isFound ? { backgroundColor: p.color, borderColor: p.color } : { borderLeftColor: p.color }}
+                >
+                  <span className="flex items-center gap-2">
+                    {!isFound && <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: p.color }} />}
+                    <span className={isFound ? "" : "font-mono tracking-widest"}>
+                      {isFound ? p.label : p.label.replace(/[A-Za-z]/g, "_")}
+                    </span>
+                  </span>
+                  <span className="text-[11px] opacity-80">{p.answer.length}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Completion */}
+        {isComplete && (
+          <div className="text-center p-6 rounded-xl bg-accent/10 border border-accent/30 space-y-3 animate-slide-up">
+            <div className="text-4xl">🎉</div>
+            <h4 className="font-serif text-xl font-bold text-primary">Puzzle solved!</h4>
+            <p className="text-sm text-muted-foreground">
+              You found all {placed.length} key words in {formatTime(seconds)}
+              {hints.length > 0 ? ` using ${hints.length} hint${hints.length > 1 ? "s" : ""}` : " without any hints"}.
+            </p>
+
+            {saveState === "saved" && (
+              <p className="text-sm font-semibold text-green-600">Your score is on the leaderboard below!</p>
+            )}
+            {saveState === "saving" && <p className="text-sm text-muted-foreground">Saving your score…</p>}
+            {saveState === "error" && (
+              <p className="text-xs text-red-500">
+                Couldn't save your score right now.{" "}
+                <button type="button" onClick={() => setSaveState("idle")} className="underline font-semibold">
+                  Try again
+                </button>
+              </p>
+            )}
+
+            <Button variant="hero" size="sm" onClick={newPuzzle}>
+              Play Again
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <PuzzleLeaderboard puzzleId={puzzle.id} refreshKey={leaderboardRefresh} highlightId={savedScoreId} />
+
+      {/* Name pop-up shown before each game */}
+      {namePromptOpen && createPortal(
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onKeyDown={(e) => e.key === "Escape" && setNamePromptOpen(false)}
+        >
+          <form
+            onSubmit={confirmName}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={`${puzzle.id}-name-title`}
+            className="w-full max-w-xs bg-card rounded-2xl border border-border shadow-2xl p-6 space-y-4 text-center animate-slide-up"
+          >
+            <div className="w-12 h-12 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent">
+              <User size={22} />
+            </div>
+            <div className="space-y-1">
+              <h4 id={`${puzzle.id}-name-title`} className="font-serif text-lg font-bold text-primary">
+                Enter your name
+              </h4>
+              <p className="text-xs text-muted-foreground">It will appear on the leaderboard with your score.</p>
+            </div>
+            <input
+              type="text"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              maxLength={30}
+              autoFocus
+              placeholder="Your name"
+              aria-label="Your name"
+              className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm text-center focus:outline-none focus:ring-2 focus:ring-accent/50"
+            />
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => setNamePromptOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="hero" size="sm" className="flex-1" disabled={!nameInput.trim()}>
+                {playerName ? "Save" : "Start"}
+              </Button>
+            </div>
+          </form>
+        </div>,
+        document.body
       )}
     </div>
   );
