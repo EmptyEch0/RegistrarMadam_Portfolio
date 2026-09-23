@@ -7,16 +7,27 @@ import { supabase } from "@/lib/supabase";
 import scholarsJSON from "@/data/scholars.json";
 import { cn } from "@/lib/utils";
 
-type ScholarType = "btech" | "mtech" | "phd";
+export type ScholarType = "btech" | "mtech" | "mca" | "phd";
 
-interface Scholar {
+export interface Scholar {
+  id?: string;
   name: string;
   roll: string;
   title: string;
   dept: string;
   year: string;
   type: ScholarType;
+  university?: string;
+  guide_name?: string;
 }
+
+const FILTER_LABELS: Record<"all" | ScholarType, string> = {
+  all: "ALL",
+  phd: "PH.D",
+  mca: "MCA",
+  mtech: "M.TECH",
+  btech: "B.TECH",
+};
 
 export default function ScholarsPage() {
   const [activeFilter, setActiveFilter] = useState<"all" | ScholarType>("all");
@@ -33,18 +44,57 @@ export default function ScholarsPage() {
     const fetchScholars = async () => {
       setIsLoading(true);
       try {
-        if (!isSupabaseEnabled) throw new Error("Supabase not configured");
+        // 1. Check local storage overrides / admin additions first
+        const localSaved = localStorage.getItem("portfolio_scholars_data");
+        let initialList: Scholar[] = localSaved ? JSON.parse(localSaved) : (scholarsJSON as Scholar[]);
 
-        const { data, error } = await supabase
-          .from("scholars")
-          .select("name, roll, title, dept, year, type")
-          .order("year", { ascending: false });
+        if (!isSupabaseEnabled) {
+          setScholars(initialList);
+          return;
+        }
 
-        if (error) throw error;
+        // 2. Try fetching from Supabase scholars table
+        try {
+          const { data, error } = await supabase
+            .from("scholars")
+            .select("*")
+            .order("year", { ascending: false });
 
-        setScholars(data || []);
+          if (!error && data && data.length > 0) {
+            const normalizedData: Scholar[] = data.map((item: any) => ({
+              id: item.id,
+              name: item.name || item.student_name || item.scholar_name || "Scholar",
+              roll: item.roll || item.roll_number || "-",
+              title: item.title || item.project_title || item.thesis_title || "Project / Thesis",
+              dept: item.dept || item.department || "CSE",
+              year: item.year || item.academic_year || item.awarded_year || "-",
+              type: (item.type || "phd").toLowerCase() as ScholarType,
+              university: item.university,
+              guide_name: item.guide_name,
+            }));
+
+            // Merge with local storage if any unique IDs exist
+            const merged = [...normalizedData];
+            if (localSaved) {
+              const localParsed: Scholar[] = JSON.parse(localSaved);
+              localParsed.forEach((l) => {
+                if (!merged.some((m) => m.id === l.id || (m.roll === l.roll && m.roll !== "-"))) {
+                  merged.push(l);
+                }
+              });
+            }
+
+            setScholars(merged);
+            return;
+          }
+        } catch (sbErr) {
+          console.warn("Supabase scholars query error:", sbErr);
+        }
+
+        // Fallback to local / json
+        setScholars(initialList);
       } catch (err) {
-        console.warn("Supabase failed → loading scholars from JSON");
+        console.warn("Loading scholars from fallback JSON", err);
         setScholars(scholarsJSON as Scholar[]);
       } finally {
         setIsLoading(false);
@@ -61,7 +111,8 @@ export default function ScholarsPage() {
       search === "" ||
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.roll.toLowerCase().includes(search.toLowerCase()) ||
-      s.title.toLowerCase().includes(search.toLowerCase());
+      s.title.toLowerCase().includes(search.toLowerCase()) ||
+      (s.dept && s.dept.toLowerCase().includes(search.toLowerCase()));
 
     return matchesFilter && matchesSearch;
   });
@@ -73,26 +124,26 @@ export default function ScholarsPage() {
       <section className="section-padding">
         <div className="container-wide px-6 lg:px-12">
           <SectionHeading
-            title="Scholars"
-            subtitle="B.Tech, M.Tech and Ph.D scholars mentored"
+            title="Scholars & Mentorship"
+            subtitle="Ph.D, MCA, M.Tech and B.Tech scholars & student research mentored"
           />
 
           {/* Search Bar */}
           <div className="flex justify-center mb-8">
             <input
               type="text"
-              placeholder="Search by name, roll number, or thesis title..."
+              placeholder="Search by scholar name, roll number, project/thesis title, or dept..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full md:w-2/3 lg:w-1/2 px-5 py-3 rounded-xl border border-border bg-background 
                          focus:ring-2 focus:ring-primary focus:border-primary outline-none 
-                         transition-all duration-300 text-sm placeholder:text-muted-foreground"
+                         transition-all duration-300 text-sm placeholder:text-muted-foreground shadow-sm"
             />
           </div>
 
           {/* Premium Filter Chips */}
           <div className="flex flex-wrap justify-center gap-3 mb-12">
-            {(["all", "btech", "mtech", "phd"] as const).map((f) => {
+            {(["all", "phd", "mca", "mtech", "btech"] as const).map((f) => {
               const count =
                 f === "all"
                   ? scholars.length
@@ -110,7 +161,7 @@ export default function ScholarsPage() {
                       : "bg-background hover:bg-accent/20 border-border hover:border-accent"
                   )}
                 >
-                  {f.toUpperCase()}
+                  {FILTER_LABELS[f]}
                   <span className="text-xs opacity-70">({count})</span>
                 </button>
               );
@@ -128,14 +179,14 @@ export default function ScholarsPage() {
             ) : filtered.length > 0 ? (
               filtered.map((s, i) => (
                 <div
-                  key={`${s.roll}-${i}`}
+                  key={s.id || `${s.roll}-${i}`}
                   className={cn(
                     "relative p-6 bg-card rounded-xl border border-border",
                     "transition-all duration-300",
                     "hover:-translate-y-1 hover:shadow-xl hover:border-primary",
                     "animate-fade-in-up"
                   )}
-                  style={{ animationDelay: `${i * 80}ms` }}
+                  style={{ animationDelay: `${i * 60}ms` }}
                 >
                   {/* Left Accent Bar */}
                   <span className="absolute left-0 top-6 h-12 w-1 bg-primary rounded-r" />
@@ -147,17 +198,19 @@ export default function ScholarsPage() {
                         {s.name}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {s.roll} • {s.dept} • {s.year}
+                        {s.roll && s.roll !== "-" ? `${s.roll} • ` : ""}
+                        {s.dept || "CSE"} • {s.year}
+                        {s.university ? ` • ${s.university}` : ""}
                       </p>
                     </div>
 
                     {/* Type Badge */}
                     <span className="text-xs px-3 py-1 rounded-full bg-accent/20 text-accent font-medium whitespace-nowrap">
-                      {s.type.toUpperCase()}
+                      {FILTER_LABELS[s.type] || s.type.toUpperCase()}
                     </span>
                   </div>
 
-                  {/* Thesis Title */}
+                  {/* Thesis / Project Title */}
                   <p className="mt-4 text-sm leading-relaxed text-foreground/80">
                     {s.title}
                   </p>
@@ -182,10 +235,10 @@ export default function ScholarsPage() {
                   </svg>
                 </div>
                 <p className="text-lg font-medium text-foreground">
-                  No scholars found
+                  No scholars found in this category
                 </p>
                 <p className="text-sm mt-2">
-                  Try adjusting your filters or search keywords
+                  Try adjusting your search keywords or select another filter
                 </p>
               </div>
             )}

@@ -1,51 +1,240 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
 import AdminLayout from "@/components/admin/AdminLayout";
 import AdminTable from "@/components/admin/AdminTable";
-import AdminForm from "@/components/admin/AdminForm";
+import AdminForm, { AdminField } from "@/components/admin/AdminForm";
+import scholarsJSON from "@/data/scholars.json";
+import { CheckCircle2, AlertCircle, Plus } from "lucide-react";
 
-type ScholarType = "btech" | "mtech" | "phd";
+export type ScholarType = "btech" | "mtech" | "mca" | "phd";
 
 const TABLE_MAP: Record<ScholarType, string> = {
   btech: "btech_scholars",
   mtech: "mtech_scholars",
+  mca: "mca_scholars",
   phd: "phd_scholars_awarded",
 };
 
+const TYPE_LABELS: Record<ScholarType, string> = {
+  btech: "B.Tech Scholars",
+  mtech: "M.Tech Scholars",
+  mca: "MCA Scholars",
+  phd: "Ph.D Scholars",
+};
+
+const TAB_BUTTONS: { key: ScholarType; label: string }[] = [
+  { key: "phd", label: "Ph.D Scholars" },
+  { key: "mca", label: "MCA Scholars" },
+  { key: "mtech", label: "M.Tech Scholars" },
+  { key: "btech", label: "B.Tech Scholars" },
+];
+
 export default function ScholarsAdmin() {
-  const [type, setType] = useState<ScholarType>("btech");
+  const [type, setType] = useState<ScholarType>("mca");
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<any | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const showNotification = (msg: string, isError = false) => {
+    setFeedback({ type: isError ? "error" : "success", message: msg });
+    setTimeout(() => setFeedback(null), 4000);
+  };
+
+  // Helper to get all scholars stored in localStorage
+  const getStoredScholars = (): any[] => {
+    try {
+      const stored = localStorage.getItem("portfolio_scholars_data");
+      if (stored) return JSON.parse(stored);
+    } catch (e) {
+      console.warn("Failed to parse local scholars cache", e);
+    }
+    return (scholarsJSON as any[]).map((item, idx) => ({
+      id: item.id || `${item.type}-${idx + 1}`,
+      ...item,
+      student_name: item.name,
+      scholar_name: item.name,
+      roll_number: item.roll,
+      project_title: item.title,
+      thesis_title: item.title,
+      department: item.dept,
+      academic_year: item.year,
+      awarded_year: item.year,
+    }));
+  };
+
+  // Helper to save all scholars to localStorage
+  const saveStoredScholars = (list: any[]) => {
+    try {
+      localStorage.setItem("portfolio_scholars_data", JSON.stringify(list));
+    } catch (e) {
+      console.error("Failed to update local storage", e);
+    }
+  };
 
   /* ---------------- FETCH ---------------- */
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
+    let itemsForType: any[] = [];
+    let fetchedFromCloud = false;
 
-    const { data, error } = await supabase
-      .from(TABLE_MAP[type])
-      .select("*")
-      .order("created_at", { ascending: false });
+    // 1. Try Supabase
+    try {
+      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
+        // Try specific table first
+        const { data: tableData, error: tableError } = await supabase
+          .from(TABLE_MAP[type])
+          .select("*")
+          .order("created_at", { ascending: false });
 
-    if (!error) setData(data || []);
+        if (!tableError && tableData && tableData.length > 0) {
+          itemsForType = tableData;
+          fetchedFromCloud = true;
+        } else {
+          // Fallback to unified scholars table
+          const { data: unifiedData, error: unifiedError } = await supabase
+            .from("scholars")
+            .select("*")
+            .eq("type", type)
+            .order("year", { ascending: false });
+
+          if (!unifiedError && unifiedData && unifiedData.length > 0) {
+            itemsForType = unifiedData;
+            fetchedFromCloud = true;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("Supabase fetch failed, loading from local cache:", err);
+    }
+
+    // 2. Fallback to local cache & JSON
+    if (!fetchedFromCloud) {
+      const allLocal = getStoredScholars();
+      itemsForType = allLocal.filter((item) => (item.type || "").toLowerCase() === type.toLowerCase());
+    }
+
+    // Normalize all items so columns always display
+    const normalized = itemsForType.map((item, index) => ({
+      id: item.id || `${type}-${index + 1}`,
+      ...item,
+      student_name: item.student_name || item.scholar_name || item.name || "Scholar",
+      scholar_name: item.scholar_name || item.student_name || item.name || "Scholar",
+      name: item.name || item.student_name || item.scholar_name || "Scholar",
+      roll_number: item.roll_number || item.roll || "-",
+      roll: item.roll || item.roll_number || "-",
+      project_title: item.project_title || item.thesis_title || item.title || "-",
+      thesis_title: item.thesis_title || item.project_title || item.title || "-",
+      title: item.title || item.project_title || item.thesis_title || "-",
+      department: item.department || item.dept || "CSE",
+      dept: item.dept || item.department || "CSE",
+      academic_year: item.academic_year || item.awarded_year || item.year || "-",
+      awarded_year: item.awarded_year || item.academic_year || item.year || "-",
+      year: item.year || item.academic_year || item.awarded_year || "-",
+      type: type,
+    }));
+
+    setData(normalized);
     setLoading(false);
-  };
+  }, [type]);
 
   useEffect(() => {
     fetchData();
-  }, [type]);
+  }, [fetchData]);
 
-  /* ---------------- SAVE ---------------- */
+  /* ---------------- SAVE (ADD / UPDATE) ---------------- */
   const handleSave = async (formData: any) => {
-    if (editing) {
-      await supabase
-        .from(TABLE_MAP[type])
-        .update(formData)
-        .eq("id", editing.id);
-    } else {
-      await supabase.from(TABLE_MAP[type]).insert(formData);
+    const studentName = formData.student_name || formData.scholar_name || formData.name || "";
+    const titleVal = formData.project_title || formData.thesis_title || formData.title || "";
+    const yearVal = formData.academic_year || formData.awarded_year || formData.year || "";
+    const rollVal = formData.roll_number || formData.roll || "";
+    const deptVal = formData.department || formData.dept || "CSE";
+
+    const newItemId = editing?.id || `scholar-${Date.now()}`;
+
+    const normalizedRecord = {
+      id: newItemId,
+      name: studentName,
+      student_name: studentName,
+      scholar_name: studentName,
+      roll: rollVal,
+      roll_number: rollVal,
+      title: titleVal,
+      project_title: titleVal,
+      thesis_title: titleVal,
+      dept: deptVal,
+      department: deptVal,
+      year: yearVal,
+      academic_year: yearVal,
+      awarded_year: yearVal,
+      guide_name: formData.guide_name || "",
+      university: formData.university || "JNTUK, Kakinada",
+      type: type,
+      created_at: editing?.created_at || new Date().toISOString(),
+      ...formData,
+    };
+
+    let cloudSaved = false;
+
+    // 1. Save to Supabase if reachable
+    try {
+      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
+        const table = TABLE_MAP[type];
+        if (editing?.id) {
+          const { error } = await supabase.from(table).update(formData).eq("id", editing.id);
+          if (!error) cloudSaved = true;
+        } else {
+          const { error } = await supabase.from(table).insert(formData);
+          if (!error) cloudSaved = true;
+        }
+
+        // Also attempt unified scholars table
+        try {
+          if (editing?.id) {
+            await supabase.from("scholars").update({
+              name: studentName,
+              roll: rollVal,
+              title: titleVal,
+              dept: deptVal,
+              year: yearVal,
+              type: type,
+            }).eq("id", editing.id);
+          } else {
+            await supabase.from("scholars").insert({
+              name: studentName,
+              roll: rollVal,
+              title: titleVal,
+              dept: deptVal,
+              year: yearVal,
+              type: type,
+            });
+          }
+        } catch (e) {
+          // ignore if table doesn't exist
+        }
+      }
+    } catch (sbErr) {
+      console.warn("Supabase save not reachable, syncing to local storage:", sbErr);
     }
+
+    // 2. Always sync to localStorage so portfolio is always updated immediately
+    const allStored = getStoredScholars();
+    const existingIndex = allStored.findIndex((item) => item.id === newItemId);
+
+    if (existingIndex >= 0) {
+      allStored[existingIndex] = { ...allStored[existingIndex], ...normalizedRecord };
+    } else {
+      allStored.unshift(normalizedRecord);
+    }
+
+    saveStoredScholars(allStored);
+
+    showNotification(
+      editing
+        ? `${TYPE_LABELS[type]} updated successfully! ${cloudSaved ? "(Synced with Cloud)" : "(Saved to Local Cache)"}`
+        : `${TYPE_LABELS[type]} added successfully! ${cloudSaved ? "(Synced with Cloud)" : "(Saved to Local Cache)"}`
+    );
 
     setShowForm(false);
     setEditing(null);
@@ -54,99 +243,200 @@ export default function ScholarsAdmin() {
 
   /* ---------------- DELETE ---------------- */
   const handleDelete = async (row: any) => {
-    if (!confirm("Delete this scholar?")) return;
-    await supabase.from(TABLE_MAP[type]).delete().eq("id", row.id);
+    if (!confirm(`Delete scholar "${row.name || row.student_name || row.scholar_name}"?`)) return;
+
+    try {
+      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
+        await supabase.from(TABLE_MAP[type]).delete().eq("id", row.id);
+        await supabase.from("scholars").delete().eq("id", row.id);
+      }
+    } catch (e) {
+      console.warn("Could not delete from cloud:", e);
+    }
+
+    // Remove from local storage
+    const allStored = getStoredScholars();
+    const updated = allStored.filter((item) => item.id !== row.id);
+    saveStoredScholars(updated);
+
+    showNotification("Scholar removed successfully.");
     fetchData();
   };
 
-  /* ---------------- FIELDS BY TYPE ---------------- */
-  const fieldsByType: Record<ScholarType, any[]> = {
+  /* ---------------- FORM FIELDS BY TYPE ---------------- */
+  const fieldsByType: Record<ScholarType, AdminField[]> = {
+    mca: [
+      { name: "student_name", label: "Student Name / Team", type: "text", required: true, placeholder: "e.g. K. Sravani" },
+      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 18021F0012" },
+      { name: "project_title", label: "MCA Project / Thesis Title", type: "text", required: true, placeholder: "e.g. Cloud-Based Intelligent Healthcare..." },
+      { name: "department", label: "Department", type: "text", placeholder: "MCA / CSE" },
+      { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2023-2024" },
+      { name: "guide_name", label: "Guide / Coordinator Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
+    ],
     btech: [
-      { name: "student_name", label: "Student Name", type: "text", required: true },
-      { name: "roll_number", label: "Roll Number", type: "text" },
-      { name: "project_title", label: "Project Title", type: "text" },
-      { name: "department", label: "Department", type: "text" },
-      { name: "academic_year", label: "Academic Year", type: "text" },
-      { name: "guide_name", label: "Guide Name", type: "text" },
+      { name: "student_name", label: "Student Name / Team", type: "text", required: true, placeholder: "e.g. Ch. Rohith & Team" },
+      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 19021A0501" },
+      { name: "project_title", label: "B.Tech Project Title", type: "text", required: true, placeholder: "e.g. IoT and Deep Learning Framework..." },
+      { name: "department", label: "Department", type: "text", placeholder: "CSE / IT" },
+      { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2023-2024" },
+      { name: "guide_name", label: "Guide Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
     ],
     mtech: [
-      { name: "student_name", label: "Student Name", type: "text", required: true },
-      { name: "roll_number", label: "Roll Number", type: "text" },
-      { name: "thesis_title", label: "Thesis Title", type: "text" },
-      { name: "department", label: "Department", type: "text" },
-      { name: "academic_year", label: "Academic Year", type: "text" },
-      { name: "guide_name", label: "Guide Name", type: "text" },
+      { name: "student_name", label: "Student Name", type: "text", required: true, placeholder: "e.g. G. Rajesh" },
+      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 17022D5804" },
+      { name: "thesis_title", label: "M.Tech Thesis Title", type: "text", required: true, placeholder: "e.g. Optimized Resource Allocation..." },
+      { name: "department", label: "Department", type: "text", placeholder: "CSE / IT" },
+      { name: "academic_year", label: "Academic Year", type: "text", required: true, placeholder: "e.g. 2022-2023" },
+      { name: "guide_name", label: "Guide Name", type: "text", placeholder: "Dr. G. Jaya Suma" },
     ],
     phd: [
-      { name: "scholar_name", label: "Scholar Name", type: "text", required: true },
-      { name: "roll_number", label: "Roll Number", type: "text" },
-      { name: "thesis_title", label: "Thesis Title", type: "text" },
-      { name: "department", label: "Department", type: "text" },
-      { name: "university", label: "University", type: "text" },
-      { name: "awarded_year", label: "Awarded Year", type: "text" },
+      { name: "scholar_name", label: "Ph.D Scholar Name", type: "text", required: true, placeholder: "e.g. Dr. RVS Lalitha" },
+      { name: "roll_number", label: "Roll Number", type: "text", placeholder: "e.g. 09022P0544" },
+      { name: "thesis_title", label: "Ph.D Thesis Title", type: "text", required: true, placeholder: "e.g. Vehicular Ad Hoc Networks..." },
+      { name: "department", label: "Department", type: "text", placeholder: "CSE" },
+      { name: "university", label: "University", type: "text", placeholder: "JNTUK, Kakinada" },
+      { name: "awarded_year", label: "Awarded Year", type: "text", required: true, placeholder: "e.g. 2023" },
     ],
   };
 
   /* ---------------- TABLE COLUMNS ---------------- */
   const columnsByType: Record<ScholarType, any[]> = {
-    btech: [
-      { key: "student_name", label: "Name" },
-      { key: "project_title", label: "Project" },
+    mca: [
+      { key: "student_name", label: "Student Name" },
+      { key: "roll_number", label: "Roll No" },
+      { key: "project_title", label: "Project Title" },
       { key: "academic_year", label: "Year" },
+      { key: "department", label: "Department" },
+    ],
+    btech: [
+      { key: "student_name", label: "Student Name" },
+      { key: "roll_number", label: "Roll No" },
+      { key: "project_title", label: "Project Title" },
+      { key: "academic_year", label: "Year" },
+      { key: "department", label: "Department" },
     ],
     mtech: [
-      { key: "student_name", label: "Name" },
-      { key: "thesis_title", label: "Thesis" },
+      { key: "student_name", label: "Student Name" },
+      { key: "roll_number", label: "Roll No" },
+      { key: "thesis_title", label: "Thesis Title" },
       { key: "academic_year", label: "Year" },
+      { key: "department", label: "Department" },
     ],
     phd: [
-      { key: "scholar_name", label: "Name" },
-      { key: "thesis_title", label: "Thesis" },
-      { key: "awarded_year", label: "Awarded" },
+      { key: "scholar_name", label: "Scholar Name" },
+      { key: "roll_number", label: "Roll No" },
+      { key: "thesis_title", label: "Thesis Title" },
+      { key: "awarded_year", label: "Awarded Year" },
+      { key: "university", label: "University" },
     ],
+  };
+
+  // Pre-fill data for form when editing
+  const getEditingInitialData = () => {
+    if (!editing) {
+      return {
+        department: "CSE",
+        guide_name: "Dr. G. Jaya Suma",
+        university: "JNTUK, Kakinada",
+      };
+    }
+    return {
+      ...editing,
+      student_name: editing.student_name || editing.scholar_name || editing.name || "",
+      scholar_name: editing.scholar_name || editing.student_name || editing.name || "",
+      roll_number: editing.roll_number || editing.roll || "",
+      project_title: editing.project_title || editing.thesis_title || editing.title || "",
+      thesis_title: editing.thesis_title || editing.project_title || editing.title || "",
+      department: editing.department || editing.dept || "CSE",
+      academic_year: editing.academic_year || editing.awarded_year || editing.year || "",
+      awarded_year: editing.awarded_year || editing.academic_year || editing.year || "",
+      guide_name: editing.guide_name || "Dr. G. Jaya Suma",
+      university: editing.university || "JNTUK, Kakinada",
+    };
   };
 
   return (
     <AdminLayout>
+      {/* Feedback Banner */}
+      {feedback && (
+        <div
+          className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium shadow-md transition-all ${
+            feedback.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+              : "bg-rose-50 text-rose-800 border border-rose-200"
+          }`}
+        >
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+          )}
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
       {/* ---------- HEADER ---------- */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Scholars</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">Scholars Management</h2>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Manage Ph.D., MCA, M.Tech, and B.Tech scholars and mentorship records
+          </p>
+        </div>
+
         <button
           onClick={() => {
             setEditing(null);
             setShowForm(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg active:scale-95"
         >
-          + Add Scholar
+          <Plus className="w-4 h-4" />
+          Add {TYPE_LABELS[type].replace(" Scholars", "")} Scholar
         </button>
       </div>
 
       {/* ---------- TABS ---------- */}
-      <div className="flex gap-3 mb-6">
-        {(["btech", "mtech", "phd"] as ScholarType[]).map((t) => (
+      <div className="flex flex-wrap gap-2.5 mb-6 p-1.5 bg-gray-100/80 rounded-2xl border border-gray-200/60 max-w-fit">
+        {TAB_BUTTONS.map((t) => (
           <button
-            key={t}
-            onClick={() => setType(t)}
-            className={`px-4 py-2 rounded-full text-sm font-medium ${
-              type === t
-                ? "bg-primary text-white"
-                : "bg-white border hover:bg-accent/20"
+            key={t.key}
+            onClick={() => {
+              setType(t.key);
+              setShowForm(false);
+              setEditing(null);
+            }}
+            className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              type === t.key
+                ? "bg-white text-blue-700 shadow-sm border border-gray-200/80 scale-[1.02]"
+                : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
             }`}
           >
-            {t.toUpperCase()}
+            {t.label}
           </button>
         ))}
       </div>
 
-      {/* ---------- FORM ---------- */}
+      {/* ---------- FORM (MODAL / INLINE) ---------- */}
       {showForm && (
-        <div className="mb-6 bg-white p-4 border rounded">
+        <div className="mb-8 bg-white/90 backdrop-blur-md p-6 border border-blue-100 rounded-2xl shadow-xl animate-fade-in-up">
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
+            <h3 className="text-lg font-bold text-gray-800">
+              {editing ? `Edit ${TYPE_LABELS[type]}` : `Add New ${TYPE_LABELS[type]}`}
+            </h3>
+            <span className="text-xs px-3 py-1 bg-blue-50 text-blue-700 font-semibold rounded-full uppercase">
+              {type}
+            </span>
+          </div>
+
           <AdminForm
             fields={fieldsByType[type]}
-            initialData={editing || {}}
-            submitLabel={editing ? "Update Scholar" : "Add Scholar"}
-            onCancel={() => setShowForm(false)}
+            initialData={getEditingInitialData()}
+            submitLabel={editing ? "Update Scholar" : "Save Scholar"}
+            onCancel={() => {
+              setShowForm(false);
+              setEditing(null);
+            }}
             onSubmit={handleSave}
           />
         </div>
@@ -154,15 +444,17 @@ export default function ScholarsAdmin() {
 
       {/* ---------- TABLE ---------- */}
       {!loading && (
-        <AdminTable
-          columns={columnsByType[type]}
-          data={data}
-          onEdit={(row) => {
-            setEditing(row);
-            setShowForm(true);
-          }}
-          onDelete={handleDelete}
-        />
+        <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm overflow-hidden">
+          <AdminTable
+            columns={columnsByType[type]}
+            data={data}
+            onEdit={(row) => {
+              setEditing(row);
+              setShowForm(true);
+            }}
+            onDelete={handleDelete}
+          />
+        </div>
       )}
     </AdminLayout>
   );
