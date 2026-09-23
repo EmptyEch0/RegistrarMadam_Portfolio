@@ -24,6 +24,7 @@ import {
   Puzzle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
 
 // Interfaces
 interface VideoItem {
@@ -2319,6 +2320,17 @@ const DEFAULT_DOMAINS: DomainData[] = [
   }
 ];
 
+// Puzzles per domain (shown in the Puzzles tab of every module in that domain)
+const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
+  "iot-internet-of-things": [
+    {
+      id: "iot-key-words",
+      title: "Figure out the Key words related to IoT",
+      words: ["Connectivity", "Sensing", "Data Processing", "Automation", "Control", "Intelligence"],
+    },
+  ],
+};
+
 // Helper to convert PPT / Google Drive URLs into embeddable view links
 const getEmbeddablePptUrl = (url: string): string => {
   if (!url) return "";
@@ -3364,10 +3376,18 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
                       {/* PUZZLES TAB */}
                       {activeTab === "puzzles" && (
-                        <div className="text-center py-16 border border-dashed border-border rounded-xl">
-                          <Puzzle size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
-                          <p className="text-muted-foreground font-medium">Puzzles for this topic are coming soon.</p>
-                        </div>
+                        activeDomain && DOMAIN_PUZZLES[activeDomain.id] ? (
+                          <div className="max-w-4xl mx-auto space-y-8">
+                            {DOMAIN_PUZZLES[activeDomain.id].map((puzzle) => (
+                              <WordPuzzle key={`${activeModule.id}-${puzzle.id}`} puzzle={puzzle} />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-16 border border-dashed border-border rounded-xl">
+                            <Puzzle size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
+                            <p className="text-muted-foreground font-medium">Puzzles for this topic are coming soon.</p>
+                          </div>
+                        )
                       )}
                     </div>
                   </>
