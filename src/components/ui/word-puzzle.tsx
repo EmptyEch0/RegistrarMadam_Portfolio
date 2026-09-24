@@ -128,6 +128,8 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   const foundWords = placed.filter((p) => found.includes(p.answer));
   const foundCellColor = new Map<number, string>();
   foundWords.forEach((p) => p.cells.forEach((cell) => foundCellColor.set(cell, p.color)));
+  // The first letter of each word is shown in that word's colour
+  const startCellColor = new Map(placed.map((p) => [p.cells[0], p.color]));
 
   useEffect(() => {
     if (!started || isComplete) return;
@@ -198,11 +200,12 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   };
 
   const giveHint = () => {
-    const candidates = placed.filter((p) => !found.includes(p.answer) && !hints.includes(p.cells[0]));
+    // Start letters are always coloured, so a hint lights up a word's second letter
+    const candidates = placed.filter((p) => !found.includes(p.answer) && !hints.includes(p.cells[1]));
     if (candidates.length === 0 || !playerName) return;
     setStarted(true);
-    setHints((prev) => [...prev, randomItem(candidates).cells[0]]);
-    setMessage({ ok: true, text: "A glowing letter marks where a hidden word begins." });
+    setHints((prev) => [...prev, randomItem(candidates).cells[1]]);
+    setMessage({ ok: true, text: "A glowing letter shows the second letter of a hidden word." });
   };
 
   const newPuzzle = () => {
@@ -254,7 +257,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   }, [isComplete, playerName, saveState]);
 
   const centre = (cell: number) => `${(cell % size) + 0.5},${Math.floor(cell / size) + 0.5}`;
-  const hintsLeft = placed.some((p) => !found.includes(p.answer) && !hints.includes(p.cells[0]));
+  const hintsLeft = placed.some((p) => !found.includes(p.answer) && !hints.includes(p.cells[1]));
 
   return (
     <div className="space-y-8">
@@ -267,6 +270,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
           <h3 className="font-serif text-2xl font-bold text-primary">{puzzle.title}</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             Drag across connected letters (up, down, left or right) to find all {placed.length} hidden words.
+            Each word starts on the letter shown in its colour.
           </p>
         </div>
 
@@ -373,6 +377,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
                   const colour = foundCellColor.get(cell);
                   const isSelected = selection.includes(cell);
                   const isHint = hints.includes(cell) && !colour;
+                  const startColour = !colour && !isSelected ? startCellColor.get(cell) : undefined;
                   if (!letter) return <div key={cell} />;
                   return (
                     <div key={cell} data-cell={cell} className="flex items-center justify-center cursor-pointer">
@@ -382,9 +387,22 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
                             ? "text-white shadow-sm"
                             : isSelected
                             ? "bg-accent text-accent-foreground scale-110 shadow-md"
+                            : startColour
+                            ? "bg-card border-2"
                             : "bg-card text-foreground border border-border/70 hover:border-accent/60"
                         } ${isHint ? "ring-2 ring-amber-400 ring-offset-1 animate-pulse" : ""}`}
-                        style={colour ? { backgroundColor: colour } : undefined}
+                        style={
+                          colour
+                            ? { backgroundColor: colour }
+                            : startColour
+                            ? {
+                                // Light tint of the word colour laid over the card background
+                                backgroundImage: `linear-gradient(${startColour}26, ${startColour}26)`,
+                                borderColor: startColour,
+                                color: startColour,
+                              }
+                            : undefined
+                        }
                       >
                         {letter}
                       </span>
