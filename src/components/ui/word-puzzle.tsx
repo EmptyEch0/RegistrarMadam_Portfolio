@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User } from "lucide-react";
-import { PuzzleLeaderboard, submitPuzzleScore, formatTime } from "@/components/ui/puzzle-leaderboard";
+import { PuzzleLeaderboard, submitPuzzleScore, formatTime, HINT_PENALTY_SECONDS } from "@/components/ui/puzzle-leaderboard";
+import { PuzzleCelebration } from "@/components/ui/puzzle-celebration";
 
 const PLAYER_NAME_KEY = "qlearn_puzzle_player_name";
 
@@ -119,6 +120,8 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [savedScoreId, setSavedScoreId] = useState<string | null>(null);
   const [leaderboardRefresh, setLeaderboardRefresh] = useState(0);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
+  const leaderboardRef = useRef<HTMLDivElement>(null);
 
   const draggingRef = useRef(false);
   const selectionRef = useRef<number[]>([]);
@@ -217,6 +220,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
     setSeconds(0);
     setStarted(false);
     setSaveState("idle");
+    setCelebrationOpen(false);
     updateSelection([]);
     setNameInput(playerName || readSavedName());
     setPlayerName("");
@@ -255,6 +259,25 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
     if (isComplete && playerName && saveState === "idle") saveScore();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isComplete, playerName, saveState]);
+
+  // Celebrate with a flower shower the moment the last word is found
+  useEffect(() => {
+    if (isComplete) setCelebrationOpen(true);
+  }, [isComplete]);
+
+  const viewLeaderboard = () => {
+    setCelebrationOpen(false);
+    leaderboardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const saveStatusText =
+    saveState === "saving"
+      ? "Saving your score to the leaderboard…"
+      : saveState === "saved"
+      ? "Your score is on the leaderboard!"
+      : saveState === "error"
+      ? "Couldn't save your score right now."
+      : null;
 
   const centre = (cell: number) => `${(cell % size) + 0.5},${Math.floor(cell / size) + 0.5}`;
   const hintsLeft = placed.some((p) => !found.includes(p.answer) && !hints.includes(p.cells[1]));
@@ -472,7 +495,24 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
         )}
       </div>
 
-      <PuzzleLeaderboard puzzleId={puzzle.id} refreshKey={leaderboardRefresh} highlightId={savedScoreId} />
+      <div ref={leaderboardRef} className="scroll-mt-24">
+        <PuzzleLeaderboard puzzleId={puzzle.id} refreshKey={leaderboardRefresh} highlightId={savedScoreId} />
+      </div>
+
+      {celebrationOpen && (
+        <PuzzleCelebration
+          playerName={playerName}
+          puzzleTitle={puzzle.title}
+          wordCount={placed.length}
+          time={formatTime(seconds)}
+          hints={hints.length}
+          score={formatTime(seconds + hints.length * HINT_PENALTY_SECONDS)}
+          saveStatus={saveStatusText}
+          onPlayAgain={newPuzzle}
+          onViewLeaderboard={viewLeaderboard}
+          onClose={() => setCelebrationOpen(false)}
+        />
+      )}
 
       {/* Name pop-up shown before each game */}
       {namePromptOpen && createPortal(
