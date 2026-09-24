@@ -21,7 +21,10 @@ import {
   ExternalLink,
   ChevronRightSquare,
   Presentation,
-  Puzzle
+  Puzzle,
+  Gamepad2,
+  Trophy,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
@@ -2322,11 +2325,46 @@ const DEFAULT_DOMAINS: DomainData[] = [
 
 // Puzzles per domain (shown in the Puzzles tab of every module in that domain)
 const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
+  "quantum-computing": [
+    {
+      id: "quantum-computing-key-words",
+      title: "Figure out the Key Words in Quantum Computing",
+      words: ["Qubit", "Superposition", "Entanglement", "Hadamard", "Teleportation", "Interference", "Decoherence"],
+    },
+  ],
+  "data-science": [
+    {
+      id: "data-science-key-words",
+      title: "Figure out the Key Words in Data Science",
+      words: ["Analytics", "Regression", "Wrangling", "Visualization", "Statistics", "Hypothesis", "Pipeline"],
+    },
+  ],
+  "machine-learning": [
+    {
+      id: "machine-learning-key-words",
+      title: "Figure out the Key Words in Machine Learning",
+      words: ["Supervised", "Clustering", "Overfitting", "Gradient Descent", "Classification", "Validation"],
+    },
+  ],
+  "deep-learning": [
+    {
+      id: "deep-learning-key-words",
+      title: "Figure out the Key Words in Deep Learning",
+      words: ["Neural Network", "Backpropagation", "Convolution", "Transformer", "Activation", "Tensor"],
+    },
+  ],
   "iot-internet-of-things": [
     {
       id: "iot-key-words",
       title: "Figure out the Key words related to IoT",
       words: ["Connectivity", "Sensing", "Data Processing", "Automation", "Control", "Intelligence"],
+    },
+  ],
+  "agentic-ai": [
+    {
+      id: "agentic-ai-key-words",
+      title: "Figure out the Key Words in Agentic AI",
+      words: ["Autonomous", "Reasoning", "Planning", "Memory", "Multi Agent", "Tool Use", "Reflection"],
     },
   ],
 };
@@ -2378,6 +2416,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   // Upload modals states
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [puzzleModalOpen, setPuzzleModalOpen] = useState(false);
 
   // Upload forms inputs
   const [videoTitle, setVideoTitle] = useState("");
@@ -2660,6 +2699,19 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setQuizStarted(false);
     setQuizFinished(false);
   };
+
+  // Switch straight to puzzles of a domain
+  const handlePlayPuzzle = (domainIdx: number) => {
+    setActiveDomainIndex(domainIdx);
+    setActiveModuleIndex(0);
+    setActiveNoteIndex(0);
+    setActivePptIndex(0);
+    setActiveTab("puzzles");
+    setQuizStarted(false);
+    setQuizFinished(false);
+    setPuzzleModalOpen(false);
+    window.scrollTo({ top: 380, behavior: "smooth" });
+  };
   
   // Back to domains
   const handleBackToDomains = () => {
@@ -2706,12 +2758,22 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
         <div className="container-wide px-6 lg:px-12 relative z-10">
           <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <Link 
-              to="/education" 
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/15 border border-accent/30 rounded-full text-accent text-sm font-medium hover:bg-accent/20 transition-all duration-300 mb-6"
-            >
-              <ArrowLeft size={14} /> Back to Contributions
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+              <Link 
+                to="/education" 
+                className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/15 border border-accent/30 rounded-full text-accent text-sm font-medium hover:bg-accent/20 transition-all duration-300"
+              >
+                <ArrowLeft size={14} /> Back to Contributions
+              </Link>
+              <button
+                type="button"
+                onClick={() => setPuzzleModalOpen(true)}
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white rounded-full text-sm font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all duration-300 border border-white/25"
+              >
+                <Gamepad2 size={16} /> <span>Course Puzzles & Leaderboards</span>
+                <span className="bg-white/30 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider">6 Courses</span>
+              </button>
+            </div>
             
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tight leading-tight">
               QLearn
@@ -2723,7 +2785,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
             <div className="w-24 h-1 bg-accent rounded-full my-6" />
 
             <p className="text-lg text-muted-foreground max-w-2xl">
-              An interactive visual laboratory. Explore domains like Quantum Computing, Data Science, AI, and more.
+              An interactive visual laboratory. Explore domains like Quantum Computing, Data Science, AI, and test your skills with word puzzles & live leaderboards.
             </p>
           </div>
         </div>
@@ -2736,9 +2798,19 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           {activeDomainIndex === null ? (
             // DOMAINS GRID VIEW
             <div className="space-y-8">
-              <div className="text-center">
-                <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
-                <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap.</p>
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                  <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
+                  <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap and interactive puzzle game.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPuzzleModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white font-bold text-sm transition-all duration-200 self-start md:self-auto shadow-sm"
+                >
+                  <Gamepad2 size={18} /> <span>All Puzzles & Games</span>
+                  <Trophy size={16} className="text-amber-500" />
+                </button>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {domains.map((domain, idx) => (
@@ -2758,11 +2830,20 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                       <p className="text-muted-foreground text-sm line-clamp-3">
                         {domain.description}
                       </p>
-                      <div className="pt-4 border-t border-border flex items-center justify-between">
+                      <div className="pt-4 border-t border-border flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold text-accent uppercase tracking-wider">
                           10 Modules
                         </span>
-                        <ChevronRight className="text-accent group-hover:translate-x-1 transition-transform" size={18} />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayPuzzle(idx);
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all duration-200 border border-amber-500/30 shadow-sm"
+                        >
+                          <Puzzle size={13} /> Play Puzzle
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -2820,23 +2901,38 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                       style={{ backgroundColor: activeDomain?.glowColor }}
                     />
                     
-                    <div className="relative z-10 space-y-3 max-w-2xl">
-                      <div className="flex items-center gap-3">
-                        <span className="text-3xl bg-white/10 p-2 rounded-lg backdrop-blur-md">
-                          {activeDomain?.icon}
-                        </span>
-                        <div>
-                          <span className="text-xs tracking-widest uppercase font-semibold text-white/70">
-                            {activeDomain?.name}
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                      <div className="space-y-3 max-w-2xl">
+                        <div className="flex items-center gap-3">
+                          <span className="text-3xl bg-white/10 p-2 rounded-lg backdrop-blur-md">
+                            {activeDomain?.icon}
                           </span>
-                          <h2 className="text-2xl md:text-3xl font-serif font-bold">
-                            {activeModule.name}
-                          </h2>
+                          <div>
+                            <span className="text-xs tracking-widest uppercase font-semibold text-white/70">
+                              {activeDomain?.name}
+                            </span>
+                            <h2 className="text-2xl md:text-3xl font-serif font-bold">
+                              {activeModule.name}
+                            </h2>
+                          </div>
                         </div>
+                        <p className="text-sm text-white/90 leading-relaxed pt-2">
+                          {activeModule.description}
+                        </p>
                       </div>
-                      <p className="text-sm text-white/90 leading-relaxed pt-2">
-                        {activeModule.description}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab("puzzles");
+                            window.scrollTo({ top: 460, behavior: "smooth" });
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs sm:text-sm font-bold transition-all duration-200 border border-white/30 shadow-lg hover:scale-105"
+                        >
+                          <Gamepad2 size={16} /> <span>Play {activeDomain?.name} Puzzle</span>
+                          <span className="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded text-[10px] font-black uppercase">Top 10</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2851,7 +2947,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
                           { id: "ppts", label: "PPT & Drive Slides", icon: Presentation },
                           { id: "quiz", label: "Take Quiz", icon: Award },
-                          { id: "puzzles", label: "Puzzles", icon: Puzzle }
+                          { id: "puzzles", label: "Puzzles & Games", icon: Puzzle, badge: true }
                         ].map((tab) => {
                           const TabIcon = tab.icon;
                           const isActive = activeTab === tab.id;
@@ -2859,7 +2955,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                             <button
                               key={tab.id}
                               onClick={() => setActiveTab(tab.id as any)}
-                              className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
+                              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
                                 isActive
                                   ? "bg-card text-accent shadow-md shadow-accent/10 ring-1 ring-accent/30 font-bold transform scale-[1.01]"
                                   : "text-muted-foreground hover:text-foreground hover:bg-card/60"
@@ -2867,6 +2963,11 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                             >
                               <TabIcon size={18} className={isActive ? "text-accent" : "text-muted-foreground"} />
                               <span className="whitespace-nowrap">{tab.label}</span>
+                              {tab.badge && !isActive && (
+                                <span className="hidden xl:inline-block text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                  🎮 Top 10
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -3777,6 +3878,93 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
               </div>
             </form>
 
+          </div>
+        </div>
+      )}
+      {/* FLOATING QUICK ACCESS PUZZLES & GAMES BUTTON ON THE RIGHT */}
+      <div className="fixed right-4 sm:right-6 bottom-6 sm:bottom-8 z-40 flex flex-col items-end gap-2">
+        <button
+          type="button"
+          onClick={() => setPuzzleModalOpen(true)}
+          className="group flex items-center gap-2.5 px-4 py-3 sm:px-5 sm:py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white rounded-full font-bold shadow-2xl shadow-orange-500/40 hover:shadow-orange-500/60 hover:scale-105 active:scale-95 transition-all duration-300 ring-4 ring-white/30 dark:ring-white/10"
+          title="Play Course Puzzles & Games"
+        >
+          <Gamepad2 size={22} className="group-hover:rotate-12 transition-transform animate-bounce" />
+          <div className="flex flex-col text-left">
+            <span className="text-xs sm:text-sm font-bold tracking-tight leading-none">Puzzles & Games</span>
+            <span className="text-[10px] text-white/80 font-medium leading-none mt-0.5">Top 10 Leaderboards</span>
+          </div>
+          <span className="bg-white/25 text-white text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider ml-1">
+            Play
+          </span>
+        </button>
+      </div>
+
+      {/* PUZZLE & GAMES HUB MODAL */}
+      {puzzleModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setPuzzleModalOpen(false)}
+        >
+          <div 
+            className="bg-card w-full max-w-2xl rounded-2xl border border-border shadow-2xl overflow-hidden p-6 space-y-6 animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-4 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-amber-500/15 border border-amber-500/30 rounded-xl flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                  <Gamepad2 size={24} />
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-primary flex items-center gap-2">
+                    Course Puzzles & Games <Trophy size={18} className="text-amber-500" />
+                  </h3>
+                  <p className="text-xs text-muted-foreground">Select any course to solve its interactive word connect puzzle and claim your rank on the live leaderboard!</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPuzzleModalOpen(false)}
+                className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-3.5 max-h-[60vh] overflow-y-auto pr-1">
+              {domains.map((d, idx) => {
+                const puzzle = DOMAIN_PUZZLES[d.id]?.[0];
+                return (
+                  <div
+                    key={d.id}
+                    onClick={() => handlePlayPuzzle(idx)}
+                    className="group cursor-pointer p-4 rounded-xl border border-border hover:border-amber-500/60 bg-muted/30 hover:bg-amber-500/5 transition-all duration-200 flex flex-col justify-between space-y-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-2xl p-2 rounded-lg bg-card border border-border group-hover:scale-110 transition-transform">
+                        {d.icon}
+                      </span>
+                      <div>
+                        <h4 className="font-serif font-bold text-sm text-primary group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                          {d.name}
+                        </h4>
+                        <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
+                          {puzzle ? puzzle.title : "Interactive puzzle game"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
+                      <span className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
+                        <Trophy size={13} className="text-amber-500" /> Live Leaderboard
+                      </span>
+                      <span className="font-bold text-amber-600 dark:text-amber-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                        Play Now <ChevronRight size={14} />
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}

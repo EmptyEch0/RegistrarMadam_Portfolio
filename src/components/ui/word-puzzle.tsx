@@ -441,7 +441,7 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
             {saveState === "error" && (
               <p className="text-xs text-red-500">
                 Couldn't save your score right now.{" "}
-                <button type="button" onClick={() => setSaveState("idle")} className="underline font-semibold">
+                <button type="button" onClick={saveScore} className="underline font-semibold">
                   Try again
                 </button>
               </p>

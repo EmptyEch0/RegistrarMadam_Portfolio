@@ -5,8 +5,8 @@ create table if not exists public.puzzle_scores (
   id            uuid primary key default gen_random_uuid(),
   puzzle_id     text        not null check (char_length(puzzle_id) between 1 and 100),
   player_name   text        not null check (char_length(btrim(player_name)) between 1 and 30),
-  seconds       integer     not null check (seconds between 5 and 36000),
-  hints         integer     not null default 0 check (hints between 0 and 20),
+  seconds       integer     not null check (seconds between 1 and 86400),
+  hints         integer     not null default 0 check (hints >= 0),
   -- Ranking score: solve time plus a 30 second penalty per hint (lower is better)
   total_seconds integer     generated always as (seconds + hints * 30) stored,
   created_at    timestamptz not null default now()
