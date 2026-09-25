@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import {
@@ -24,7 +24,10 @@ import {
   Puzzle,
   Gamepad2,
   Trophy,
-  Sparkles
+  Sparkles,
+  Home,
+  Trash2,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
@@ -2391,6 +2394,7 @@ const getEmbeddablePptUrl = (url: string): string => {
 };
 
 export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: boolean } = {}) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
@@ -2480,6 +2484,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     }
   }, []);
 
+  // Synchronize with URL search parameters (tab=puzzles or tab=courses)
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "puzzles") {
+      setActiveDomainIndex((prev) => (prev === null ? 0 : prev));
+      setActiveTab("puzzles");
+    } else if (tab === "courses") {
+      setActiveDomainIndex(null);
+    }
+  }, [searchParams]);
+
   // Update localStorage when domains change
   const saveDomains = (updatedDomains: DomainData[]) => {
     setDomains(updatedDomains);
@@ -2488,6 +2503,93 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
   const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
   const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
+
+  // Delete Video handler (admin)
+  const handleDeleteVideo = (videoId: string) => {
+    if (!window.confirm("Are you sure you want to delete this video lecture?")) return;
+    if (activeDomainIndex === null || !activeModule) return;
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                videos: m.videos.filter((v) => v.id !== videoId)
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return d;
+    });
+    saveDomains(updatedDomains);
+  };
+
+  // Delete Note handler (admin)
+  const handleDeleteNote = (noteId: string) => {
+    if (!window.confirm("Are you sure you want to delete this lecture note slide?")) return;
+    if (activeDomainIndex === null || !activeModule) return;
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                notes: m.notes.filter((n) => n.id !== noteId)
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return d;
+    });
+    saveDomains(updatedDomains);
+    setActiveNoteIndex(0);
+  };
+
+  // Delete PPT handler (admin)
+  const handleDeletePpt = (pptId: string) => {
+    if (!window.confirm("Are you sure you want to delete this presentation slide deck?")) return;
+    if (activeDomainIndex === null || !activeModule) return;
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === activeModuleIndex) {
+              return {
+                ...m,
+                ppts: (m.ppts || []).filter((p) => p.id !== pptId)
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return d;
+    });
+    saveDomains(updatedDomains);
+    setActivePptIndex(0);
+  };
+
+  // Reset to Defaults (admin)
+  const handleResetToDefaults = () => {
+    if (window.confirm("Reset all QLearn courses and learning modules to original default roadmap? Any custom uploaded items will be cleared.")) {
+      setDomains(DEFAULT_DOMAINS);
+      localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
+      setActiveDomainIndex(null);
+      alert("QLearn content reset to default successfully.");
+    }
+  };
 
   // Active PPT Decks for the current module (provides fallback deck so every module has interactive slides)
   const activeModulePpts: PptItem[] = (activeModule?.ppts && activeModule.ppts.length > 0)
@@ -2719,6 +2821,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
     setActivePptIndex(0);
+    if (searchParams.get("tab")) {
+      setSearchParams({});
+    }
   };
 
   // Switch module handler
@@ -2975,7 +3080,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
                       {/* Admin upload controls (ONLY rendered when accessed inside protected Admin Portal) */}
                       {isAdminPortal && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           {activeTab === "videos" && (
                             <Button 
                               variant="hero" 
@@ -3006,6 +3111,15 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               <Plus size={14} /> Upload PPT / Drive Link
                             </Button>
                           )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleResetToDefaults}
+                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-red-500 hover:border-red-500/40 transition-all duration-200"
+                            title="Reset all content to original defaults"
+                          >
+                            <RefreshCw size={12} /> Reset to Defaults
+                          </Button>
                         </div>
                       )}
                     </div>
@@ -3045,21 +3159,34 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                       {vid.description}
                                     </p>
                                   </div>
-                                  <div className="border-t border-border/40 pt-4 flex items-center justify-between">
+                                  <div className="border-t border-border/40 pt-4 flex items-center justify-between gap-2">
                                     <span className="text-xs text-muted-foreground font-mono">
                                       Seminar Lecture Video
                                     </span>
-                                    <Button 
-                                      variant="hero-outline" 
-                                      size="xs"
-                                      onClick={() => {
-                                        setActivePlayVideoUrl(vid.url);
-                                        setActivePlayVideoTitle(vid.title);
-                                      }}
-                                      className="flex items-center gap-1.5 text-xs py-1.5"
-                                    >
-                                      Play Lecture <ExternalLink size={12} />
-                                    </Button>
+                                    <div className="flex items-center gap-1.5">
+                                      {isAdminPortal && (
+                                        <Button
+                                          variant="ghost"
+                                          size="xs"
+                                          onClick={() => handleDeleteVideo(vid.id)}
+                                          className="text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs py-1.5 px-2"
+                                          title="Delete video lecture"
+                                        >
+                                          <Trash2 size={13} />
+                                        </Button>
+                                      )}
+                                      <Button 
+                                        variant="hero-outline" 
+                                        size="xs"
+                                        onClick={() => {
+                                          setActivePlayVideoUrl(vid.url);
+                                          setActivePlayVideoTitle(vid.title);
+                                        }}
+                                        className="flex items-center gap-1.5 text-xs py-1.5"
+                                      >
+                                        Play Lecture <ExternalLink size={12} />
+                                      </Button>
+                                    </div>
                                   </div>
                                 </div>
                               ))}
@@ -3099,8 +3226,21 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                   </div>
 
                                   <div className="md:col-span-7 space-y-4">
-                                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
-                                       Note Sheet {activeNoteIndex + 1} of {activeModule.notes.length}
+                                     <div className="flex items-center justify-between gap-2">
+                                       <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent/15 border border-accent/30 rounded text-accent text-xs font-semibold">
+                                         Note Sheet {activeNoteIndex + 1} of {activeModule.notes.length}
+                                       </div>
+                                       {isAdminPortal && (
+                                         <Button
+                                           variant="ghost"
+                                           size="xs"
+                                           onClick={() => handleDeleteNote(activeModule.notes[activeNoteIndex].id)}
+                                           className="text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs py-1 px-2.5"
+                                           title="Delete this note slide"
+                                         >
+                                           <Trash2 size={13} className="mr-1" /> Delete Slide
+                                         </Button>
+                                       )}
                                      </div>
                                      <h3 className="font-serif text-2xl font-bold text-primary">
                                        {activeModule.notes[activeNoteIndex].title}
@@ -3221,6 +3361,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                 </div>
 
                                 <div className="flex items-center gap-2 flex-wrap">
+                                  {isAdminPortal && activeModule?.ppts && activeModule.ppts.length > 0 && (
+                                    <Button
+                                      variant="ghost"
+                                      size="xs"
+                                      onClick={() => handleDeletePpt(activeModulePpts[activePptIndex].id)}
+                                      className="text-red-500 hover:text-red-600 hover:bg-red-500/10 text-xs py-1.5 px-2.5"
+                                      title="Delete this PPT deck"
+                                    >
+                                      <Trash2 size={13} className="mr-1" /> Delete Deck
+                                    </Button>
+                                  )}
                                   {activeModulePpts[activePptIndex]?.slideCount && (
                                     <span className="text-xs font-semibold px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-accent shadow-xs">
                                       {activeModulePpts[activePptIndex].slideCount}
@@ -3477,18 +3628,76 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
                       {/* PUZZLES TAB */}
                       {activeTab === "puzzles" && (
-                        activeDomain && DOMAIN_PUZZLES[activeDomain.id] ? (
-                          <div className="max-w-4xl mx-auto space-y-8">
-                            {DOMAIN_PUZZLES[activeDomain.id].map((puzzle) => (
-                              <WordPuzzle key={`${activeModule.id}-${puzzle.id}`} puzzle={puzzle} />
-                            ))}
+                        <div className="max-w-4xl mx-auto space-y-6">
+                          {/* Dedicated Puzzle Navigation Bar */}
+                          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 bg-card/90 backdrop-blur-md rounded-2xl border border-border shadow-sm">
+                            <div className="flex items-center gap-2">
+                              <Link
+                                to="/"
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted/80 hover:bg-muted text-foreground text-xs font-semibold transition-all hover:scale-105 border border-border/80 shadow-xs"
+                              >
+                                <Home size={14} className="text-accent" /> Home
+                              </Link>
+                              <button
+                                type="button"
+                                onClick={handleBackToDomains}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent text-xs font-semibold border border-accent/30 transition-all hover:scale-105 shadow-xs"
+                              >
+                                <ArrowLeft size={14} /> Back to Courses
+                              </button>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setPuzzleModalOpen(true)}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold shadow-md shadow-orange-500/20 transition-all hover:scale-105"
+                              >
+                                <Gamepad2 size={15} /> All Course Puzzles <Trophy size={13} />
+                              </button>
+                            </div>
                           </div>
-                        ) : (
-                          <div className="text-center py-16 border border-dashed border-border rounded-xl">
-                            <Puzzle size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
-                            <p className="text-muted-foreground font-medium">Puzzles for this topic are coming soon.</p>
+
+                          {/* Quick Course Switcher Pills */}
+                          <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap pl-1 pr-1">Course:</span>
+                            {domains.map((d, dIdx) => {
+                              const isCurrentDomain = activeDomainIndex === dIdx;
+                              return (
+                                <button
+                                  key={d.id}
+                                  type="button"
+                                  onClick={() => handlePlayPuzzle(dIdx)}
+                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 ${
+                                    isCurrentDomain
+                                      ? "bg-amber-500 text-white shadow-md shadow-amber-500/25 scale-105"
+                                      : "bg-card border border-border/80 text-muted-foreground hover:text-foreground hover:border-accent/50"
+                                  }`}
+                                >
+                                  <span>{d.icon}</span>
+                                  <span>{d.name}</span>
+                                </button>
+                              );
+                            })}
                           </div>
-                        )
+
+                          {activeDomain && DOMAIN_PUZZLES[activeDomain.id] ? (
+                            <div className="space-y-8">
+                              {DOMAIN_PUZZLES[activeDomain.id].map((puzzle) => (
+                                <WordPuzzle 
+                                  key={`${activeDomain.id}-${puzzle.id}`} 
+                                  puzzle={puzzle} 
+                                  onBack={handleBackToDomains}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="text-center py-16 border border-dashed border-border rounded-xl">
+                              <Puzzle size={48} className="mx-auto text-muted-foreground opacity-40 mb-3" />
+                              <p className="text-muted-foreground font-medium">Puzzles for this topic are coming soon.</p>
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   </>
@@ -3964,6 +4173,25 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   </div>
                 );
               })}
+            </div>
+            <div className="flex items-center justify-between pt-3 border-t border-border text-xs">
+              <Link
+                to="/"
+                onClick={() => setPuzzleModalOpen(false)}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-accent font-semibold transition-colors"
+              >
+                <Home size={14} /> Home Page
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setPuzzleModalOpen(false);
+                  handleBackToDomains();
+                }}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-accent font-semibold transition-colors"
+              >
+                <ArrowLeft size={14} /> All Courses Roadmap
+              </button>
             </div>
           </div>
         </div>

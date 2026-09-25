@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User } from "lucide-react";
+import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft } from "lucide-react";
 import { PuzzleLeaderboard, submitPuzzleScore, formatTime, HINT_PENALTY_SECONDS } from "@/components/ui/puzzle-leaderboard";
 import { PuzzleCelebration } from "@/components/ui/puzzle-celebration";
 
@@ -103,7 +104,15 @@ const buildPuzzle = (words: string[]): PuzzleLayout => {
 
 const sameCells = (a: number[], b: number[]) => a.length === b.length && a.every((cell, i) => cell === b[i]);
 
-export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
+export function WordPuzzle({
+  puzzle,
+  onBack,
+  showNav = true,
+}: {
+  puzzle: WordPuzzleData;
+  onBack?: () => void;
+  showNav?: boolean;
+}) {
   const [layout, setLayout] = useState<PuzzleLayout>(() => buildPuzzle(puzzle.words));
   const [found, setFound] = useState<string[]>([]);
   const [selection, setSelection] = useState<number[]>([]);
@@ -285,6 +294,41 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
   return (
     <div className="space-y-8">
       <div className="card-institutional p-6 md:p-8 space-y-6 animate-fade-in">
+        {/* Navigation Bar inside Puzzle */}
+        {showNav && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/80 pb-4">
+            <div className="flex items-center gap-2">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 bg-muted/60 hover:bg-muted text-foreground text-xs font-semibold transition-all hover:scale-105 shadow-xs"
+              >
+                <Home size={14} className="text-accent" /> Home
+              </Link>
+              {onBack ? (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-accent/30 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-semibold transition-all hover:scale-105 shadow-xs"
+                >
+                  <ArrowLeft size={14} /> Back to Courses
+                </button>
+              ) : (
+                <Link
+                  to="/qlearn"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-accent/30 bg-accent/10 hover:bg-accent/20 text-accent text-xs font-semibold transition-all hover:scale-105 shadow-xs"
+                >
+                  <ArrowLeft size={14} /> Back to Courses
+                </Link>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Interactive Word Connect</span>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-14 h-14 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent">
@@ -488,9 +532,27 @@ export function WordPuzzle({ puzzle }: { puzzle: WordPuzzleData }) {
               </p>
             )}
 
-            <Button variant="hero" size="sm" onClick={newPuzzle}>
-              Play Again
-            </Button>
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+              <Button variant="hero" size="sm" onClick={newPuzzle}>
+                Play Again
+              </Button>
+              {onBack ? (
+                <Button variant="outline" size="sm" onClick={onBack} className="flex items-center gap-1.5">
+                  <ArrowLeft size={14} /> Back to Courses
+                </Button>
+              ) : (
+                <Link to="/qlearn">
+                  <Button variant="outline" size="sm" className="flex items-center gap-1.5">
+                    <ArrowLeft size={14} /> Back to Courses
+                  </Button>
+                </Link>
+              )}
+              <Link to="/">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1.5">
+                  <Home size={14} className="text-accent" /> Home
+                </Button>
+              </Link>
+            </div>
           </div>
         )}
       </div>
