@@ -126,7 +126,7 @@ export function Header() {
             <div className="relative group py-2">
               <button
                 className={cn(
-                  "flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground",
                   isDropdownActive && "text-accent font-semibold"
                 )}
               >
@@ -134,8 +134,8 @@ export function Header() {
                 <ChevronDown size={14} className="transition-transform duration-300 group-hover:rotate-180" />
               </button>
               
-              {/* Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
+              {/* Contributions Dropdown Menu Overlay */}
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 md:w-[350px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
                 <div className="grid grid-cols-1 gap-1.5">
                   {dropdownItems.map((item) => {
                     const ItemIcon = item.icon;
@@ -145,19 +145,19 @@ export function Header() {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "flex items-start gap-3 p-2.5 rounded-lg transition-all duration-200 hover:bg-muted/70",
+                          "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-muted/70 group/item",
                           isItemActive ? "bg-accent/10 text-accent font-medium" : "text-foreground hover:text-accent"
                         )}
                       >
                         <div className={cn(
-                          "p-1.5 rounded-md flex-shrink-0",
-                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
+                          "p-2 rounded-lg flex-shrink-0 transition-colors",
+                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground group-hover/item:bg-accent/15 group-hover/item:text-accent"
                         )}>
                           <ItemIcon size={16} />
                         </div>
                         <div>
-                          <div className="text-xs font-semibold">{item.label}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
+                          <div className="text-xs font-semibold group-hover/item:text-accent transition-colors">{item.label}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
                         </div>
                       </Link>
                     );
@@ -170,7 +170,7 @@ export function Header() {
             <div className="relative group py-2">
               <button
                 className={cn(
-                  "flex items-center gap-1 px-3 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-1 px-3.5 py-2 text-sm font-medium transition-colors text-muted-foreground hover:text-foreground",
                   isQLearnActive && "text-accent font-semibold"
                 )}
               >
@@ -179,8 +179,8 @@ export function Header() {
               </button>
               
               {/* QLearn Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-88 bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
-                <div className="grid grid-cols-1 gap-1.5">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[380px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
+                <div className="grid grid-cols-1 gap-2">
                   {qlearnDropdownItems.map((item) => {
                     const ItemIcon = item.icon;
                     const isItemActive = location.pathname === "/qlearn" && (
@@ -192,19 +192,19 @@ export function Header() {
                         key={item.href}
                         to={item.href}
                         className={cn(
-                          "flex items-start gap-3 p-2.5 rounded-lg transition-all duration-200 hover:bg-muted/70",
+                          "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-muted/70 group/item",
                           isItemActive ? "bg-accent/10 text-accent font-medium" : "text-foreground hover:text-accent"
                         )}
                       >
                         <div className={cn(
-                          "p-1.5 rounded-md flex-shrink-0",
-                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
+                          "p-2 rounded-lg flex-shrink-0 transition-colors",
+                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground group-hover/item:bg-accent/15 group-hover/item:text-accent"
                         )}>
-                          <ItemIcon size={16} />
+                          <ItemIcon size={18} />
                         </div>
                         <div>
-                          <div className="text-xs font-semibold">{item.label}</div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
+                          <div className="text-xs font-semibold group-hover/item:text-accent transition-colors">{item.label}</div>
+                          <div className="text-[11px] text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
                         </div>
                       </Link>
                     );
@@ -212,14 +212,14 @@ export function Header() {
                 </div>
 
                 {/* Quick Subject Selectors */}
-                <div className="mt-2.5 pt-2.5 border-t border-border/70">
-                  <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                <div className="mt-3 pt-3 border-t border-border/70">
+                  <div className="flex items-center justify-between px-1 pb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                     <span>Play Puzzle by Subject</span>
-                    <span className="text-[9px] text-amber-500 font-semibold flex items-center gap-1">
-                      <Trophy size={10} /> Live Ranks
+                    <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-1">
+                      <Trophy size={11} /> Live Ranks
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-1">
+                  <div className="grid grid-cols-2 gap-1.5">
                     {PUZZLE_SUBJECTS.map((subj) => {
                       const isSubjActive = location.pathname === "/qlearn" && location.search.includes(`subject=${subj.id}`);
                       return (
@@ -227,13 +227,13 @@ export function Header() {
                           key={subj.id}
                           to={`/qlearn?tab=puzzles&subject=${subj.id}`}
                           className={cn(
-                            "flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                            "flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all duration-150",
                             isSubjActive 
-                              ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400 border border-amber-500/30" 
-                              : "text-foreground hover:bg-amber-500/10 hover:text-amber-600"
+                              ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400 border border-amber-500/30 shadow-xs" 
+                              : "text-foreground bg-muted/30 hover:bg-amber-500/10 hover:text-amber-600 border border-transparent hover:border-amber-500/20"
                           )}
                         >
-                          <span className="text-xs">{subj.icon}</span>
+                          <span className="text-sm shrink-0">{subj.icon}</span>
                           <span className="truncate text-[11px]">{subj.label}</span>
                         </Link>
                       );

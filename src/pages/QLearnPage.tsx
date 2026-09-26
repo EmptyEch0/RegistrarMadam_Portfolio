@@ -28,6 +28,7 @@ import {
   Home,
   Trash2,
   RefreshCw,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
