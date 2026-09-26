@@ -2484,16 +2484,33 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     }
   }, []);
 
-  // Synchronize with URL search parameters (tab=puzzles or tab=courses)
+  // Synchronize with URL search parameters (tab=puzzles, tab=courses, and subject)
   useEffect(() => {
     const tab = searchParams.get("tab");
+    const subjectParam = searchParams.get("subject");
+
     if (tab === "puzzles") {
-      setActiveDomainIndex((prev) => (prev === null ? 0 : prev));
       setActiveTab("puzzles");
+      if (subjectParam) {
+        const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
+        const foundIdx = domainList.findIndex(
+          (d) => d.id.toLowerCase() === subjectParam.toLowerCase() || d.name.toLowerCase().includes(subjectParam.toLowerCase())
+        );
+        if (foundIdx !== -1) {
+          setActiveDomainIndex(foundIdx);
+          setPuzzleModalOpen(false);
+        } else {
+          setActiveDomainIndex(null);
+        }
+      } else {
+        // Tab is puzzles with no specific subject: display subject selection screen
+        setActiveDomainIndex(null);
+      }
     } else if (tab === "courses") {
       setActiveDomainIndex(null);
+      setActiveTab("videos");
     }
-  }, [searchParams]);
+  }, [searchParams, domains]);
 
   // Update localStorage when domains change
   const saveDomains = (updatedDomains: DomainData[]) => {
@@ -2812,18 +2829,33 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setQuizStarted(false);
     setQuizFinished(false);
     setPuzzleModalOpen(false);
+    const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
+    const domain = domainList[domainIdx];
+    if (domain) {
+      setSearchParams({ tab: "puzzles", subject: domain.id });
+    }
     window.scrollTo({ top: 380, behavior: "smooth" });
   };
   
-  // Back to domains
+  // Back to domains / courses roadmap
   const handleBackToDomains = () => {
     setActiveDomainIndex(null);
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
     setActivePptIndex(0);
-    if (searchParams.get("tab")) {
-      setSearchParams({});
-    }
+    setActiveTab("videos");
+    setSearchParams({});
+  };
+
+  // Back to puzzle subject selection (stays in puzzles tab)
+  const handleBackToPuzzleSubjects = () => {
+    setActiveDomainIndex(null);
+    setActiveModuleIndex(0);
+    setActiveNoteIndex(0);
+    setActivePptIndex(0);
+    setActiveTab("puzzles");
+    setSearchParams({ tab: "puzzles" });
+    window.scrollTo({ top: 320, behavior: "smooth" });
   };
 
   // Switch module handler
@@ -2901,60 +2933,143 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
         <div className="container-wide px-6 lg:px-12">
           
           {activeDomainIndex === null ? (
-            // DOMAINS GRID VIEW
-            <div className="space-y-8">
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-                <div>
-                  <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
-                  <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap and interactive puzzle game.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setPuzzleModalOpen(true)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white font-bold text-sm transition-all duration-200 self-start md:self-auto shadow-sm"
-                >
-                  <Gamepad2 size={18} /> <span>All Puzzles & Games</span>
-                  <Trophy size={16} className="text-amber-500" />
-                </button>
-              </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {domains.map((domain, idx) => (
-                  <div
-                    key={domain.id}
-                    onClick={() => handleDomainSelect(idx)}
-                    className="cursor-pointer card-institutional overflow-hidden group hover:shadow-2xl hover:border-accent/40 transition-all duration-300 transform hover:-translate-y-1"
+            activeTab === "puzzles" ? (
+              // PUZZLES SUBJECT SELECTOR HUB
+              <div className="space-y-8 animate-fade-in">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/60 pb-6">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 text-xs font-bold mb-3">
+                      <Gamepad2 size={14} /> Interactive Subject Word Puzzles
+                    </div>
+                    <h2 className="font-serif text-3xl font-bold text-primary">Which subject would you like to play?</h2>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Select any subject below to connect key terminology, beat the clock, and claim your spot on the live leaderboard!
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBackToDomains}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted font-semibold text-xs transition-colors self-start md:self-auto shadow-xs"
                   >
-                    <div className={`h-2 bg-gradient-to-r ${domain.color}`} />
-                    <div className="p-6 space-y-4">
-                      <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
-                        {domain.icon}
+                    <GraduationCap size={16} className="text-accent" /> View Course Roadmaps
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {domains.map((domain, idx) => {
+                    const puzzle = DOMAIN_PUZZLES[domain.id]?.[0];
+                    return (
+                      <div
+                        key={domain.id}
+                        onClick={() => handlePlayPuzzle(idx)}
+                        className="cursor-pointer card-institutional overflow-hidden group hover:shadow-2xl hover:border-amber-500/50 transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between"
+                      >
+                        <div className={`h-2 bg-gradient-to-r ${domain.color}`} />
+                        <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <div className="w-14 h-14 rounded-2xl bg-accent/10 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                                {domain.icon}
+                              </div>
+                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                                <Trophy size={12} className="text-amber-500" /> Live Leaderboard
+                              </span>
+                            </div>
+                            <h3 className="font-serif text-xl font-bold text-primary group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
+                              {domain.name}
+                            </h3>
+                            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">
+                              {puzzle ? puzzle.title : domain.description}
+                            </p>
+                            {puzzle && (
+                              <div className="pt-2 flex flex-wrap gap-1">
+                                {puzzle.words.slice(0, 4).map((w, wIdx) => (
+                                  <span key={wIdx} className="text-[10px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono">
+                                    {w}
+                                  </span>
+                                ))}
+                                {puzzle.words.length > 4 && (
+                                  <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground font-mono">
+                                    +{puzzle.words.length - 4} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="pt-4 border-t border-border flex items-center justify-between gap-2">
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              {puzzle ? `${puzzle.words.length} Key Words` : "Interactive Game"}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500 text-white shadow-md shadow-amber-500/20 group-hover:bg-amber-600 transition-colors">
+                              <Puzzle size={13} /> Play Puzzle <ChevronRight size={14} />
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <h3 className="font-serif text-2xl font-bold text-primary group-hover:text-accent transition-colors">
-                        {domain.name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm line-clamp-3">
-                        {domain.description}
-                      </p>
-                      <div className="pt-4 border-t border-border flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                          10 Modules
-                        </span>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePlayPuzzle(idx);
-                          }}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all duration-200 border border-amber-500/30 shadow-sm"
-                        >
-                          <Puzzle size={13} /> Play Puzzle
-                        </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              // DOMAINS GRID VIEW (Courses)
+              <div className="space-y-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div>
+                    <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
+                    <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap and interactive puzzle game.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("puzzles");
+                      setActiveDomainIndex(null);
+                      setSearchParams({ tab: "puzzles" });
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white font-bold text-sm transition-all duration-200 self-start md:self-auto shadow-sm"
+                  >
+                    <Gamepad2 size={18} /> <span>All Puzzles & Games</span>
+                    <Trophy size={16} className="text-amber-500" />
+                  </button>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {domains.map((domain, idx) => (
+                    <div
+                      key={domain.id}
+                      onClick={() => handleDomainSelect(idx)}
+                      className="cursor-pointer card-institutional overflow-hidden group hover:shadow-2xl hover:border-accent/40 transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      <div className={`h-2 bg-gradient-to-r ${domain.color}`} />
+                      <div className="p-6 space-y-4">
+                        <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform">
+                          {domain.icon}
+                        </div>
+                        <h3 className="font-serif text-2xl font-bold text-primary group-hover:text-accent transition-colors">
+                          {domain.name}
+                        </h3>
+                        <p className="text-muted-foreground text-sm line-clamp-3">
+                          {domain.description}
+                        </p>
+                        <div className="pt-4 border-t border-border flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold text-accent uppercase tracking-wider">
+                            10 Modules
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayPuzzle(idx);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all duration-200 border border-amber-500/30 shadow-sm"
+                          >
+                            <Puzzle size={13} /> Play Puzzle
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )
           ) : (
             // MODULES VIEW
             <div className="grid lg:grid-cols-4 gap-8">
@@ -3631,7 +3746,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                         <div className="max-w-4xl mx-auto space-y-6">
                           {/* Dedicated Puzzle Navigation Bar */}
                           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 bg-card/90 backdrop-blur-md rounded-2xl border border-border shadow-sm">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                               <Link
                                 to="/"
                                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-muted/80 hover:bg-muted text-foreground text-xs font-semibold transition-all hover:scale-105 border border-border/80 shadow-xs"
@@ -3640,10 +3755,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               </Link>
                               <button
                                 type="button"
+                                onClick={handleBackToPuzzleSubjects}
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-700 dark:text-amber-300 text-xs font-semibold border border-amber-500/30 transition-all hover:scale-105 shadow-xs"
+                              >
+                                <Gamepad2 size={14} className="text-amber-500" /> Choose Subject
+                              </button>
+                              <button
+                                type="button"
                                 onClick={handleBackToDomains}
                                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-accent/10 hover:bg-accent/20 text-accent text-xs font-semibold border border-accent/30 transition-all hover:scale-105 shadow-xs"
                               >
-                                <ArrowLeft size={14} /> Back to Courses
+                                <ArrowLeft size={14} /> Course Roadmap
                               </button>
                             </div>
 
@@ -3660,7 +3782,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
                           {/* Quick Course Switcher Pills */}
                           <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
-                            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap pl-1 pr-1">Course:</span>
+                            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap pl-1 pr-1">Subject:</span>
                             {domains.map((d, dIdx) => {
                               const isCurrentDomain = activeDomainIndex === dIdx;
                               return (
@@ -3688,6 +3810,10 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                   key={`${activeDomain.id}-${puzzle.id}`} 
                                   puzzle={puzzle} 
                                   onBack={handleBackToDomains}
+                                  onBackToSubjects={handleBackToPuzzleSubjects}
+                                  domains={domains.map((d) => ({ id: d.id, name: d.name, icon: d.icon }))}
+                                  activeDomainIndex={activeDomainIndex}
+                                  onSelectDomain={handlePlayPuzzle}
                                 />
                               ))}
                             </div>

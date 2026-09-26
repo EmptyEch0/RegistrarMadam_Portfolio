@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap } from "lucide-react";
+import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,16 @@ const dropdownItems = [
 
 const qlearnDropdownItems = [
   { label: "Courses", href: "/qlearn", desc: "10-module domains & lecture roadmaps", icon: GraduationCap },
-  { label: "Puzzles", href: "/qlearn?tab=puzzles", desc: "Interactive word puzzles & leaderboards", icon: Gamepad2 },
+  { label: "All Puzzles & Hub", href: "/qlearn?tab=puzzles", desc: "Select subject, play word connect & rankings", icon: Gamepad2 },
+];
+
+const PUZZLE_SUBJECTS = [
+  { id: "quantum-computing", label: "Quantum Computing", icon: "⚛️" },
+  { id: "data-science", label: "Data Science", icon: "📊" },
+  { id: "machine-learning", label: "Machine Learning", icon: "🤖" },
+  { id: "deep-learning", label: "Deep Learning", icon: "🧠" },
+  { id: "iot-internet-of-things", label: "IoT", icon: "🌐" },
+  { id: "agentic-ai", label: "Agentic AI", icon: "⚡" },
 ];
 
 export function Header() {
@@ -170,13 +179,13 @@ export function Header() {
               </button>
               
               {/* QLearn Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-88 bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
                 <div className="grid grid-cols-1 gap-1.5">
                   {qlearnDropdownItems.map((item) => {
                     const ItemIcon = item.icon;
                     const isItemActive = location.pathname === "/qlearn" && (
                       (item.href === "/qlearn" && !location.search.includes("tab=puzzles")) ||
-                      (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles"))
+                      (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles") && !location.search.includes("subject="))
                     );
                     return (
                       <Link
@@ -200,6 +209,36 @@ export function Header() {
                       </Link>
                     );
                   })}
+                </div>
+
+                {/* Quick Subject Selectors */}
+                <div className="mt-2.5 pt-2.5 border-t border-border/70">
+                  <div className="flex items-center justify-between px-2 pb-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    <span>Play Puzzle by Subject</span>
+                    <span className="text-[9px] text-amber-500 font-semibold flex items-center gap-1">
+                      <Trophy size={10} /> Live Ranks
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1">
+                    {PUZZLE_SUBJECTS.map((subj) => {
+                      const isSubjActive = location.pathname === "/qlearn" && location.search.includes(`subject=${subj.id}`);
+                      return (
+                        <Link
+                          key={subj.id}
+                          to={`/qlearn?tab=puzzles&subject=${subj.id}`}
+                          className={cn(
+                            "flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                            isSubjActive 
+                              ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400 border border-amber-500/30" 
+                              : "text-foreground hover:bg-amber-500/10 hover:text-amber-600"
+                          )}
+                        >
+                          <span className="text-xs">{subj.icon}</span>
+                          <span className="truncate text-[11px]">{subj.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -310,11 +349,11 @@ export function Header() {
 
                 {/* Collapsible QLearn items */}
                 {isMobileQLearnOpen && (
-                  <div className="flex flex-col pl-6 mt-1 border-l-2 border-accent/20 space-y-0.5 animate-slide-up">
+                  <div className="flex flex-col pl-6 mt-1 border-l-2 border-accent/20 space-y-1 animate-slide-up">
                     {qlearnDropdownItems.map((item) => {
                       const isItemActive = location.pathname === "/qlearn" && (
                         (item.href === "/qlearn" && !location.search.includes("tab=puzzles")) ||
-                        (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles"))
+                        (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles") && !location.search.includes("subject="))
                       );
                       return (
                         <Link
@@ -331,6 +370,33 @@ export function Header() {
                         </Link>
                       );
                     })}
+
+                    <div className="pt-2 pl-2 border-t border-border/50">
+                      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between pr-2">
+                        <span>Puzzle Subjects</span>
+                        <span className="text-amber-500 font-bold text-[9px]">Live Games</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-1 pr-2">
+                        {PUZZLE_SUBJECTS.map((subj) => {
+                          const isSubjActive = location.pathname === "/qlearn" && location.search.includes(`subject=${subj.id}`);
+                          return (
+                            <Link
+                              key={subj.id}
+                              to={`/qlearn?tab=puzzles&subject=${subj.id}`}
+                              className={cn(
+                                "flex items-center gap-1.5 px-2 py-1.5 text-xs rounded transition-colors",
+                                isSubjActive
+                                  ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400"
+                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                              )}
+                            >
+                              <span>{subj.icon}</span>
+                              <span className="truncate">{subj.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

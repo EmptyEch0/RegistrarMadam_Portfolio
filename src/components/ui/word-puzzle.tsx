@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft } from "lucide-react";
+import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft, Gamepad2 } from "lucide-react";
 import { PuzzleLeaderboard, submitPuzzleScore, formatTime, HINT_PENALTY_SECONDS } from "@/components/ui/puzzle-leaderboard";
 import { PuzzleCelebration } from "@/components/ui/puzzle-celebration";
 
@@ -108,10 +108,18 @@ export function WordPuzzle({
   puzzle,
   onBack,
   showNav = true,
+  domains,
+  activeDomainIndex,
+  onSelectDomain,
+  onBackToSubjects,
 }: {
   puzzle: WordPuzzleData;
   onBack?: () => void;
   showNav?: boolean;
+  domains?: Array<{ id: string; name: string; icon: string }>;
+  activeDomainIndex?: number;
+  onSelectDomain?: (domainIdx: number) => void;
+  onBackToSubjects?: () => void;
 }) {
   const [layout, setLayout] = useState<PuzzleLayout>(() => buildPuzzle(puzzle.words));
   const [found, setFound] = useState<string[]>([]);
@@ -121,6 +129,21 @@ export function WordPuzzle({
   const [lastFound, setLastFound] = useState<PlacedWord | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [started, setStarted] = useState(false);
+
+  // Reset layout and state whenever the puzzle changes
+  useEffect(() => {
+    setLayout(buildPuzzle(puzzle.words));
+    setFound([]);
+    setSelection([]);
+    setHints([]);
+    setMessage(null);
+    setLastFound(null);
+    setSeconds(0);
+    setStarted(false);
+    setSaveState("idle");
+    setSavedScoreId(null);
+    setCelebrationOpen(false);
+  }, [puzzle.id, puzzle.words]);
 
   // Player name (asked in a pop-up before each game) and leaderboard submission
   const [playerName, setPlayerName] = useState("");
@@ -297,13 +320,22 @@ export function WordPuzzle({
         {/* Navigation Bar inside Puzzle */}
         {showNav && (
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/80 pb-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Link
                 to="/"
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/80 bg-muted/60 hover:bg-muted text-foreground text-xs font-semibold transition-all hover:scale-105 shadow-xs"
               >
                 <Home size={14} className="text-accent" /> Home
               </Link>
+              {onBackToSubjects && (
+                <button
+                  type="button"
+                  onClick={onBackToSubjects}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold transition-all hover:scale-105 shadow-xs"
+                >
+                  <Gamepad2 size={14} /> Change Subject
+                </button>
+              )}
               {onBack ? (
                 <button
                   type="button"
@@ -536,6 +568,11 @@ export function WordPuzzle({
               <Button variant="hero" size="sm" onClick={newPuzzle}>
                 Play Again
               </Button>
+              {onBackToSubjects && (
+                <Button variant="outline" size="sm" onClick={onBackToSubjects} className="flex items-center gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10">
+                  <Gamepad2 size={14} /> Change Subject
+                </Button>
+              )}
               {onBack ? (
                 <Button variant="outline" size="sm" onClick={onBack} className="flex items-center gap-1.5">
                   <ArrowLeft size={14} /> Back to Courses
@@ -576,7 +613,7 @@ export function WordPuzzle({
         />
       )}
 
-      {/* Name pop-up shown before each game */}
+      {/* Name and Subject pop-up shown before each game */}
       {namePromptOpen && createPortal(
         <div
           className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
@@ -587,33 +624,67 @@ export function WordPuzzle({
             role="dialog"
             aria-modal="true"
             aria-labelledby={`${puzzle.id}-name-title`}
-            className="w-full max-w-xs bg-card rounded-2xl border border-border shadow-2xl p-6 space-y-4 text-center animate-slide-up"
+            className="w-full max-w-sm bg-card rounded-2xl border border-border shadow-2xl p-6 space-y-4 text-center animate-slide-up"
           >
-            <div className="w-12 h-12 bg-accent/15 border border-accent/30 rounded-full flex items-center justify-center mx-auto text-accent">
-              <User size={22} />
+            <div className="w-12 h-12 bg-amber-500/15 border border-amber-500/30 rounded-full flex items-center justify-center mx-auto text-amber-500">
+              <Gamepad2 size={22} />
             </div>
             <div className="space-y-1">
               <h4 id={`${puzzle.id}-name-title`} className="font-serif text-lg font-bold text-primary">
-                Enter your name
+                Word Puzzle Challenge
               </h4>
-              <p className="text-xs text-muted-foreground">It will appear on the leaderboard with your score.</p>
+              <p className="text-xs text-muted-foreground">Select your subject and enter your name to start!</p>
             </div>
-            <input
-              type="text"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              maxLength={30}
-              autoFocus
-              placeholder="Your name"
-              aria-label="Your name"
-              className="w-full h-10 px-3 rounded-md border border-border bg-background text-sm text-center focus:outline-none focus:ring-2 focus:ring-accent/50"
-            />
-            <div className="flex gap-2">
+
+            {/* Subject Selector inside the dialog */}
+            {domains && domains.length > 0 && (
+              <div className="bg-muted/50 p-2.5 rounded-xl border border-border text-left space-y-1.5">
+                <label htmlFor="puzzle-subject-select" className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Puzzle Subject:
+                </label>
+                <select
+                  id="puzzle-subject-select"
+                  value={activeDomainIndex ?? 0}
+                  onChange={(e) => {
+                    const newIdx = Number(e.target.value);
+                    if (onSelectDomain) {
+                      onSelectDomain(newIdx);
+                    }
+                  }}
+                  className="w-full h-9 px-2.5 rounded-lg border border-border bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 cursor-pointer"
+                >
+                  {domains.map((d, i) => (
+                    <option key={d.id} value={i}>
+                      {d.icon} {d.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div className="space-y-1.5 text-left">
+              <label htmlFor="puzzle-player-name-input" className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                Your Name (for Leaderboard):
+              </label>
+              <input
+                id="puzzle-player-name-input"
+                type="text"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                maxLength={30}
+                autoFocus
+                placeholder="Enter your name"
+                aria-label="Your name"
+                className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm text-center focus:outline-none focus:ring-2 focus:ring-accent/50"
+              />
+            </div>
+
+            <div className="flex gap-2 pt-1">
               <Button type="button" variant="outline" size="sm" className="flex-1" onClick={() => setNamePromptOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" variant="hero" size="sm" className="flex-1" disabled={!nameInput.trim()}>
-                {playerName ? "Save" : "Start"}
+                {playerName ? "Save & Play" : "Start Game"}
               </Button>
             </div>
           </form>
