@@ -455,13 +455,13 @@ export default function AdminProjects() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
-                    Live URL (e.g. https://qlearn.jayasuma.com)
+                    Live URL / Route (e.g. /qlearn or https://...)
                   </label>
                   <input
-                    type="url"
+                    type="text"
                     value={liveUrl}
                     onChange={(e) => setLiveUrl(e.target.value)}
-                    placeholder="https://qlearn.jayasuma.com"
+                    placeholder="/qlearn or https://..."
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm"
                   />
                 </div>

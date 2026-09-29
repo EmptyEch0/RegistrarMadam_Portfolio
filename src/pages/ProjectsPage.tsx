@@ -149,15 +149,13 @@ export default function ProjectsPage() {
           <div className="mt-8 inline-flex items-center gap-3 px-5 py-2.5 bg-card border border-border shadow-sm rounded-full text-xs md:text-sm text-foreground">
             <Globe size={16} className="text-accent shrink-0" />
             <span>
-              Explore our dedicated learning portal at{" "}
-              <a
-                href="https://qlearn.jayasuma.com"
-                target="_blank"
-                rel="noopener noreferrer"
+              Explore our interactive learning portal at{" "}
+              <Link
+                to="/qlearn"
                 className="font-bold text-accent hover:underline inline-flex items-center gap-1"
               >
-                qlearn.jayasuma.com <ArrowUpRight size={14} />
-              </a>
+                jayasuma.com/qlearn <ArrowUpRight size={14} />
+              </Link>
             </span>
           </div>
         </div>
@@ -361,16 +359,27 @@ export default function ProjectsPage() {
                     {/* Action Buttons */}
                     <div className="flex items-center gap-2 pt-2">
                       {project.live_url ? (
-                        <a
-                          href={project.live_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
-                        >
-                          <Globe size={14} />
-                          <span>Live Platform</span>
-                          <ArrowUpRight size={14} />
-                        </a>
+                        project.live_url.startsWith("/") ? (
+                          <Link
+                            to={project.live_url}
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                          >
+                            <Globe size={14} />
+                            <span>Open Platform</span>
+                            <ArrowUpRight size={14} />
+                          </Link>
+                        ) : (
+                          <a
+                            href={project.live_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent/90 text-accent-foreground text-xs font-semibold rounded-xl transition-all duration-200 shadow-sm hover:shadow-md"
+                          >
+                            <Globe size={14} />
+                            <span>Live Platform</span>
+                            <ArrowUpRight size={14} />
+                          </a>
+                        )
                       ) : (
                         <span className="flex-1 text-center py-2 text-xs text-muted-foreground bg-muted/40 rounded-xl">
                           Internal Showcase
@@ -413,9 +422,7 @@ export default function ProjectsPage() {
                 <Link to="/contact">Submit for Mentorship</Link>
               </Button>
               <Button variant="outline" asChild>
-                <a href="https://qlearn.jayasuma.com" target="_blank" rel="noopener noreferrer">
-                  Visit QLearn Hub
-                </a>
+                <Link to="/qlearn">Visit QLearn Hub</Link>
               </Button>
             </div>
           </div>

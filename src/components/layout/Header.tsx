@@ -182,19 +182,17 @@ export function Header() {
               {/* QLearn Dropdown Menu Overlay */}
               <div className="absolute top-full left-1/2 -translate-x-1/2 w-[390px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
                 {/* Domain banner badge */}
-                <a
-                  href="https://qlearn.jayasuma.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <Link
+                  to="/qlearn"
                   className="flex items-center justify-between px-3 py-2 mb-2.5 rounded-xl bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent transition-colors text-xs font-medium"
                 >
                   <span className="flex items-center gap-1.5 font-bold">
-                    <Globe size={13} /> qlearn.jayasuma.com
+                    <Globe size={13} /> jayasuma.com/qlearn
                   </span>
                   <span className="flex items-center gap-0.5 text-[10px] uppercase tracking-wider font-semibold">
-                    Visit Portal <ArrowUpRight size={12} />
+                    Interactive Hub <ArrowUpRight size={12} />
                   </span>
-                </a>
+                </Link>
 
                 <div className="grid grid-cols-1 gap-1.5">
                   {qlearnDropdownItems.map((item) => {
@@ -405,15 +403,13 @@ export function Header() {
                     })}
 
                     {/* Direct Domain Link */}
-                    <a
-                      href="https://qlearn.jayasuma.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      to="/qlearn"
                       className="px-4 py-2 text-xs font-semibold text-accent flex items-center justify-between bg-accent/10 rounded-lg mx-1"
                     >
-                      <span className="flex items-center gap-1.5"><Globe size={13} /> qlearn.jayasuma.com</span>
+                      <span className="flex items-center gap-1.5"><Globe size={13} /> jayasuma.com/qlearn</span>
                       <ArrowUpRight size={13} />
-                    </a>
+                    </Link>
 
                     <div className="pt-2 pl-2 border-t border-border/50">
                       <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between pr-2">

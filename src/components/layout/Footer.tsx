@@ -23,11 +23,9 @@ export function Footer() {
           </div>
 
           <div className="lg:col-span-6 flex flex-col sm:flex-row gap-6 lg:justify-end items-start sm:items-center">
-            {/* Quick action card 1: QLearn Domain */}
-            <a
-              href="https://qlearn.jayasuma.com"
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* Quick action card 1: QLearn Platform */}
+            <Link
+              to="/qlearn"
               className="group p-4 rounded-2xl bg-primary-foreground/5 hover:bg-primary-foreground/10 border border-primary-foreground/15 transition-all duration-300 w-full sm:w-64"
             >
               <div className="flex items-center justify-between mb-2">
@@ -36,10 +34,10 @@ export function Footer() {
                 </span>
                 <ExternalLink size={14} className="text-primary-foreground/60 group-hover:text-accent transition-colors" />
               </div>
-              <p className="text-xs font-bold text-accent uppercase tracking-wider">Dedicated Platform</p>
-              <p className="font-semibold text-sm text-primary-foreground mt-0.5">qlearn.jayasuma.com</p>
+              <p className="text-xs font-bold text-accent uppercase tracking-wider">Interactive Learning</p>
+              <p className="font-semibold text-sm text-primary-foreground mt-0.5">jayasuma.com/qlearn</p>
               <p className="text-[11px] text-primary-foreground/70 mt-1">10-Module roadmaps & puzzle games</p>
-            </a>
+            </Link>
 
             {/* Quick action card 2: Student Projects */}
             <Link
@@ -148,18 +146,8 @@ export function Footer() {
                 </li>
                 <li>
                   <Link to="/qlearn" className="text-primary-foreground/75 hover:text-accent transition-colors">
-                    QLearn Platform (Overview)
+                    jayasuma.com/qlearn
                   </Link>
-                </li>
-                <li>
-                  <a
-                    href="https://qlearn.jayasuma.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary-foreground/75 hover:text-accent transition-colors inline-flex items-center gap-1"
-                  >
-                    qlearn.jayasuma.com <ExternalLink size={11} />
-                  </a>
                 </li>
                 <li>
                   <Link to="/qlearn?tab=puzzles" className="text-primary-foreground/75 hover:text-accent transition-colors">
