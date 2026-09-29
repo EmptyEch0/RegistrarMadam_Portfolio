@@ -2513,6 +2513,21 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     }
   }, [searchParams, domains]);
 
+  // Dynamic SEO Title & Meta update for QLearn
+  useEffect(() => {
+    const defaultTitle = "QLearn Platform | AI, Quantum Computing & Word Connect Puzzles | Dr. G. Jaya Suma";
+    if (activeDomain) {
+      document.title = `${activeDomain.name} Course & Modules | QLearn Platform · Dr. G. Jaya Suma`;
+    } else if (activeTab === "puzzles") {
+      document.title = "Interactive Word Connect Puzzles & Live Ranks | QLearn Platform";
+    } else {
+      document.title = defaultTitle;
+    }
+
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeDomainIndex, activeDomain, activeTab]);
+
   // Update localStorage when domains change
   const saveDomains = (updatedDomains: DomainData[]) => {
     setDomains(updatedDomains);
