@@ -104,27 +104,26 @@ const HomePage = () => {
             </div>
 
             {/* Right - Profile Image */}
-            <div className="relative animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <div className="relative">
+            <div className="relative flex justify-center lg:justify-end animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <div className="relative w-full max-w-[300px] md:max-w-[340px] mx-auto lg:mr-6">
                 {/* Decorative frame */}
-                <div className="absolute -inset-4 border-2 border-accent/20 rounded-sm" />
-                <div className="absolute -inset-8 border border-border rounded-sm" />
+                <div className="absolute -inset-3 sm:-inset-4 border-2 border-accent/20 rounded-sm" />
+                <div className="absolute -inset-6 sm:-inset-8 border border-border rounded-sm" />
 
-                {/* Profile image placeholder */}
-                <div className="relative aspect-[3/4] rounded-sm overflow-hidden">
-  <img
-    src={RegistrarImage}
-    alt="Dr. G. JayaSuma - Professor of Information Technology"
-    className="w-full h-full object-cover object-top"
-    loading="lazy"
-  />
-</div>
-
+                {/* Profile image */}
+                <div className="relative aspect-[3/4] rounded-sm overflow-hidden shadow-xl">
+                  <img
+                    src={RegistrarImage}
+                    alt="Dr. G. JayaSuma - Professor of Information Technology"
+                    className="w-full h-full object-cover object-top"
+                    loading="lazy"
+                  />
+                </div>
 
                 {/* Floating badge */}
-                <div className="absolute -bottom-6 -right-6 bg-accent text-accent-foreground p-4 rounded-sm shadow-gold">
-                  <p className="font-serif text-2xl font-bold">24+</p>
-                  <p className="text-xs uppercase tracking-wider">Years</p>
+                <div className="absolute -bottom-4 -right-4 sm:-bottom-6 sm:-right-6 bg-accent text-accent-foreground p-3 sm:p-4 rounded-sm shadow-gold">
+                  <p className="font-serif text-xl sm:text-2xl font-bold">24+</p>
+                  <p className="text-[10px] sm:text-xs uppercase tracking-wider">Years</p>
                 </div>
               </div>
             </div>
