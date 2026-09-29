@@ -16,6 +16,7 @@ import {
   Sparkles,
   Menu,
   X,
+  FolderGit2,
 } from "lucide-react";
 
 interface AdminLayoutProps {
@@ -24,6 +25,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: Home },
+  { label: "Projects & Labs", to: "/admin/projects", icon: FolderGit2 },
   { label: "QLearn Hub", to: "/admin/qlearn", icon: Sparkles },
   { label: "Major Awards", to: "/admin/major-awards", icon: Award },
   { label: "Academic Governance", to: "/admin/academic-governance", icon: BookOpen },

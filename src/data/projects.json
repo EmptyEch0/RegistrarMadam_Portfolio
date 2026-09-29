@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "title": "QLearn - Interactive AI & Quantum Learning Platform",
+    "description": "An interactive learning portal featuring 10-module comprehensive roadmaps, lectures, and gamified word connect puzzles across Quantum Computing, Data Science, Machine Learning, Deep Learning, Agentic AI, and IoT with real-time scoring and live ranks.",
+    "category": "Educational Platform",
+    "live_url": "https://qlearn.jayasuma.com",
+    "github_url": "https://github.com/EmptyEch0/RegistrarMadam_Portfolio",
+    "image_url": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80",
+    "tags": ["React", "TypeScript", "TailwindCSS", "Supabase", "Gamified Learning"],
+    "status": "Live",
+    "featured": true,
+    "developers": [
+      {
+        "name": "Likhith Mankala",
+        "role": "Lead Fullstack Architect",
+        "photo_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+        "linkedin_url": "https://linkedin.com/in/likhith-mankala",
+        "github_url": "https://github.com/Likhith32"
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "title": "JNTU-GV Academic Governance & Faculty Audit Portal",
+    "description": "A centralized digital portal for university academic audit and planning (DAA&P), enabling transparent institutional reporting, curriculum benchmarking, and NAAC/NBA compliance documentation.",
+    "category": "Institutional Governance",
+    "live_url": "https://jntugv.edu.in",
+    "github_url": "",
+    "image_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&auto=format&fit=crop&q=80",
+    "tags": ["Next.js", "PostgreSQL", "TailwindCSS", "Audit Analytics"],
+    "status": "Live",
+    "featured": true,
+    "developers": [
+      {
+        "name": "Department IT Team",
+        "role": "Governance Systems Engineers",
+        "photo_url": "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&auto=format&fit=crop&q=80",
+        "linkedin_url": "https://linkedin.com",
+        "github_url": "https://github.com"
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "title": "Quantum Circuit Simulation & Cryptography Sandbox",
+    "description": "An interactive web-based simulator allowing research scholars and undergraduate students to visually assemble quantum logic gates, test Bell state entanglement, and evaluate quantum key distribution protocols.",
+    "category": "Quantum Research",
+    "live_url": "https://qlearn.jayasuma.com",
+    "github_url": "",
+    "image_url": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=80",
+    "tags": ["Quantum Computing", "Qiskit", "Python", "WebAssembly"],
+    "status": "In Progress",
+    "featured": false,
+    "developers": [
+      {
+        "name": "Research Scholars Group",
+        "role": "Quantum Computing Lab",
+        "photo_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80",
+        "linkedin_url": "https://linkedin.com",
+        "github_url": "https://github.com"
+      }
+    ]
+  },
+  {
+    "id": "4",
+    "title": "Agentic AI Multi-Agent Workflow Orchestrator",
+    "description": "Multi-agent autonomous framework designed for automated research paper summarization, citation cross-validation, and semantic literature clustering for academic scholars.",
+    "category": "Artificial Intelligence",
+    "live_url": "https://qlearn.jayasuma.com",
+    "github_url": "",
+    "image_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+    "tags": ["Agentic AI", "LangChain", "FastAPI", "Vector Embeddings"],
+    "status": "Live",
+    "featured": true,
+    "developers": [
+      {
+        "name": "Likhith Mankala",
+        "role": "AI Research Lead",
+        "photo_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+        "linkedin_url": "https://linkedin.com/in/likhith-mankala",
+        "github_url": "https://github.com/Likhith32"
+      }
+    ]
+  }
+]

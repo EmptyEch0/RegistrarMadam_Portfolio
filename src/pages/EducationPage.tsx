@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Award, BookOpen, Users, Trophy, Briefcase, GraduationCap } from "lucide-react";
+import { Award, BookOpen, Users, Trophy, Briefcase, GraduationCap, FolderGit2, ArrowRight, Globe } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 // 1️⃣ ADD JSON IMPORTS (TOP OF FILE)
@@ -272,6 +273,69 @@ const EducationPage = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Guided Projects & Innovation Showcase Section */}
+      <section className="py-12 bg-accent/5 border-b border-border/40">
+        <div className="container-wide px-6 lg:px-12">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Projects Hub Card */}
+            <div className="p-7 rounded-2xl bg-card border border-border/80 shadow-md flex flex-col justify-between group hover:border-accent/50 transition-all">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-xl bg-accent/15 text-accent">
+                    <FolderGit2 size={24} />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-accent/10 text-accent">
+                    Live Prototypes
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl font-bold text-primary mb-2 group-hover:text-accent transition-colors">
+                  Department & Guided Projects
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Explore academic, student, and research projects mentored under Dr. G. Jaya Suma with full developer profiles, GitHub repositories, and live links.
+                </p>
+              </div>
+              <Link
+                to="/projects"
+                className="inline-flex items-center justify-between px-5 py-3 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-all"
+              >
+                <span>Browse Guided Projects</span>
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            {/* QLearn Platform Card */}
+            <div className="p-7 rounded-2xl bg-card border border-border/80 shadow-md flex flex-col justify-between group hover:border-amber-500/50 transition-all">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                    <Globe size={24} />
+                  </div>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                    qlearn.jayasuma.com
+                  </span>
+                </div>
+                <h3 className="font-serif text-2xl font-bold text-primary mb-2 group-hover:text-amber-600 transition-colors">
+                  QLearn AI & Quantum Platform
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                  Interactive domain roadmaps, lecture modules, word connect puzzles, and real-time live rank leaderboards for learners and research scholars.
+                </p>
+              </div>
+              <a
+                href="https://qlearn.jayasuma.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-between px-5 py-3 rounded-xl bg-accent text-accent-foreground text-xs font-bold hover:bg-accent/90 transition-all"
+              >
+                <span>Visit QLearn Standalone Platform</span>
+                <ArrowRight size={16} />
+              </a>
+            </div>
           </div>
         </div>
       </section>

@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import LearningSymposiumPage from "@/pages/LearningSymposiumPage";
 import ScholarsPage from "@/pages/ScholarsPage";
 import QLearnPage from "./pages/QLearnPage";
+import ProjectsPage from "./pages/ProjectsPage";
 
 // ================= ADMIN COMPONENTS =================
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
@@ -36,6 +37,7 @@ import WorkshopsOrganizedAdmin from "./pages/admin/workshops-organized";
 import AdminMedia from "./pages/admin/media";
 import ScholarsAdmin from "./pages/admin/Scholars";
 import DailyActivitiesAdmin from "./pages/admin/daily-activities";
+import AdminProjects from "./pages/admin/projects";
 
 import AdminQLearn from "./pages/admin/qlearn";
 
@@ -62,6 +64,7 @@ export default function App() {
             <Route path="/scholars" element={<ScholarsPage />} />
             <Route path="/learning-symposium" element={<LearningSymposiumPage />} />
             <Route path="/qlearn" element={<QLearnPage />} />
+            <Route path="/projects" element={<ProjectsPage />} />
 
             {/* ================= ADMIN AUTH ================= */}
             <Route path="/admin/login" element={<AdminLogin />} />
@@ -82,6 +85,7 @@ export default function App() {
               <Route path="media" element={<AdminMedia />} />
               <Route path="scholars" element={<ScholarsAdmin />} />
               <Route path="qlearn" element={<AdminQLearn />} />
+              <Route path="projects" element={<AdminProjects />} />
 
               {/* ✅ DAILY ACTIVITIES */}
               <Route path="daily-activities" element={<DailyActivitiesAdmin />} />

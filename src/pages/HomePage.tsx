@@ -50,17 +50,19 @@ const HomePage = () => {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Content */}
             <div className="animate-slide-up">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-sm mb-6">
-                <span className="text-sm font-medium tracking-wider uppercase">
-                  Professor
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-sm mb-5 border border-accent/20 shadow-xs">
+                <GraduationCap size={16} />
+                <span className="text-xs md:text-sm font-semibold tracking-wider uppercase">
+                  Professor of Information Technology · JNTU-GV
                 </span>
               </div>
 
-              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary leading-tight mb-6">
-                Dr. G.Jaya Suma
-                <br />
-                <span className="text-secondary"></span>
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary leading-tight mb-2">
+                Dr. G. Jaya Suma
               </h1>
+              <p className="text-base md:text-lg font-medium text-accent tracking-wide mb-6">
+                Professor of Information Technology, JNTU-GV
+              </p>
 
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-8 max-w-xl">
                 Professor at JNTU-GV, with nearly three decades of
@@ -70,7 +72,7 @@ const HomePage = () => {
 
               {/* Quote */}
               <blockquote className="border-l-4 border-accent pl-6 py-2 mb-10">
-<p className="font-serif text-lg italic text-muted-foreground">
+                <p className="font-serif text-lg italic text-muted-foreground">
                   "Excellence in education administration is not merely about
                   managing institutions, but about nurturing the future of a
                   nation through principled governance and visionary
@@ -79,7 +81,7 @@ const HomePage = () => {
               </blockquote>
 
               {/* CTA Buttons */}
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap items-center gap-3.5">
                 <Button variant="hero" size="lg" asChild>
                   <Link to="/about">
                     View Profile
@@ -87,19 +89,30 @@ const HomePage = () => {
                   </Link>
                 </Button>
                 <Button variant="hero-outline" size="lg" asChild>
-                  <Link to="/publications">Academic Contributions</Link>
+                  <Link to="/qlearn">QLearn Platform</Link>
+                </Button>
+                <Button variant="hero-outline" size="lg" asChild>
+                  <Link to="/projects">Projects</Link>
                 </Button>
                 <Button variant="institutional" size="lg" asChild>
                   <Link to="/contact">Contact</Link>
                 </Button>
               </div>
 
-              {/* PDF Download */}
-              <div className="mt-8">
+              {/* Domain Tag & PDF Download */}
+              <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                   <Download size={16} />
                   Download CV (PDF)
                 </Button>
+                <a
+                  href="https://qlearn.jayasuma.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20"
+                >
+                  🌐 qlearn.jayasuma.com
+                </a>
               </div>
             </div>
 
@@ -175,6 +188,18 @@ const HomePage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
+                title: "Projects & Innovations",
+                description:
+                  "Showcase of student platforms, AI tools, quantum simulators, and innovation lab projects with live URLs.",
+                link: "/projects",
+              },
+              {
+                title: "QLearn Interactive Platform",
+                description:
+                  "10-module curriculum roadmaps, gamified word connect puzzles, and real-time live rank leaderboards.",
+                link: "/qlearn",
+              },
+              {
                 title: "Professional Experience",
                 description:
                   "A comprehensive timeline of leadership roles and administrative positions across premier institutions.",
@@ -197,18 +222,6 @@ const HomePage = () => {
                 description:
                   "Newspaper features, interviews, and public addresses highlighting institutional initiatives.",
                 link: "/media",
-              },
-              {
-                title: "Academic Background",
-                description:
-                  "Educational qualifications and alma mater institutions shaping the administrative philosophy.",
-                link: "/education",
-              },
-              {
-                title: "Connect",
-                description:
-                  "Reach out for collaborations, consultations, or academic engagements.",
-                link: "/contact",
               },
             ].map((item, index) => (
               <Link

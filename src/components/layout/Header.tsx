@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy } from "lucide-react";
+import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ const mainNavItems = [
 ];
 
 const dropdownItems = [
+  { label: "Projects & Innovations", href: "/projects", desc: "Student & research prototypes", icon: FolderGit2 },
   { label: "Publications", href: "/publications", desc: "Journals and papers", icon: BookOpen },
   { label: "Achievements", href: "/achievements", desc: "National awards & honors", icon: Award },
   { label: "Scholars", href: "/scholars", desc: "Ph.D. guidance and research", icon: Users },
@@ -20,7 +21,7 @@ const dropdownItems = [
 ];
 
 const qlearnDropdownItems = [
-  { label: "Courses", href: "/qlearn", desc: "10-module domains & lecture roadmaps", icon: GraduationCap },
+  { label: "Courses & Roadmaps", href: "/qlearn", desc: "10-module domains & lecture roadmaps", icon: GraduationCap },
   { label: "All Puzzles & Hub", href: "/qlearn?tab=puzzles", desc: "Select subject, play word connect & rankings", icon: Gamepad2 },
 ];
 
@@ -92,8 +93,8 @@ export function Header() {
             <span className="font-serif text-lg md:text-xl font-semibold text-primary tracking-wide">
               Dr. G. Jaya Suma
             </span>
-            <span className="text-xs md:text-sm text-muted-foreground tracking-wider uppercase">
-             Professor
+            <span className="text-[11px] md:text-xs text-muted-foreground font-medium tracking-wide">
+              Professor of Information Technology · JNTU-GV
             </span>
           </Link>
 
@@ -179,8 +180,23 @@ export function Header() {
               </button>
               
               {/* QLearn Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[380px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
-                <div className="grid grid-cols-1 gap-2">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[390px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
+                {/* Domain banner badge */}
+                <a
+                  href="https://qlearn.jayasuma.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between px-3 py-2 mb-2.5 rounded-xl bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent transition-colors text-xs font-medium"
+                >
+                  <span className="flex items-center gap-1.5 font-bold">
+                    <Globe size={13} /> qlearn.jayasuma.com
+                  </span>
+                  <span className="flex items-center gap-0.5 text-[10px] uppercase tracking-wider font-semibold">
+                    Visit Portal <ArrowUpRight size={12} />
+                  </span>
+                </a>
+
+                <div className="grid grid-cols-1 gap-1.5">
                   {qlearnDropdownItems.map((item) => {
                     const ItemIcon = item.icon;
                     const isItemActive = location.pathname === "/qlearn" && (
@@ -242,6 +258,23 @@ export function Header() {
                 </div>
               </div>
             </div>
+
+            {/* Projects Link (Beside the left of Contact) */}
+            <Link
+              to="/projects"
+              aria-current={location.pathname === "/projects" ? "page" : undefined}
+              className={cn(
+                "px-3 py-2 text-sm font-medium relative transition-colors",
+                "after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+                "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
+                "hover:after:scale-x-100",
+                location.pathname === "/projects"
+                  ? "text-primary after:scale-x-100 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Projects
+            </Link>
 
             {/* Contact */}
             <Link
@@ -371,6 +404,17 @@ export function Header() {
                       );
                     })}
 
+                    {/* Direct Domain Link */}
+                    <a
+                      href="https://qlearn.jayasuma.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 text-xs font-semibold text-accent flex items-center justify-between bg-accent/10 rounded-lg mx-1"
+                    >
+                      <span className="flex items-center gap-1.5"><Globe size={13} /> qlearn.jayasuma.com</span>
+                      <ArrowUpRight size={13} />
+                    </a>
+
                     <div className="pt-2 pl-2 border-t border-border/50">
                       <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between pr-2">
                         <span>Puzzle Subjects</span>
@@ -400,6 +444,20 @@ export function Header() {
                   </div>
                 )}
               </div>
+
+              {/* Projects (Beside / Before Contact) */}
+              <Link
+                to="/projects"
+                aria-current={location.pathname === "/projects" ? "page" : undefined}
+                className={cn(
+                  "px-4 py-2.5 text-base font-medium rounded-sm transition-colors",
+                  location.pathname === "/projects"
+                    ? "text-primary bg-muted font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )}
+              >
+                Projects
+              </Link>
 
               {/* Contact */}
               <Link

@@ -13,11 +13,20 @@ import {
   Calendar,
   Settings,
   Sparkles,
+  FolderGit2,
 } from "lucide-react";
 import AdminLayout from "@/components/admin/AdminLayout";
 
 // Section configuration with colors and metadata
 const sections = [
+  { 
+    title: "Projects & Innovations", 
+    path: "/admin/projects", 
+    icon: FolderGit2, 
+    color: "text-amber-600",
+    bgGradient: "from-amber-500/20 to-orange-400/20",
+    count: null
+  },
   { 
     title: "QLearn Hub", 
     path: "/admin/qlearn", 
