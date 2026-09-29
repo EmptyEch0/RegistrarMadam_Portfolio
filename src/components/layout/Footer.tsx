@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone, Github, ExternalLink, Globe, Sparkles, FolderGit2, BookOpen, Award, GraduationCap, ShieldCheck } from "lucide-react";
+import { Mail, MapPin, Phone, Github, ExternalLink, Globe, Sparkles, FolderGit2, BookOpen, Award, GraduationCap } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -164,11 +164,6 @@ export function Footer() {
                 <li>
                   <Link to="/qlearn?tab=puzzles" className="text-primary-foreground/75 hover:text-accent transition-colors">
                     Word Connect Puzzles & Rankings
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/admin/login" className="text-primary-foreground/75 hover:text-accent transition-colors flex items-center gap-1">
-                    <ShieldCheck size={13} /> Admin Portal Login
                   </Link>
                 </li>
               </ul>

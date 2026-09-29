@@ -99,20 +99,12 @@ const HomePage = () => {
                 </Button>
               </div>
 
-              {/* Domain Tag & PDF Download */}
-              <div className="mt-8 flex flex-wrap items-center gap-4">
+              {/* PDF Download */}
+              <div className="mt-8">
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
                   <Download size={16} />
                   Download CV (PDF)
                 </Button>
-                <a
-                  href="https://qlearn.jayasuma.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-semibold text-accent hover:underline inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20"
-                >
-                  🌐 qlearn.jayasuma.com
-                </a>
               </div>
             </div>
 
