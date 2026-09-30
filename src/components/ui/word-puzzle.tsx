@@ -163,8 +163,14 @@ export function WordPuzzle({
   const foundWords = placed.filter((p) => found.includes(p.answer));
   const foundCellColor = new Map<number, string>();
   foundWords.forEach((p) => p.cells.forEach((cell) => foundCellColor.set(cell, p.color)));
-  // The first letter of each word is shown in that word's colour
-  const startCellColor = new Map(placed.map((p) => [p.cells[0], p.color]));
+  // The first and last letters of each word are shown in that word's colour
+  const clueCellColor = new Map<number, string>();
+  placed.forEach((p) => {
+    if (p.cells.length > 0) {
+      clueCellColor.set(p.cells[0], p.color);
+      clueCellColor.set(p.cells[p.cells.length - 1], p.color);
+    }
+  });
 
   useEffect(() => {
     if (!started || isComplete) return;
@@ -235,12 +241,23 @@ export function WordPuzzle({
   };
 
   const giveHint = () => {
-    // Start letters are always coloured, so a hint lights up a word's second letter
-    const candidates = placed.filter((p) => !found.includes(p.answer) && !hints.includes(p.cells[1]));
+    // Start and end letters are always coloured, so a hint lights up an unrevealed inner letter
+    const candidates: { word: PlacedWord; cell: number }[] = [];
+    placed.forEach((p) => {
+      if (!found.includes(p.answer)) {
+        const inner = p.cells.slice(1, -1).filter((c) => !hints.includes(c));
+        if (inner.length > 0) {
+          candidates.push({ word: p, cell: inner[0] });
+        } else if (p.cells.length > 1 && !hints.includes(p.cells[1])) {
+          candidates.push({ word: p, cell: p.cells[1] });
+        }
+      }
+    });
     if (candidates.length === 0 || !playerName) return;
+    const pick = randomItem(candidates);
     setStarted(true);
-    setHints((prev) => [...prev, randomItem(candidates).cells[1]]);
-    setMessage({ ok: true, text: "A glowing letter shows the second letter of a hidden word." });
+    setHints((prev) => [...prev, pick.cell]);
+    setMessage({ ok: true, text: "A glowing letter shows an inner letter of a hidden word." });
   };
 
   const newPuzzle = () => {
@@ -369,7 +386,7 @@ export function WordPuzzle({
           <h3 className="font-serif text-2xl font-bold text-primary">{puzzle.title}</h3>
           <p className="text-sm text-muted-foreground max-w-md mx-auto">
             Drag across connected letters (up, down, left or right) to find all {placed.length} hidden words.
-            Each word starts on the letter shown in its colour.
+            Each word's first and last letters are highlighted in its colour.
           </p>
         </div>
 
@@ -476,7 +493,7 @@ export function WordPuzzle({
                   const colour = foundCellColor.get(cell);
                   const isSelected = selection.includes(cell);
                   const isHint = hints.includes(cell) && !colour;
-                  const startColour = !colour && !isSelected ? startCellColor.get(cell) : undefined;
+                  const clueColour = !colour && !isSelected ? clueCellColor.get(cell) : undefined;
                   if (!letter) return <div key={cell} />;
                   return (
                     <div key={cell} data-cell={cell} className="flex items-center justify-center cursor-pointer">
@@ -486,19 +503,19 @@ export function WordPuzzle({
                             ? "text-white shadow-sm"
                             : isSelected
                             ? "bg-accent text-accent-foreground scale-110 shadow-md"
-                            : startColour
-                            ? "bg-card border-2"
+                            : clueColour
+                            ? "bg-card border-2 font-black shadow-xs"
                             : "bg-card text-foreground border border-border/70 hover:border-accent/60"
                         } ${isHint ? "ring-2 ring-amber-400 ring-offset-1 animate-pulse" : ""}`}
                         style={
                           colour
                             ? { backgroundColor: colour }
-                            : startColour
+                            : clueColour
                             ? {
                                 // Light tint of the word colour laid over the card background
-                                backgroundImage: `linear-gradient(${startColour}26, ${startColour}26)`,
-                                borderColor: startColour,
-                                color: startColour,
+                                backgroundImage: `linear-gradient(${clueColour}26, ${clueColour}26)`,
+                                borderColor: clueColour,
+                                color: clueColour,
                               }
                             : undefined
                         }

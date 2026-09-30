@@ -29,9 +29,12 @@ import {
   Trash2,
   RefreshCw,
   GraduationCap,
+  FileText,
+  FileDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
+import { WorksheetViewer } from "@/components/ui/worksheet-viewer";
 
 // Interfaces
 interface VideoItem {
@@ -2338,8 +2341,33 @@ const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
   ],
   "data-science": [
     {
+      id: "data-science-unit-1",
+      title: "Unit 1: Python Basics & Programming Concepts",
+      words: ["PYTHON", "STRINGS", "TUPLES", "LOOPS", "FUNCTIONS", "CLASSES", "MODULES", "SCOPES"],
+    },
+    {
+      id: "data-science-unit-2",
+      title: "Unit 2: Python Tools for Data Handling (GUI, APIs, DB)",
+      words: ["TKINTER", "JUPYTER", "REQUESTS", "SCRAPING", "SQL", "DATABASES", "SQLITE", "JSON"],
+    },
+    {
+      id: "data-science-unit-3",
+      title: "Unit 3: Pandas and NumPy Data Structures",
+      words: ["NUMPY", "ARRAYS", "PANDAS", "INDEXING", "STATISTICS", "MISSINGDATA", "FILEIO", "ELEMENTWISE"],
+    },
+    {
+      id: "data-science-unit-4",
+      title: "Unit 4: Data Preprocessing & Visualization",
+      words: ["DATALOADING", "WRANGLING", "MERGING", "RESHAPING", "GROUPBY", "AGGREGATION", "MATPLOTLIB", "SEABORN"],
+    },
+    {
+      id: "data-science-unit-5",
+      title: "Unit 5: Machine Learning for Data Science",
+      words: ["SUPERVISED", "UNSUPERVISED", "REGRESSION", "CLUSTERING", "DECISIONTREES", "KMEANS", "PCA", "OVERFITTING"],
+    },
+    {
       id: "data-science-key-words",
-      title: "Figure out the Key Words in Data Science",
+      title: "Data Science Core Essentials",
       words: ["Analytics", "Regression", "Wrangling", "Visualization", "Statistics", "Hypothesis", "Pipeline"],
     },
   ],
@@ -2399,7 +2427,8 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz" | "puzzles">("videos");
+  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles">("videos");
+  const [selectedPuzzleIndex, setSelectedPuzzleIndex] = useState(0);
 
   // Carousel states for the active notes tab
   const [activeNoteIndex, setActiveNoteIndex] = useState(0);
@@ -3177,13 +3206,14 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 {activeModule && (
                   <>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/80 gap-4 pb-3">
-                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
+                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
                         {[
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
                           { id: "ppts", label: "PPT & Drive Slides", icon: Presentation },
                           { id: "quiz", label: "Take Quiz", icon: Award },
-                          { id: "puzzles", label: "Puzzles & Games", icon: Puzzle, badge: true }
+                          { id: "worksheets", label: "Worksheets", icon: FileText, badge: "DOCX" },
+                          { id: "puzzles", label: "Puzzles & Games", icon: Puzzle, badge: "🎮 Top 10" }
                         ].map((tab) => {
                           const TabIcon = tab.icon;
                           const isActive = activeTab === tab.id;
@@ -3201,7 +3231,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               <span className="whitespace-nowrap">{tab.label}</span>
                               {tab.badge && !isActive && (
                                 <span className="hidden xl:inline-block text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                  🎮 Top 10
+                                  {tab.badge}
                                 </span>
                               )}
                             </button>
@@ -3757,6 +3787,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                         </div>
                       )}
 
+                      {/* WORKSHEETS TAB */}
+                      {activeTab === "worksheets" && (
+                        <div className="max-w-5xl mx-auto space-y-6">
+                          <WorksheetViewer
+                            initialUnitNumber={
+                              activeModuleIndex < 5 ? activeModuleIndex + 1 : 2
+                            }
+                          />
+                        </div>
+                      )}
+
                       {/* PUZZLES TAB */}
                       {activeTab === "puzzles" && (
                         <div className="max-w-4xl mx-auto space-y-6">
@@ -3785,7 +3826,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               </button>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {activeDomain?.id === "data-science" && (
+                                <a
+                                  href="/puzzles/data-science-word-search.html"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all hover:scale-105 shadow-xs"
+                                >
+                                  <Sparkles size={14} /> Fullscreen Word Search App <ExternalLink size={12} />
+                                </a>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => setPuzzleModalOpen(true)}
@@ -3819,19 +3870,63 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                             })}
                           </div>
 
+                          {/* Unit Puzzle Selector (if active domain has multiple puzzles) */}
+                          {activeDomain && DOMAIN_PUZZLES[activeDomain.id] && DOMAIN_PUZZLES[activeDomain.id].length > 1 && (
+                            <div className="p-3.5 rounded-2xl bg-card border border-border/80 shadow-xs space-y-2">
+                              <div className="flex items-center justify-between text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                                <span>Select Unit Puzzle:</span>
+                                <span className="text-accent font-semibold lowercase">
+                                  {selectedPuzzleIndex + 1} of {DOMAIN_PUZZLES[activeDomain.id].length} puzzles
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
+                                {DOMAIN_PUZZLES[activeDomain.id].map((puz, pIdx) => {
+                                  const isSelected = selectedPuzzleIndex === pIdx;
+                                  return (
+                                    <button
+                                      key={puz.id}
+                                      type="button"
+                                      onClick={() => setSelectedPuzzleIndex(pIdx)}
+                                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                                        isSelected
+                                          ? "bg-primary text-primary-foreground shadow-sm font-bold scale-105 ring-1 ring-accent/40"
+                                          : "bg-muted/70 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/70"
+                                      }`}
+                                    >
+                                      <Puzzle size={13} />
+                                      <span>{puz.title.split(":")[0]}</span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
                           {activeDomain && DOMAIN_PUZZLES[activeDomain.id] ? (
                             <div className="space-y-8">
-                              {DOMAIN_PUZZLES[activeDomain.id].map((puzzle) => (
-                                <WordPuzzle 
-                                  key={`${activeDomain.id}-${puzzle.id}`} 
-                                  puzzle={puzzle} 
+                              {DOMAIN_PUZZLES[activeDomain.id].length > 1 ? (
+                                <WordPuzzle
+                                  key={`${activeDomain.id}-${DOMAIN_PUZZLES[activeDomain.id][Math.min(selectedPuzzleIndex, DOMAIN_PUZZLES[activeDomain.id].length - 1)].id}`}
+                                  puzzle={DOMAIN_PUZZLES[activeDomain.id][Math.min(selectedPuzzleIndex, DOMAIN_PUZZLES[activeDomain.id].length - 1)]}
                                   onBack={handleBackToDomains}
                                   onBackToSubjects={handleBackToPuzzleSubjects}
                                   domains={domains.map((d) => ({ id: d.id, name: d.name, icon: d.icon }))}
                                   activeDomainIndex={activeDomainIndex}
                                   onSelectDomain={handlePlayPuzzle}
                                 />
-                              ))}
+                              ) : (
+                                DOMAIN_PUZZLES[activeDomain.id].map((puzzle) => (
+                                  <WordPuzzle 
+                                    key={`${activeDomain.id}-${puzzle.id}`} 
+                                    puzzle={puzzle} 
+                                    onBack={handleBackToDomains}
+                                    onBackToSubjects={handleBackToPuzzleSubjects}
+                                    domains={domains.map((d) => ({ id: d.id, name: d.name, icon: d.icon }))}
+                                    activeDomainIndex={activeDomainIndex}
+                                    onSelectDomain={handlePlayPuzzle}
+                                  />
+                                ))
+                              )}
                             </div>
                           ) : (
                             <div className="text-center py-16 border border-dashed border-border rounded-xl">

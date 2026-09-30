@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Data Science with Python - Word Search Challenge</title>
+<style>
+:root{
+  --blue:#3B82F6; --purple:#8B5CF6; --green:#10B981; --orange:#F59E0B; --pink:#EC4899;
+  --bg:#F5F7FB; --card:#FFFFFF; --text:#1F2430; --muted:#6B7280;
+  color-scheme: light;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+.hidden{display:none !important;}
+#app{max-width:1100px;margin:0 auto;padding:16px;}
+
+.topbar{display:flex;justify-content:space-between;align-items:center;background:linear-gradient(90deg,var(--purple),var(--blue));color:#fff;padding:14px 20px;border-radius:16px;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.topbar h1{font-size:18px;margin:0;font-weight:700;}
+.topbar .student{font-size:14px;opacity:.95;background:rgba(255,255,255,.18);padding:6px 12px;border-radius:20px;}
+
+.card{background:var(--card);border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(20,20,40,.06);margin-bottom:16px;}
+
+/* Name entry */
+#nameScreen{max-width:420px;margin:60px auto;text-align:center;}
+#nameScreen h2{margin-top:0;}
+#nameScreen input{width:100%;padding:12px 14px;border-radius:10px;border:2px solid #E2E8F0;font-size:16px;margin:14px 0;}
+.btn{cursor:pointer;border:none;border-radius:10px;padding:12px 20px;font-size:15px;font-weight:600;color:#fff;background:var(--blue);transition:transform .12s ease;}
+.btn:hover{transform:translateY(-1px);}
+.btn.green{background:var(--green);}
+.btn.purple{background:var(--purple);}
+.btn.orange{background:var(--orange);}
+.btn.outline{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+.err{color:#DC2626;font-size:13px;min-height:18px;}
+
+/* Dashboard */
+.dash{display:grid;grid-template-columns:220px 1fr;gap:16px;}
+@media (max-width:760px){.dash{grid-template-columns:1fr;}}
+.unitList{display:flex;flex-direction:column;gap:8px;}
+.unitBtn{text-align:left;padding:12px 14px;border-radius:12px;border:2px solid #E5E7EB;background:#fff;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);}
+.unitBtn small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:2px;}
+.unitBtn.active{border-color:var(--purple);background:#F3EEFF;}
+.unitColors{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+
+/* Puzzle layout */
+.puzzleWrap{display:grid;grid-template-columns:1fr 240px;gap:16px;}
+@media (max-width:760px){.puzzleWrap{grid-template-columns:1fr;}}
+.puzzleHead{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.statPill{background:#F1F5F9;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--text);}
+.statsRow{display:flex;gap:8px;flex-wrap:wrap;}
+
+.gridBox{display:flex;justify-content:center;overflow-x:auto;}
+.gridWrap{position:relative;display:inline-block;}
+#pathSvg{position:absolute;top:0;left:0;z-index:0;pointer-events:none;}
+#grid{position:relative;z-index:1;display:grid;gap:3px;user-select:none;touch-action:none;}
+.cell{width:36px;height:36px;border-radius:50%;background:#F1F5F9;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;cursor:pointer;color:var(--text);transition:background .1s;border:2px solid transparent;}
+.cell.sel{background:#FDE68A;}
+.cell.wordFound{color:#fff;}
+.cell.startHint{color:#fff;font-weight:800;}
+.cell.hint{outline:3px solid #F59E0B;}
+
+.kwPanel h3{margin:4px 0 10px;font-size:15px;}
+.kwList{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto;}
+.kwItem{font-size:13px;padding:7px 10px;border-radius:8px;background:#F8FAFC;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.kwItem .dot{width:10px;height:10px;border-radius:50%;background:#E2E8F0;flex-shrink:0;}
+.kwItem .blank{font-family:monospace;letter-spacing:2px;}
+.kwItem.found{color:#fff;font-weight:700;}
+
+.controlsRow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+
+/* Completion modal */
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px;}
+.modalCard{background:#fff;border-radius:18px;padding:28px;max-width:380px;width:100%;text-align:center;}
+.modalCard h2{margin-top:0;font-size:22px;}
+.modalStats{text-align:left;background:#F8FAFC;border-radius:10px;padding:12px 16px;margin:16px 0;font-size:14px;line-height:1.8;}
+.modalBtns{display:flex;flex-direction:column;gap:8px;}
+
+/* Leaderboard */
+table.lb{width:100%;border-collapse:collapse;font-size:13px;}
+table.lb th{text-align:left;padding:8px;color:var(--muted);border-bottom:2px solid #E5E7EB;font-size:12px;}
+table.lb td{padding:8px;border-bottom:1px solid #F1F5F9;}
+.you{background:#EFF6FF;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="nameScreen">
+  <div class="card">
+    <h2>Data Science with Python</h2>
+    <p style="color:var(--muted);font-size:14px;">JNTUGV-CEV, Dept. of Information Technology<br>Enter your name to start the word search challenge</p>
+    <input id="nameInput" type="text" placeholder="Enter your name" maxlength="24">
+    <div class="err" id="nameErr"></div>
+    <button class="btn green" style="width:100%" onclick="startApp()">START PUZZLE</button>
+  </div>
+</div>
+
+<div id="mainScreen" class="hidden">
+  <div class="topbar">
+    <h1>Data Science with Python</h1>
+    <div class="student" id="studentBadge"></div>
+  </div>
+
+  <div id="dashboardScreen">
+    <div class="dash">
+      <div class="card unitList" id="unitList"></div>
+      <div class="card" id="puzzleArea"></div>
+    </div>
+  </div>
+
+  <div id="leaderboardScreen" class="card hidden"></div>
+</div>
+
+</div>
+
+<div id="modalHost"></div>
+
+<script>
+var syllabus = {
+  courseName: "Data Science with Python",
+  units: [
+    { id:1, title:"Python Basics and Programming Concepts",
+      topics:["Types and Operations","Statements and Syntax","Functions","Modules","Classes and OOP","Exceptions and Tools"],
+      keywords:["PYTHON","STRINGS","TUPLES","LOOPS","FUNCTIONS","CLASSES","MODULES","SCOPES"] },
+    { id:2, title:"Python Tools for Data Handling: GUI, APIs, Web Data and Databases",
+      topics:["GUI Programming","Jupyter Notebook","Internet Programming","Web Scraping","Databases and Persistence"],
+      keywords:["TKINTER","JUPYTER","REQUESTS","SCRAPING","SQL","DATABASES","SQLITE","JSON"] },
+    { id:3, title:"Pandas and NumPy",
+      topics:["Numpy Basics","Pandas Data Structures","Descriptive Statistics","Missing Data","Hierarchical Indexing"],
+      keywords:["NUMPY","ARRAYS","PANDAS","INDEXING","STATISTICS","MISSINGDATA","FILEIO","ELEMENTWISE"] },
+    { id:4, title:"Data Preprocessing and Visualization",
+      topics:["Data Loading and Storage","Data Wrangling","Data Aggregation","Data Visualization"],
+      keywords:["DATALOADING","WRANGLING","MERGING","RESHAPING","GROUPBY","AGGREGATION","MATPLOTLIB","SEABORN"] },
+    { id:5, title:"Machine Learning for Data Science",
+      topics:["Introduction to ML","Data Preparation for ML","Supervised Learning","Unsupervised Learning","Model Evaluation"],
+      keywords:["SUPERVISED","UNSUPERVISED","REGRESSION","CLUSTERING","DECISIONTREES","KMEANS","PCA","OVERFITTING"] }
+  ]
+};
+
+var SCORES = { correct:100, wrong:-5, hint:-20 };
+var UNIT_COLORS = {1:"var(--blue)",2:"var(--green)",3:"var(--pink)",4:"var(--orange)",5:"var(--purple)"};
+var WORD_COLORS = ["#3B82F6","#8B5CF6","#EC4899","#10B981","#F59E0B","#14B8A6","#EF4444","#6366F1"];
+var STEP = 39;
+
+var state = {
+  student:"", currentUnit:null, grid:[], size:0, placedWords:[], found:[],
+  score:0, hints:0, startTime:null, timerId:null, elapsed:0,
+  selecting:false, selStart:null, selCells:[]
+};
+
+function startApp(){
+  var v = document.getElementById('nameInput').value.trim();
+  if(!v){ document.getElementById('nameErr').textContent = 'Enter your name first'; return; }
+  state.student = v;
+  document.getElementById('nameErr').textContent = '';
+  document.getElementById('nameScreen').classList.add('hidden');
+  document.getElementById('mainScreen').classList.remove('hidden');
+  document.getElementById('studentBadge').textContent = v;
+  renderUnitList();
+  document.getElementById('puzzleArea').innerHTML = '<p style="color:var(--muted)">Select a unit to begin.</p>';
+}
+
+function renderUnitList(){
+  var el = document.getElementById('unitList');
+  el.innerHTML = '';
+  syllabus.units.forEach(function(u){
+    var b = document.createElement('button');
+    b.className = 'unitBtn' + (state.currentUnit===u.id ? ' active':'');
+    b.innerHTML = '<span class="unitColors" style="background:'+UNIT_COLORS[u.id]+'"></span>Unit '+u.id+'<small>'+u.title+'</small>';
+    b.onclick = function(){ loadUnit(u.id); };
+    el.appendChild(b);
+  });
+}
+
+function loadUnit(id){
+  state.currentUnit = id;
+  renderUnitList();
+  generatePuzzle(id);
+}
+
+var DIRS = [ [0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,-1] ];
+
+var STRAIGHT_PATTERNS = DIRS.map(function(d){ return [d]; });
+
+function shuffleArr(arr){
+  for(var i=arr.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=arr[i]; arr[i]=arr[j]; arr[j]=t; }
+  return arr;
+}
+
+function tryPatternPath(word, size, occupied, pattern){
+  var starts = [];
+  for(var r=0;r<size;r++){ for(var c=0;c<size;c++){ if(!occupied[r][c]) starts.push({r:r,c:c}); } }
+  shuffleArr(starts);
+  var cap = Math.min(starts.length, 80);
+  for(var s=0;s<cap;s++){
+    var path = [starts[s]];
+    var ok = true;
+    for(var i=1;i<word.length;i++){
+      var d = pattern[(i-1) % pattern.length];
+      var prev = path[i-1];
+      var nr = prev.r+d[0], nc = prev.c+d[1];
+      if(nr<0||nr>=size||nc<0||nc>=size){ ok=false; break; }
+      if(occupied[nr][nc]){ ok=false; break; }
+      var dup = false;
+      for(var k=0;k<path.length;k++){ if(path[k].r===nr && path[k].c===nc){ dup=true; break; } }
+      if(dup){ ok=false; break; }
+      path.push({r:nr,c:nc});
+    }
+    if(ok) return path;
+  }
+  return null;
+}
+
+function findWordPath(word, size, occupied){
+  var patterns = shuffleArr(STRAIGHT_PATTERNS.slice());
+  for(var p=0;p<patterns.length;p++){
+    var res = tryPatternPath(word, size, occupied, patterns[p]);
+    if(res) return res;
+  }
+  return null;
+}
+
+function attemptGeneration(unit, size){
+  var colorMap = {};
+  unit.keywords.forEach(function(w,i){ colorMap[w] = WORD_COLORS[i % WORD_COLORS.length]; });
+  var words = unit.keywords.slice().sort(function(a,b){return b.length-a.length;});
+  var occupied = [];
+  var grid = [];
+  for(var r=0;r<size;r++){ occupied.push(new Array(size).fill(false)); grid.push(new Array(size).fill(null)); }
+  var placed = [];
+  for(var w=0; w<words.length; w++){
+    var word = words[w];
+    var path = findWordPath(word, size, occupied);
+    if(!path) return null;
+    path.forEach(function(cell,i){ occupied[cell.r][cell.c] = true; grid[cell.r][cell.c] = word[i]; });
+    placed.push({word:word, cells:path, color:colorMap[word]});
+  }
+  var letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  for(var r=0;r<size;r++){
+    for(var c=0;c<size;c++){
+      if(grid[r][c]===null){ grid[r][c] = letters[Math.floor(Math.random()*26)]; }
+    }
+  }
+  return { grid:grid, size:size, placed:placed };
+}
+
+function generatePuzzle(unitId){
+  var unit = syllabus.units.find(function(u){ return u.id===unitId; });
+  var maxLen = Math.max.apply(null, unit.keywords.map(function(w){return w.length;}));
+  var size = Math.max(maxLen, 8);
+  var result = null;
+  var tries = 0;
+  while(!result && tries<8){
+    result = attemptGeneration(unit, size);
+    if(!result){ size += 1; }
+    tries++;
+  }
+  if(!result){ result = attemptGeneration(unit, size+4); }
+  state.grid = result.grid; state.size = result.size; state.placedWords = result.placed;
+  state.found = []; state.score = 0; state.hints = 0; state.elapsed = 0;
+  clearInterval(state.timerId);
+  state.startTime = Date.now();
+  state.timerId = setInterval(tick, 1000);
+  renderPuzzle(unit);
+}
+
+function tick(){
+  state.elapsed = Math.floor((Date.now()-state.startTime)/1000);
+  var t = document.getElementById('timerPill');
+  if(t) t.textContent = '\u23F1 ' + fmtTime(state.elapsed);
+}
+function fmtTime(s){
+  var m = Math.floor(s/60), ss = s%60;
+  return (m<10?'0':'')+m+':'+(ss<10?'0':'')+ss;
+}
+
+function renderPuzzle(unit){
+  var area = document.getElementById('puzzleArea');
+  area.innerHTML =
+    '<div class="puzzleHead">'+
+      '<div><strong>Unit '+unit.id+'</strong> &mdash; '+unit.title+'</div>'+
+      '<div class="statsRow">'+
+        '<div class="statPill" id="timerPill">\u23F1 00:00</div>'+
+        '<div class="statPill" id="scorePill">SCORE: 0</div>'+
+        '<div class="statPill" id="wordsPill">WORDS: 0/'+state.placedWords.length+'</div>'+
+        '<div class="statPill" id="hintsPill">HINTS: 0</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="puzzleWrap">'+
+      '<div><div class="gridBox"><div class="gridWrap"><svg id="pathSvg"></svg><div id="grid"></div></div></div>'+
+      '<div class="controlsRow">'+
+        '<button class="btn orange" onclick="useHint()">\uD83D\uDCA1 HINT</button>'+
+        '<button class="btn outline" onclick="loadUnit(state.currentUnit)">\uD83D\uDD04 New Puzzle</button>'+
+        '<button class="btn purple" onclick="showLeaderboard(state.currentUnit)">\uD83C\uDFC6 Leaderboard</button>'+
+      '</div></div>'+
+      '<div class="kwPanel"><h3>Keywords</h3><div class="kwList" id="kwList"></div></div>'+
+    '</div>';
+
+  var startMap = {};
+  state.placedWords.forEach(function(pw){
+    if(pw.cells && pw.cells.length > 0){
+      var s = pw.cells[0];
+      var e = pw.cells[pw.cells.length - 1];
+      startMap[s.r+','+s.c] = pw.color;
+      startMap[e.r+','+e.c] = pw.color;
+    }
+  });
+
+  var gridEl = document.getElementById('grid');
+  gridEl.style.gridTemplateColumns = 'repeat('+state.size+', 36px)';
+  gridEl.innerHTML = '';
+  for(var r=0;r<state.size;r++){
+    for(var c=0;c<state.size;c++){
+      var d = document.createElement('div');
+      d.className = 'cell';
+      d.textContent = state.grid[r][c];
+      d.dataset.r = r; d.dataset.c = c;
+      var startColor = startMap[r+','+c];
+      if(startColor){ d.classList.add('startHint'); d.style.background = startColor; }
+      gridEl.appendChild(d);
+    }
+  }
+  var svg = document.getElementById('pathSvg');
+  var px = state.size*STEP;
+  svg.setAttribute('width', px);
+  svg.setAttribute('height', px);
+  svg.setAttribute('viewBox', '0 0 '+px+' '+px);
+  svg.innerHTML = '<g id="foundLines"></g><polyline id="selLine" fill="none" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"></polyline>';
+  renderKeywordList();
+  attachGridEvents(gridEl);
+}
+
+function cellCenter(r,c){ return {x: c*STEP+18, y: r*STEP+18}; }
+
+function pointsFor(cells){
+  return cells.map(function(cell){ var p = cellCenter(cell.r,cell.c); return p.x+','+p.y; }).join(' ');
+}
+
+function drawFoundPath(pw){
+  var g = document.getElementById('foundLines');
+  if(!g) return;
+  var svgNS = 'http://www.w3.org/2000/svg';
+  var poly = document.createElementNS(svgNS, 'polyline');
+  poly.setAttribute('points', pointsFor(pw.cells));
+  poly.setAttribute('fill', 'none');
+  poly.setAttribute('stroke', pw.color);
+  poly.setAttribute('stroke-width', '6');
+  poly.setAttribute('stroke-linecap', 'round');
+  poly.setAttribute('stroke-linejoin', 'round');
+  poly.setAttribute('opacity', '0.9');
+  g.appendChild(poly);
+}
+
+function updateSelLine(){
+  var sel = document.getElementById('selLine');
+  if(!sel) return;
+  sel.setAttribute('points', state.selCells.length>1 ? pointsFor(state.selCells) : '');
+}
+
+function renderKeywordList(){
+  var kwEl = document.getElementById('kwList');
+  if(!kwEl) return;
+  kwEl.innerHTML = '';
+  state.placedWords.forEach(function(pw){
+    var isFound = state.found.indexOf(pw.word) !== -1;
+    var it = document.createElement('div');
+    it.className = 'kwItem' + (isFound ? ' found':'');
+    if(isFound){ it.style.background = pw.color; }
+    var dot = '<span class="dot" style="background:'+pw.color+'"></span>';
+    var blanks = '<span class="blank">'+pw.word.split('').map(function(){return '_';}).join(' ')+'</span>';
+    it.innerHTML = dot + (isFound ? '\u2713 '+pw.word : blanks);
+    kwEl.appendChild(it);
+  });
+}
+
+function cellEl(r,c){ return document.querySelector('.cell[data-r="'+r+'"][data-c="'+c+'"]'); }
+
+function attachGridEvents(gridEl){
+  var down = false;
+  function startSel(r,c){ down=true; state.selecting=true; state.selCells=[{r:r,c:c}]; paintSelection(); }
+  function moveSel(r,c){
+    if(!down) return;
+    var last = state.selCells[state.selCells.length-1];
+    if(last.r===r && last.c===c) return;
+    if(state.selCells.length>1){
+      var prev = state.selCells[state.selCells.length-2];
+      if(prev.r===r && prev.c===c){ state.selCells.pop(); paintSelection(); return; }
+    }
+    var dr = Math.abs(r-last.r), dc = Math.abs(c-last.c);
+    if(dr>1 || dc>1) return;
+    var already = state.selCells.some(function(p){ return p.r===r && p.c===c; });
+    if(already) return;
+    state.selCells.push({r:r,c:c});
+    paintSelection();
+  }
+  function endSel(){
+    if(!down) return;
+    down = false; state.selecting = false;
+    checkSelection();
+  }
+  function paintSelection(){
+    document.querySelectorAll('.cell.sel').forEach(function(e){e.classList.remove('sel');});
+    state.selCells.forEach(function(cell){
+      var e = cellEl(cell.r,cell.c);
+      if(e && !e.classList.contains('wordFound')) e.classList.add('sel');
+    });
+    updateSelLine();
+  }
+  gridEl.addEventListener('mousedown', function(e){
+    var t = e.target.closest('.cell'); if(!t) return;
+    startSel(+t.dataset.r, +t.dataset.c);
+  });
+  gridEl.addEventListener('mousemove', function(e){
+    var t = e.target.closest('.cell'); if(!t) return;
+    moveSel(+t.dataset.r, +t.dataset.c);
+  });
+  window.addEventListener('mouseup', endSel);
+
+  gridEl.addEventListener('touchstart', function(e){
+    var t = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+    var c = t && t.closest('.cell'); if(!c) return;
+    startSel(+c.dataset.r, +c.dataset.c);
+  }, {passive:true});
+  gridEl.addEventListener('touchmove', function(e){
+    var t = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+    var c = t && t.closest('.cell'); if(!c) return;
+    moveSel(+c.dataset.r, +c.dataset.c);
+    e.preventDefault();
+  }, {passive:false});
+  gridEl.addEventListener('touchend', endSel);
+}
+
+function checkSelection(){
+  var cells = state.selCells;
+  document.querySelectorAll('.cell.sel').forEach(function(e){e.classList.remove('sel');});
+  var selLine = document.getElementById('selLine');
+  if(selLine) selLine.setAttribute('points','');
+  if(cells.length<2){ return; }
+  var str = cells.map(function(cell){ return state.grid[cell.r][cell.c]; }).join('');
+  var rev = str.split('').reverse().join('');
+  var match = state.placedWords.find(function(pw){
+    return (pw.word===str || pw.word===rev) && state.found.indexOf(pw.word)===-1;
+  });
+  if(match){
+    state.found.push(match.word);
+    state.score += SCORES.correct;
+    match.cells.forEach(function(cell){
+      var e = cellEl(cell.r,cell.c);
+      if(e){ e.classList.remove('sel'); e.classList.add('wordFound'); e.style.background = match.color; }
+    });
+    drawFoundPath(match);
+    updateStats();
+    renderKeywordList();
+    if(state.found.length === state.placedWords.length){
+      finishPuzzle();
+    }
+  } else {
+    state.score += SCORES.wrong;
+    if(state.score<0) state.score = 0;
+    updateStats();
+  }
+}
+
+function useHint(){
+  var remaining = state.placedWords.filter(function(pw){ return state.found.indexOf(pw.word)===-1; });
+  if(remaining.length===0) return;
+  var pick = remaining[Math.floor(Math.random()*remaining.length)];
+  var first = pick.cells[0];
+  var e = cellEl(first.r, first.c);
+  if(e){
+    e.classList.add('hint');
+    setTimeout(function(){ e.classList.remove('hint'); }, 1500);
+  }
+  state.hints += 1;
+  state.score += SCORES.hint;
+  if(state.score<0) state.score = 0;
+  updateStats();
+}
+
+function updateStats(){
+  var sc = document.getElementById('scorePill'); if(sc) sc.textContent = 'SCORE: '+state.score;
+  var wp = document.getElementById('wordsPill'); if(wp) wp.textContent = 'WORDS: '+state.found.length+'/'+state.placedWords.length;
+  var hp = document.getElementById('hintsPill'); if(hp) hp.textContent = 'HINTS: '+state.hints;
+}
+
+function finishPuzzle(){
+  clearInterval(state.timerId);
+  var unit = syllabus.units.find(function(u){ return u.id===state.currentUnit; });
+  var entry = {
+    unit: 'Unit '+unit.id, unitId: unit.id, studentName: state.student, score: state.score,
+    time: state.elapsed, wordsFound: state.found.length, hintsUsed: state.hints,
+    date: new Date().toISOString().slice(0,10)
+  };
+  saveScore(entry);
+  showCompletionModal(unit, entry);
+}
+
+function saveScore(entry){
+  var key = 'wordsearch_lb_unit_'+entry.unitId;
+  var list = [];
+  try{ list = JSON.parse(localStorage.getItem(key)) || []; }catch(e){ list = []; }
+  list.push(entry);
+  list.sort(function(a,b){ return b.score-a.score || a.time-b.time; });
+  localStorage.setItem(key, JSON.stringify(list.slice(0,50)));
+}
+
+function getScores(unitId){
+  var key = 'wordsearch_lb_unit_'+unitId;
+  try{ return JSON.parse(localStorage.getItem(key)) || []; }catch(e){ return []; }
+}
+
+function showCompletionModal(unit, entry){
+  var host = document.getElementById('modalHost');
+  host.innerHTML =
+    '<div class="overlay"><div class="modalCard">'+
+    '<h2>\uD83C\uDF89 Puzzle solved!</h2>'+
+    '<p style="color:var(--muted)">Unit '+unit.id+': '+unit.title+'</p>'+
+    '<div class="modalStats">'+
+      '<div>Words found: '+entry.wordsFound+'/'+state.placedWords.length+'</div>'+
+      '<div>Score: '+entry.score+'</div>'+
+      '<div>Time: '+fmtTime(entry.time)+'</div>'+
+      '<div>Hints used: '+entry.hintsUsed+'</div>'+
+    '</div>'+
+    '<div class="modalBtns">'+
+      '<button class="btn green" onclick="closeModal(); loadUnit('+unit.id+')">Play again</button>'+
+      (unit.id < syllabus.units.length ? '<button class="btn purple" onclick="closeModal(); loadUnit('+(unit.id+1)+')">Next unit</button>' : '')+
+      '<button class="btn outline" onclick="closeModal(); showLeaderboard('+unit.id+')">View leaderboard</button>'+
+    '</div>'+
+    '</div></div>';
+}
+function closeModal(){ document.getElementById('modalHost').innerHTML = ''; }
+
+function showLeaderboard(unitId){
+  var unit = syllabus.units.find(function(u){ return u.id===unitId; });
+  document.getElementById('dashboardScreen').classList.add('hidden');
+  var lbScreen = document.getElementById('leaderboardScreen');
+  lbScreen.classList.remove('hidden');
+  var list = getScores(unitId);
+  var medals = ['\uD83E\uDD47','\uD83E\uDD48','\uD83E\uDD49'];
+  var rowsHtml = list.slice(0,10).map(function(row,i){
+    var isYou = row.studentName === state.student;
+    return '<tr class="'+(isYou?'you':'')+'"><td>'+(medals[i]||(i+1))+'</td><td>'+row.studentName+'</td><td>'+row.score+'</td><td>'+fmtTime(row.time)+'</td></tr>';
+  }).join('');
+  var yourBest = list.filter(function(r){return r.studentName===state.student;}).sort(function(a,b){return b.score-a.score;})[0];
+  var yourPos = yourBest ? list.indexOf(yourBest)+1 : null;
+  lbScreen.innerHTML =
+    '<h2>\uD83C\uDFC6 Unit '+unit.id+' leaderboard</h2>'+
+    (list.length===0 ? '<p style="color:var(--muted)">No scores yet for this unit. Be the first!</p>' :
+    '<table class="lb"><tr><th>Rank</th><th>Student</th><th>Score</th><th>Time</th></tr>'+rowsHtml+'</table>')+
+    (yourBest ? '<p style="margin-top:14px;font-size:14px;"><strong>Your best score:</strong> '+yourBest.score+' &nbsp; <strong>Your time:</strong> '+fmtTime(yourBest.time)+' &nbsp; <strong>Position:</strong> #'+yourPos+'</p>' : '')+
+    '<div class="controlsRow" style="margin-top:14px;">'+
+      '<button class="btn" onclick="backToDashboard()">Back to units</button>'+
+      '<button class="btn green" onclick="closeLbAndPlay('+unit.id+')">Play this unit</button>'+
+    '</div>';
+}
+function closeLbAndPlay(unitId){
+  document.getElementById('leaderboardScreen').classList.add('hidden');
+  document.getElementById('dashboardScreen').classList.remove('hidden');
+  loadUnit(unitId);
+}
+function backToDashboard(){
+  document.getElementById('leaderboardScreen').classList.add('hidden');
+  document.getElementById('dashboardScreen').classList.remove('hidden');
+}
+</script>
+</body>
+</html>
