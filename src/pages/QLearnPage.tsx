@@ -2473,6 +2473,16 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [activePlayVideoUrl, setActivePlayVideoUrl] = useState<string | null>(null);
   const [activePlayVideoTitle, setActivePlayVideoTitle] = useState("");
 
+  // Derived active domain and module (declared before useEffect hooks to avoid TDZ)
+  const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
+  const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
+
+  // Update localStorage when domains change
+  const saveDomains = (updatedDomains: DomainData[]) => {
+    setDomains(updatedDomains);
+    localStorage.setItem("qlearn_domains", JSON.stringify(updatedDomains));
+  };
+
   // Load from local storage on mount and sync default PPTs
   useEffect(() => {
     const saved = localStorage.getItem("qlearn_domains");
@@ -2558,15 +2568,6 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [activeDomainIndex, activeDomain, activeTab]);
-
-  // Update localStorage when domains change
-  const saveDomains = (updatedDomains: DomainData[]) => {
-    setDomains(updatedDomains);
-    localStorage.setItem("qlearn_domains", JSON.stringify(updatedDomains));
-  };
-
-  const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
-  const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
 
   // Delete Video handler (admin)
   const handleDeleteVideo = (videoId: string) => {
