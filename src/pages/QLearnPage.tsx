@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -34,7 +34,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
-import { WorksheetViewer } from "@/components/ui/worksheet-viewer";
+const WorksheetViewer = lazy(() =>
+  import("@/components/ui/worksheet-viewer").then((m) => ({ default: m.WorksheetViewer }))
+);
 
 // Interfaces
 interface VideoItem {
@@ -3790,11 +3792,21 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                       {/* WORKSHEETS TAB */}
                       {activeTab === "worksheets" && (
                         <div className="max-w-5xl mx-auto space-y-6">
-                          <WorksheetViewer
-                            initialUnitNumber={
-                              activeModuleIndex < 5 ? activeModuleIndex + 1 : 2
-                            }
-                          />
+                          <Suspense fallback={
+                            <div className="flex items-center justify-center py-20 text-muted-foreground gap-3">
+                              <svg className="animate-spin h-6 w-6 text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                              </svg>
+                              <span className="text-sm font-medium">Loading worksheets…</span>
+                            </div>
+                          }>
+                            <WorksheetViewer
+                              initialUnitNumber={
+                                activeModuleIndex < 5 ? activeModuleIndex + 1 : 2
+                              }
+                            />
+                          </Suspense>
                         </div>
                       )}
 
