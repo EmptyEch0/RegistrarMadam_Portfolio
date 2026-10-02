@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Download, FileText, GraduationCap, Award, BookOpen } from "lucide-react";
+import { ArrowRight, Download, FileText, GraduationCap, Award, BookOpen, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -94,6 +94,12 @@ const HomePage = () => {
                 <Button variant="hero-outline" size="lg" asChild>
                   <Link to="/projects">Projects</Link>
                 </Button>
+                <Button variant="hero-outline" size="lg" asChild>
+                  <Link to="/qlearn?tab=puzzles" className="inline-flex items-center gap-2">
+                    <Gamepad2 size={18} />
+                    Puzzles
+                  </Link>
+                </Button>
                 <Button variant="institutional" size="lg" asChild>
                   <Link to="/contact">Contact</Link>
                 </Button>
@@ -177,7 +183,7 @@ const HomePage = () => {
             <div className="mt-6 h-1 w-20 bg-accent mx-auto" />
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[
               {
                 title: "Projects & Innovations",
@@ -186,9 +192,15 @@ const HomePage = () => {
                 link: "/projects",
               },
               {
+                title: "Interactive Puzzles & Hub",
+                description:
+                  "Gamified domain word connect puzzles across Quantum, Data Science, AI, and live rankings.",
+                link: "/qlearn?tab=puzzles",
+              },
+              {
                 title: "QLearn Interactive Platform",
                 description:
-                  "10-module curriculum roadmaps, gamified word connect puzzles, and real-time live rank leaderboards.",
+                  "10-module curriculum roadmaps, interactive lecture modules, and learning resources.",
                 link: "/qlearn",
               },
               {
@@ -196,6 +208,12 @@ const HomePage = () => {
                 description:
                   "A comprehensive timeline of leadership roles and administrative positions across premier institutions.",
                 link: "/experience",
+              },
+              {
+                title: "Research Scholars Guidance",
+                description:
+                  "Ph.D. research guidance, candidate dissertations, patents, and scholarly mentorship.",
+                link: "/scholars",
               },
               {
                 title: "Awards & Recognition",
