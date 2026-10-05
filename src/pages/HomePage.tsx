@@ -101,7 +101,7 @@ const HomePage = () => {
                   </Link>
                 </Button>
                 <Button variant="institutional" size="lg" asChild>
-                  <Link to="/contact">Contact</Link>
+                  <Link to="/contact">Collaborate</Link>
                 </Button>
               </div>
 

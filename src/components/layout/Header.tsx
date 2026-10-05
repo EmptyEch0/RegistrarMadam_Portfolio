@@ -294,7 +294,7 @@ export function Header() {
               Puzzles
             </Link>
 
-            {/* Contact */}
+            {/* Collaborate */}
             <Link
               to="/contact"
               aria-current={isContactActive ? "page" : undefined}
@@ -308,7 +308,7 @@ export function Header() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Contact
+              Collaborate
             </Link>
           </div>
 
@@ -489,7 +489,7 @@ export function Header() {
                 Puzzles
               </Link>
 
-              {/* Contact */}
+              {/* Collaborate */}
               <Link
                 to="/contact"
                 aria-current={isContactActive ? "page" : undefined}
@@ -500,7 +500,7 @@ export function Header() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 )}
               >
-                Contact
+                Collaborate
               </Link>
             </div>
           </div>

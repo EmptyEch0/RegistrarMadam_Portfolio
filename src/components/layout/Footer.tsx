@@ -127,7 +127,7 @@ export function Footer() {
                 </li>
                 <li>
                   <Link to="/contact" className="text-primary-foreground/75 hover:text-accent transition-colors">
-                    Contact & Communication
+                    Collaborate
                   </Link>
                 </li>
               </ul>
@@ -177,10 +177,10 @@ export function Footer() {
                 <li className="flex items-center gap-2.5">
                   <Mail size={16} className="text-accent shrink-0" />
                   <a
-                    href="mailto:registrar@jntugv.edu.in"
+                    href="mailto:gjsuma.it@jntugvcev.edu.in"
                     className="text-primary-foreground/80 hover:text-accent transition-colors truncate"
                   >
-                    registrar@jntugv.edu.in
+                    gjsuma.it@jntugvcev.edu.in
                   </a>
                 </li>
 

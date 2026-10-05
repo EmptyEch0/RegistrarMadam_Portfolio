@@ -97,7 +97,7 @@ const MediaPage = () => {
           href="/contact"
           className="inline-block mt-4 text-accent font-medium"
         >
-          Contact Us →
+          Collaborate With Us →
         </a>
       </section>
 

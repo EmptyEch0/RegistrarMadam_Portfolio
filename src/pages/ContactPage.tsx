@@ -62,7 +62,7 @@ const ContactPage = () => {
     {
       icon: Mail,
       title: "Email",
-      content: ["registrar@jntugv.edu.in"],
+      content: ["gjsuma.it@jntugvcev.edu.in"],
     },
     {
       icon: Phone,
@@ -91,7 +91,7 @@ const ContactPage = () => {
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
           }`}>
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-6">
-              Contact
+              Collaborate
             </h1>
             <p className="text-xl text-muted-foreground">
               Connect for collaborations, consultations, or academic engagements
@@ -262,8 +262,8 @@ const ContactPage = () => {
               research collaborations, or department matters, please contact the
               Department of Information Technology. All official communications
               can be sent to the official email address{" "}
-              <a href="mailto:registrar@jntugv.edu.in" className="text-accent hover:underline font-medium">
-                registrar@jntugv.edu.in
+              <a href="mailto:gjsuma.it@jntugvcev.edu.in" className="text-accent hover:underline font-medium">
+                gjsuma.it@jntugvcev.edu.in
               </a>
               .
             </p>
@@ -281,7 +281,7 @@ const ContactPage = () => {
 
           <div className="grid md:grid-cols-3 gap-6">
             <a
-              href="mailto:registrar@jntugv.edu.in"
+              href="mailto:gjsuma.it@jntugvcev.edu.in"
               className="group card-institutional p-8 text-center hover:shadow-xl transition-all duration-300 transform hover:scale-105"
             >
               <div className="w-16 h-16 mx-auto mb-4 bg-accent/10 rounded-full flex items-center justify-center group-hover:bg-accent/20 transition-colors">
@@ -291,7 +291,7 @@ const ContactPage = () => {
                 Email Us
               </h3>
               <p className="text-foreground/70 text-sm">
-                registrar@jntugv.edu.in
+                gjsuma.it@jntugvcev.edu.in
               </p>
             </a>
 
