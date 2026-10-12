@@ -45,6 +45,7 @@ export default function AdminForm({
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showSuccess, setShowSuccess] = useState(false);
   const [imagePreview, setImagePreview] = useState<Record<string, string>>({});
+  const [imageInputMode, setImageInputMode] = useState<Record<string, "file" | "url">>({});
 
   // ✅ Initialize image previews from initial data
   const initialPreviews = useMemo(() => {
@@ -254,42 +255,96 @@ export default function AdminForm({
                 <div className="input-wrapper">
                   {field.type === "image" ? (
                     <>
-                      <div className="image-upload-wrapper">
-                        <input
-                          type="file"
-                          id={field.name}
-                          name={field.name}
-                          accept={field.accept || "image/*"}
-                          onChange={(e) => handleFileChange(e, field.name)}
-                          className="image-input-hidden"
-                        />
-                        <label htmlFor={field.name} className="image-upload-label">
-                          {imagePreview[field.name] ? (
-                            <div className="image-preview-container">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-semibold text-gray-700">
+                          {field.label} {field.required && <span className="text-red-500">*</span>}
+                        </span>
+                        <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-xs">
+                          <button
+                            type="button"
+                            onClick={() => setImageInputMode((prev) => ({ ...prev, [field.name]: "file" }))}
+                            className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                              (imageInputMode[field.name] || "file") === "file"
+                                ? "bg-white text-gray-900 shadow-xs"
+                                : "text-gray-500 hover:text-gray-900"
+                            }`}
+                          >
+                            Upload File
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setImageInputMode((prev) => ({ ...prev, [field.name]: "url" }))}
+                            className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                              imageInputMode[field.name] === "url"
+                                ? "bg-white text-gray-900 shadow-xs"
+                                : "text-gray-500 hover:text-gray-900"
+                            }`}
+                          >
+                            Image URL
+                          </button>
+                        </div>
+                      </div>
+
+                      {imageInputMode[field.name] === "url" ? (
+                        <div className="space-y-2">
+                          <input
+                            type="text"
+                            placeholder="Paste direct image URL (https://...)"
+                            value={typeof formData[field.name] === "string" ? formData[field.name] : ""}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setFormData((prev) => ({ ...prev, [field.name]: val }));
+                              setImagePreview((prev) => ({ ...prev, [field.name]: val }));
+                              if (touched[field.name]) {
+                                const err = validateField(field, val);
+                                setErrors((prev) => ({ ...prev, [field.name]: err }));
+                              }
+                            }}
+                            onBlur={() => handleBlur(field.name)}
+                            className="form-input"
+                          />
+                          {imagePreview[field.name] && (
+                            <div className="image-preview-container rounded-xl overflow-hidden border border-gray-200">
                               <img
                                 src={imagePreview[field.name]}
                                 alt="Preview"
                                 className="image-preview"
                               />
-                              <div className="image-overlay">
-                                <Upload size={24} />
-                                <span>Change Image</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="image-upload-placeholder">
-                              <ImageIcon size={40} className="upload-icon" />
-                              <p className="upload-text">{field.label}</p>
-                              <p className="upload-hint">Click to upload</p>
                             </div>
                           )}
-                        </label>
-                      </div>
-                      {field.required && (
-                        <p className="field-label">
-                          {field.label}
-                          <span className="required"> *</span>
-                        </p>
+                        </div>
+                      ) : (
+                        <div className="image-upload-wrapper">
+                          <input
+                            type="file"
+                            id={field.name}
+                            name={field.name}
+                            accept={field.accept || "image/*"}
+                            onChange={(e) => handleFileChange(e, field.name)}
+                            className="image-input-hidden"
+                          />
+                          <label htmlFor={field.name} className="image-upload-label">
+                            {imagePreview[field.name] ? (
+                              <div className="image-preview-container">
+                                <img
+                                  src={imagePreview[field.name]}
+                                  alt="Preview"
+                                  className="image-preview"
+                                />
+                                <div className="image-overlay">
+                                  <Upload size={24} />
+                                  <span>Change Image</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="image-upload-placeholder">
+                                <ImageIcon size={40} className="upload-icon" />
+                                <p className="upload-text">{field.label}</p>
+                                <p className="upload-hint">Click to choose image file</p>
+                              </div>
+                            )}
+                          </label>
+                        </div>
                       )}
                     </>
                   ) : field.type === "textarea" ? (

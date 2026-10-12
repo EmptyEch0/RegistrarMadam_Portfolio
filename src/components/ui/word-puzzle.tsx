@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft, Gamepad2 } from "lucide-react";
 import { PuzzleLeaderboard, submitPuzzleScore, formatTime, HINT_PENALTY_SECONDS } from "@/components/ui/puzzle-leaderboard";
 import { PuzzleCelebration } from "@/components/ui/puzzle-celebration";
+import { logVisitorAccess } from "@/lib/visitorTracking";
 
 const PLAYER_NAME_KEY = "qlearn_puzzle_player_name";
 
@@ -285,6 +286,7 @@ export function WordPuzzle({
     setNamePromptOpen(false);
     try {
       localStorage.setItem(PLAYER_NAME_KEY, name);
+      logVisitorAccess(`Puzzle: ${puzzle.title}`, "puzzle");
     } catch {
       // Remembering the name is only a convenience
     }
@@ -297,6 +299,7 @@ export function WordPuzzle({
       setSavedScoreId(id);
       setSaveState("saved");
       setLeaderboardRefresh((n) => n + 1);
+      logVisitorAccess(`Puzzle Solved: ${puzzle.title} (${seconds}s)`, "puzzle");
     } catch (err) {
       console.error("Failed saving puzzle score", err);
       setSaveState("error");

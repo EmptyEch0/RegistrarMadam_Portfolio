@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
+import { toast } from "sonner";
 import AdminLayout from "@/components/admin/AdminLayout";
 import PortalModal from "@/components/ui/PortalModal";
 import AdminForm, { AdminField } from "@/components/admin/AdminForm";
@@ -46,16 +47,42 @@ export default function AdminMedia() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  /* ===================== HELPER ===================== */
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
   /* ===================== FETCH MEDIA ===================== */
   const fetchMedia = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("media")
-      .select("*")
-      .order("year", { ascending: false });
+    try {
+      const client = supabaseAdmin || supabase;
+      const { data, error } = await client
+        .from("media")
+        .select("*")
+        .order("year", { ascending: false });
 
-    if (!error && data) setMedia(data);
-    setLoading(false);
+      if (!error && data) {
+        setMedia(data);
+        try {
+          localStorage.setItem("cached_media_items", JSON.stringify(data));
+        } catch {}
+      } else {
+        const cached = localStorage.getItem("cached_media_items");
+        if (cached) setMedia(JSON.parse(cached));
+      }
+    } catch (err) {
+      console.warn("Failed fetching media, checking cache:", err);
+      const cached = localStorage.getItem("cached_media_items");
+      if (cached) setMedia(JSON.parse(cached));
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -65,62 +92,88 @@ export default function AdminMedia() {
   /* ===================== CREATE / UPDATE ===================== */
   const handleSubmit = async (data: Record<string, any>) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
-    console.log("📤 SUBMIT DATA:", data);
+    console.log("📤 SUBMIT MEDIA DATA:", data);
 
     try {
       let imageUrl = data.image_url;
 
-      // Upload new image if File object
+      // Handle image file upload
       if (data.image_url instanceof File) {
         const file = data.image_url;
-        const ext = file.name.split(".").pop();
-        const fileName = `${crypto.randomUUID()}.${ext}`;
+        const ext = file.name.split(".").pop() || "jpg";
+        const cleanName = `${Date.now()}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
 
-        console.log("⬆️ Uploading:", fileName);
+        console.log("⬆️ Uploading media image:", cleanName);
 
-        const { error: uploadError } = await supabase.storage
-          .from("media")
-          .upload(fileName, file);
+        try {
+          const client = supabaseAdmin || supabase;
+          const { error: uploadError } = await client.storage
+            .from("media")
+            .upload(cleanName, file, {
+              contentType: file.type || "image/jpeg",
+              upsert: true,
+            });
 
-        if (uploadError) {
-          console.error("❌ Upload error:", uploadError);
-          throw uploadError;
+          if (uploadError) {
+            console.warn("Storage upload failed, falling back to Data URL:", uploadError);
+            imageUrl = await fileToDataUrl(file);
+          } else {
+            const { data: urlData } = client.storage
+              .from("media")
+              .getPublicUrl(cleanName);
+            imageUrl = urlData.publicUrl;
+            console.log("✅ Image uploaded to storage:", imageUrl);
+          }
+        } catch (uploadErr) {
+          console.warn("Storage exception, falling back to Data URL:", uploadErr);
+          imageUrl = await fileToDataUrl(file);
         }
+      } else if (typeof data.image_url === "string") {
+        imageUrl = data.image_url.trim();
+      }
 
-        const { data: urlData } = supabase.storage
-          .from("media")
-          .getPublicUrl(fileName);
-
-        imageUrl = urlData.publicUrl;
-        console.log("✅ Image uploaded:", imageUrl);
-      } else if (editing && typeof data.image_url === "string") {
-        // Keep existing URL when editing
-        imageUrl = data.image_url;
+      if (!imageUrl) {
+        toast.error("Please provide an image file or image URL");
+        setIsSubmitting(false);
+        return;
       }
 
       const payload = {
-        title: data.title,
-        source: data.source,
-        year: Number(data.year),
-        description: data.description || null,
+        title: (data.title || "").trim(),
+        source: (data.source || "").trim(),
+        year: Number(data.year) || new Date().getFullYear(),
+        description: data.description ? data.description.trim() : null,
         image_url: imageUrl,
       };
 
-      console.log("💾 Saving:", payload);
+      console.log("💾 Saving media payload:", payload);
 
+      const client = supabaseAdmin || supabase;
       if (editing) {
-        await supabase.from("media").update(payload).eq("id", editing.id);
+        const { error } = await client.from("media").update(payload).eq("id", editing.id);
+        if (error) {
+          console.error("Update error with admin, trying standard client:", error);
+          const { error: fallbackErr } = await supabase.from("media").update(payload).eq("id", editing.id);
+          if (fallbackErr) throw fallbackErr;
+        }
+        toast.success("Media clipping updated successfully!");
       } else {
-        await supabase.from("media").insert(payload);
+        const { error } = await client.from("media").insert(payload);
+        if (error) {
+          console.error("Insert error with admin, trying standard client:", error);
+          const { error: fallbackErr } = await supabase.from("media").insert(payload);
+          if (fallbackErr) throw fallbackErr;
+        }
+        toast.success("News clipping published successfully!");
       }
 
       handleClose();
       await fetchMedia();
-    } catch (err) {
-      console.error("❌ Error:", err);
-      alert("Failed to save media. Check console for details.");
+    } catch (err: any) {
+      console.error("❌ Error saving media:", err);
+      toast.error(`Failed to save media: ${err?.message || "Please check details"}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -128,26 +181,35 @@ export default function AdminMedia() {
 
   /* ===================== DELETE ===================== */
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this media item?")) return;
-    
-    const item = media.find((m) => m.id === id);
-    
-    await supabase.from("media").delete().eq("id", id);
-    
-    if (item?.image_url) {
-      try {
-        const urlParts = item.image_url.split("/");
-        const fileName = urlParts[urlParts.length - 1];
-        
-        if (fileName) {
-          await supabase.storage.from("media").remove([fileName]);
-        }
-      } catch (err) {
-        console.error("⚠️ Storage cleanup failed:", err);
+    if (!confirm("Are you sure you want to delete this media item?")) return;
+
+    try {
+      const item = media.find((m) => m.id === id);
+      const client = supabaseAdmin || supabase;
+
+      const { error } = await client.from("media").delete().eq("id", id);
+      if (error) {
+        await supabase.from("media").delete().eq("id", id);
       }
+
+      if (item?.image_url && !item.image_url.startsWith("data:")) {
+        try {
+          const urlParts = item.image_url.split("/");
+          const fileName = urlParts[urlParts.length - 1];
+          if (fileName) {
+            await client.storage.from("media").remove([fileName]);
+          }
+        } catch (storageCleanupErr) {
+          console.warn("Storage cleanup notice:", storageCleanupErr);
+        }
+      }
+
+      toast.success("Media item deleted");
+      fetchMedia();
+    } catch (err: any) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete media item");
     }
-    
-    fetchMedia();
   };
 
   /* ===================== MODAL HANDLERS ===================== */

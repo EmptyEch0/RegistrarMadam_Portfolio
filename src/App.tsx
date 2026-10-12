@@ -38,6 +38,7 @@ import AdminMedia from "./pages/admin/media";
 import ScholarsAdmin from "./pages/admin/Scholars";
 import DailyActivitiesAdmin from "./pages/admin/daily-activities";
 import AdminProjects from "./pages/admin/projects";
+import AdminVisitors from "./pages/admin/visitors";
 
 import AdminQLearn from "./pages/admin/qlearn";
 
@@ -84,6 +85,7 @@ export default function App() {
               <Route path="workshops-organized" element={<WorkshopsOrganizedAdmin />} />
               <Route path="media" element={<AdminMedia />} />
               <Route path="scholars" element={<ScholarsAdmin />} />
+              <Route path="visitors" element={<AdminVisitors />} />
               <Route path="qlearn" element={<AdminQLearn />} />
               <Route path="projects" element={<AdminProjects />} />
 

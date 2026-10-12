@@ -34,6 +34,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
+import { VisitorAccessModal } from "@/components/ui/VisitorAccessModal";
+import { VisitorProfileBadge } from "@/components/ui/VisitorProfileBadge";
+import { getSavedVisitor, logVisitorAccess, VisitorProfile } from "@/lib/visitorTracking";
 const WorksheetViewer = lazy(() =>
   import("@/components/ui/worksheet-viewer").then((m) => ({ default: m.WorksheetViewer }))
 );
@@ -2432,6 +2435,13 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles">("videos");
   const [selectedPuzzleIndex, setSelectedPuzzleIndex] = useState(0);
 
+  // Visitor Access & Tracking states
+  const [visitorModalOpen, setVisitorModalOpen] = useState(false);
+  const [targetItemPrompt, setTargetItemPrompt] = useState<string>("Courses & Puzzles");
+  const [targetTypePrompt, setTargetTypePrompt] = useState<"course" | "puzzle">("course");
+  const [currentVisitor, setCurrentVisitor] = useState<VisitorProfile | null>(() => getSavedVisitor());
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+
   // Carousel states for the active notes tab
   const [activeNoteIndex, setActiveNoteIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -2552,7 +2562,24 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
       setActiveDomainIndex(null);
       setActiveTab("videos");
     }
-  }, [searchParams, domains]);
+
+    // Check visitor gate if on public site
+    if (!isAdminPortal) {
+      const v = getSavedVisitor();
+      const isPuzzle = tab === "puzzles";
+      const targetDesc = isPuzzle
+        ? (subjectParam ? `Puzzle: ${subjectParam}` : "All Puzzles Hub")
+        : (subjectParam ? `Course: ${subjectParam}` : "Courses & Roadmaps");
+
+      if (!v) {
+        setTargetItemPrompt(targetDesc);
+        setTargetTypePrompt(isPuzzle ? "puzzle" : "course");
+        setVisitorModalOpen(true);
+      } else {
+        logVisitorAccess(targetDesc, isPuzzle ? "puzzle" : "course");
+      }
+    }
+  }, [searchParams, domains, isAdminPortal]);
 
   // Dynamic SEO Title & Meta update for QLearn
   useEffect(() => {
@@ -2856,8 +2883,42 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     }
   };
 
+  // Visitor submission handler
+  const handleVisitorSuccess = (profile: VisitorProfile) => {
+    setCurrentVisitor(profile);
+    setVisitorModalOpen(false);
+    if (pendingAction) {
+      pendingAction();
+      setPendingAction(null);
+    }
+  };
+
   // Switch domain handler
   const handleDomainSelect = (idx: number) => {
+    const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
+    const domain = domainList[idx];
+    const targetLabel = domain ? `Course: ${domain.name}` : "Course Module";
+
+    if (!isAdminPortal) {
+      const visitor = getSavedVisitor();
+      if (!visitor) {
+        setPendingAction(() => () => {
+          setActiveDomainIndex(idx);
+          setActiveModuleIndex(0);
+          setActiveNoteIndex(0);
+          setActivePptIndex(0);
+          setActiveTab("videos");
+          setQuizStarted(false);
+          setQuizFinished(false);
+        });
+        setTargetItemPrompt(targetLabel);
+        setTargetTypePrompt("course");
+        setVisitorModalOpen(true);
+        return;
+      }
+      logVisitorAccess(targetLabel, "course");
+    }
+
     setActiveDomainIndex(idx);
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
@@ -2869,6 +2930,35 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
   // Switch straight to puzzles of a domain
   const handlePlayPuzzle = (domainIdx: number) => {
+    const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
+    const domain = domainList[domainIdx];
+    const targetLabel = domain ? `Puzzle: ${domain.name}` : "Word Connect Puzzle";
+
+    if (!isAdminPortal) {
+      const visitor = getSavedVisitor();
+      if (!visitor) {
+        setPendingAction(() => () => {
+          setActiveDomainIndex(domainIdx);
+          setActiveModuleIndex(0);
+          setActiveNoteIndex(0);
+          setActivePptIndex(0);
+          setActiveTab("puzzles");
+          setQuizStarted(false);
+          setQuizFinished(false);
+          setPuzzleModalOpen(false);
+          if (domain) {
+            setSearchParams({ tab: "puzzles", subject: domain.id });
+          }
+          window.scrollTo({ top: 380, behavior: "smooth" });
+        });
+        setTargetItemPrompt(targetLabel);
+        setTargetTypePrompt("puzzle");
+        setVisitorModalOpen(true);
+        return;
+      }
+      logVisitorAccess(targetLabel, "puzzle");
+    }
+
     setActiveDomainIndex(domainIdx);
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
@@ -2877,12 +2967,27 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setQuizStarted(false);
     setQuizFinished(false);
     setPuzzleModalOpen(false);
-    const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
-    const domain = domainList[domainIdx];
     if (domain) {
       setSearchParams({ tab: "puzzles", subject: domain.id });
     }
     window.scrollTo({ top: 380, behavior: "smooth" });
+  };
+
+  // Tab switch handler with access logging
+  const handleTabSwitch = (tabId: "videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles") => {
+    setActiveTab(tabId);
+    if (!isAdminPortal) {
+      const visitor = getSavedVisitor();
+      const domainName = activeDomain?.name || "General";
+      const targetLabel = tabId === "puzzles" ? `Puzzle: ${domainName}` : `Course ${tabId.toUpperCase()}: ${domainName}`;
+      if (!visitor) {
+        setTargetItemPrompt(targetLabel);
+        setTargetTypePrompt(tabId === "puzzles" ? "puzzle" : "course");
+        setVisitorModalOpen(true);
+      } else {
+        logVisitorAccess(targetLabel, tabId === "puzzles" ? "puzzle" : "course");
+      }
+    }
   };
   
   // Back to domains / courses roadmap
@@ -2958,6 +3063,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 <Gamepad2 size={16} /> <span>Course Puzzles & Leaderboards</span>
                 <span className="bg-white/30 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider">6 Courses</span>
               </button>
+              {!isAdminPortal && (
+                <VisitorProfileBadge onProfileChanged={setCurrentVisitor} />
+              )}
             </div>
             
             <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tight leading-tight">
@@ -3223,7 +3331,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                           return (
                             <button
                               key={tab.id}
-                              onClick={() => setActiveTab(tab.id as any)}
+                              onClick={() => handleTabSwitch(tab.id as any)}
                               className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
                                 isActive
                                   ? "bg-card text-accent shadow-md shadow-accent/10 ring-1 ring-accent/30 font-bold transform scale-[1.01]"
@@ -4446,6 +4554,19 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           </div>
         </div>
       )}
+
+      {/* Visitor Access Identification Modal ("Login not like a login") */}
+      {!isAdminPortal && (
+        <VisitorAccessModal
+          isOpen={visitorModalOpen}
+          onClose={() => setVisitorModalOpen(false)}
+          onSuccess={handleVisitorSuccess}
+          targetItem={targetItemPrompt}
+          targetType={targetTypePrompt}
+          canDismiss={true}
+        />
+      )}
+
       <Footer />
     </div>
   );

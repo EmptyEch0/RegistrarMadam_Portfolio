@@ -20,6 +20,14 @@ import AdminLayout from "@/components/admin/AdminLayout";
 // Section configuration with colors and metadata
 const sections = [
   { 
+    title: "Visitor Logs & Logins", 
+    path: "/admin/visitors", 
+    icon: Users, 
+    color: "text-emerald-600",
+    bgGradient: "from-emerald-400/20 to-teal-400/20",
+    count: null
+  },
+  { 
     title: "Projects & Innovations", 
     path: "/admin/projects", 
     icon: FolderGit2, 

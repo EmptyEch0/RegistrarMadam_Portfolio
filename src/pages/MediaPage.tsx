@@ -20,18 +20,29 @@ const MediaPage = () => {
 
   useEffect(() => {
     const fetchMedia = async () => {
-      const { data, error } = await supabase
-        .from("media")
-        .select("*")
-        .order("year", { ascending: false });
+      try {
+        const { data, error } = await supabase
+          .from("media")
+          .select("*")
+          .order("year", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching media:", error);
-      } else {
-        setMediaItems(data || []);
+        if (error) {
+          console.error("Error fetching media:", error);
+          const cached = localStorage.getItem("cached_media_items");
+          if (cached) setMediaItems(JSON.parse(cached));
+        } else if (data) {
+          setMediaItems(data);
+          try {
+            localStorage.setItem("cached_media_items", JSON.stringify(data));
+          } catch {}
+        }
+      } catch (err) {
+        console.warn("Media fetch exception:", err);
+        const cached = localStorage.getItem("cached_media_items");
+        if (cached) setMediaItems(JSON.parse(cached));
+      } finally {
+        setLoading(false);
       }
-
-      setLoading(false);
     };
 
     fetchMedia();

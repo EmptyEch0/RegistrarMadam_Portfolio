@@ -25,6 +25,7 @@ interface AdminLayoutProps {
 
 const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: Home },
+  { label: "Visitor Logs", to: "/admin/visitors", icon: Users },
   { label: "Projects & Labs", to: "/admin/projects", icon: FolderGit2 },
   { label: "QLearn Hub", to: "/admin/qlearn", icon: Sparkles },
   { label: "Major Awards", to: "/admin/major-awards", icon: Award },
