@@ -356,12 +356,6 @@ const PublicationsPage = () => {
               ))}
             </div>
           )}
-
-          {!isLoading && filteredPublications.length === 0 && (
-            <p className="text-center text-muted-foreground py-12">
-              No publications found for the selected filter.
-            </p>
-          )}
         </div>
       </section>
 
