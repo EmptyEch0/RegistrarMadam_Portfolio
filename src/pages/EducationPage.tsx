@@ -1,9 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { Award, BookOpen, Users, Trophy, Briefcase, GraduationCap, FolderGit2, ArrowRight, Globe } from "lucide-react";
+import {
+  Award,
+  BookOpen,
+  Users,
+  Trophy,
+  Briefcase,
+  GraduationCap,
+  FolderGit2,
+  ArrowRight,
+  Globe,
+  ArrowUpDown,
+  ChevronDown,
+  Clock,
+  Search,
+  Filter,
+  Calendar
+} from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 // 1️⃣ ADD JSON IMPORTS (TOP OF FILE)
@@ -30,6 +46,8 @@ const EducationPage = () => {
     }[]
   >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [sortBy, setSortBy] = useState<string>("latest");
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   // 2️⃣ ADD SUPABASE SAFETY CHECK
   const isSupabaseEnabled =
@@ -220,6 +238,148 @@ const EducationPage = () => {
     },
   ];
 
+  // Helper functions for parsing years from contribution texts and objects
+  const extractYearsFromString = (text: string): number[] => {
+    if (!text) return [];
+    const matches = text.match(/\b(19\d\d|20\d\d)\b/g);
+    return matches ? matches.map(Number) : [];
+  };
+
+  const getItemLatestYear = (item: any): number => {
+    if (!item) return 0;
+    if (typeof item === "number") return item;
+    if (typeof item === "string") {
+      if (/till date|present/i.test(item)) return 2026;
+      const years = extractYearsFromString(item);
+      return years.length > 0 ? Math.max(...years) : 0;
+    }
+    if (typeof item === "object") {
+      if (typeof item.year === "number") return item.year;
+      if (item.year) {
+        const p = parseInt(String(item.year), 10);
+        if (!isNaN(p)) return p;
+      }
+      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""}`;
+      const years = extractYearsFromString(combined);
+      return years.length > 0 ? Math.max(...years) : 0;
+    }
+    return 0;
+  };
+
+  const getItemEarliestYear = (item: any): number => {
+    if (!item) return 9999;
+    if (typeof item === "number") return item;
+    if (typeof item === "string") {
+      const years = extractYearsFromString(item);
+      return years.length > 0 ? Math.min(...years) : 9999;
+    }
+    if (typeof item === "object") {
+      if (typeof item.year === "number") return item.year;
+      if (item.year) {
+        const p = parseInt(String(item.year), 10);
+        if (!isNaN(p)) return p;
+      }
+      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""}`;
+      const years = extractYearsFromString(combined);
+      return years.length > 0 ? Math.min(...years) : 9999;
+    }
+    return 9999;
+  };
+
+  const sortContributionItems = <T,>(items: T[], order: string): T[] => {
+    if (order === "default") return items;
+    return [...items].sort((a, b) => {
+      if (order === "latest") {
+        const yearA = getItemLatestYear(a);
+        const yearB = getItemLatestYear(b);
+        if (yearA > 0 && yearB > 0) return yearB - yearA;
+        if (yearA > 0) return -1;
+        if (yearB > 0) return 1;
+        return 0;
+      }
+      if (order === "oldest") {
+        const yearA = getItemEarliestYear(a);
+        const yearB = getItemEarliestYear(b);
+        if (yearA < 9999 && yearB < 9999) return yearA - yearB;
+        if (yearA < 9999) return -1;
+        if (yearB < 9999) return 1;
+        return 0;
+      }
+      return 0;
+    });
+  };
+
+  const extractDisplayYearBadge = (item: any): string | null => {
+    if (typeof item === "object") {
+      if (item.year) return String(item.year);
+    }
+    if (typeof item === "string") {
+      if (/till date|present/i.test(item)) {
+        const match = item.match(/\b(19\d\d|20\d\d)\b/);
+        return match ? `${match[0]}–Present` : "Present";
+      }
+      const rangeMatch = item.match(/\b(19\d\d|20\d\d)\s*[-–]\s*(19\d\d|20\d\d)\b/);
+      if (rangeMatch) return rangeMatch[0];
+      const singleMatch = item.match(/\b(19\d\d|20\d\d)\b/);
+      if (singleMatch) return singleMatch[0];
+    }
+    return null;
+  };
+
+  // Filter items matching search
+  const matchesSearch = (item: any): boolean => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    if (typeof item === "string") return item.toLowerCase().includes(q);
+    if (typeof item === "object") {
+      return (
+        (item.title && item.title.toLowerCase().includes(q)) ||
+        (item.organizer && item.organizer.toLowerCase().includes(q)) ||
+        (item.description && item.description.toLowerCase().includes(q)) ||
+        (item.issued_by && item.issued_by.toLowerCase().includes(q)) ||
+        (item.year && String(item.year).includes(q))
+      );
+    }
+    return true;
+  };
+
+  // Memoized sorted lists
+  const sortedFDPs = useMemo(() => {
+    const filtered = facultyDevelopmentPrograms.filter(matchesSearch);
+    return sortContributionItems(filtered, sortBy);
+  }, [facultyDevelopmentPrograms, sortBy, searchQuery]);
+
+  const sortedSessionChairs = useMemo(() => {
+    const filtered = sessionChairs.filter(matchesSearch);
+    return sortContributionItems(filtered, sortBy);
+  }, [sessionChairs, sortBy, searchQuery]);
+
+  const sortedPubsRecognition = useMemo(() => {
+    const filtered = publicationsRecognition.filter(matchesSearch);
+    return sortContributionItems(filtered, sortBy);
+  }, [publicationsRecognition, sortBy, searchQuery]);
+
+  const sortedAcademicContributions = useMemo(() => {
+    return academicContributions.map((section) => ({
+      ...section,
+      items: sortContributionItems(section.items.filter(matchesSearch), sortBy),
+    }));
+  }, [academicContributions, sortBy, searchQuery]);
+
+  const sortedAdministrationContributions = useMemo(() => {
+    return administrationContributions.map((section) => ({
+      ...section,
+      items: sortContributionItems(section.items.filter(matchesSearch), sortBy),
+    }));
+  }, [administrationContributions, sortBy, searchQuery]);
+
+  const sortedProfessionalContributions = useMemo(() => {
+    return professionalContributions.map((section) => ({
+      ...section,
+      items: sortContributionItems(section.items.filter(matchesSearch), sortBy),
+    }));
+  }, [professionalContributions, sortBy, searchQuery]);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -338,6 +498,55 @@ const EducationPage = () => {
         </div>
       </section>
 
+      {/* Sort & Filter Controls Bar */}
+      <section className="py-6 bg-card/70 border-y border-border/80 sticky top-16 z-30 backdrop-blur-md shadow-xs">
+        <div className="container-wide px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 w-full md:w-auto">
+            <span className="p-2 rounded-lg bg-accent/15 text-accent">
+              <Filter size={18} />
+            </span>
+            <div>
+              <span className="font-serif text-base md:text-lg font-bold text-primary block">
+                Contributions & Service Portfolio
+              </span>
+              <span className="text-xs text-muted-foreground">
+                Chronological Academic, Administrative, and Research Records
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search contributions, BOS, IEEE..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-xs md:text-sm bg-background border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 text-foreground placeholder:text-muted-foreground/70 shadow-xs"
+              />
+            </div>
+
+            {/* Sort By Dropdown */}
+            <div className="relative w-full sm:w-60">
+              <ArrowUpDown size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent pointer-events-none" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="w-full pl-9 pr-9 py-2 text-xs md:text-sm bg-background border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 text-foreground shadow-xs appearance-none cursor-pointer font-medium hover:border-accent/40 transition-colors"
+                aria-label="Sort contributions"
+              >
+                <option value="latest">Sort: Latest First (Chronological)</option>
+                <option value="oldest">Sort: Oldest First (Chronological)</option>
+                <option value="default">Sort: Default Curated Order</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Learning & Professional Development */}
       <section className="section-padding">
         <div className="container-wide px-6 lg:px-12">
@@ -349,43 +558,58 @@ const EducationPage = () => {
           <div className="space-y-12">
             {/* Faculty Development Programs */}
             <div className="animate-slide-in-left">
-              <div className="flex items-center gap-3 mb-6">
-                <BookOpen className="w-8 h-8 text-accent" />
-                <h3 className="font-serif text-2xl font-bold text-primary">
-                  Faculty Development Programs
-                </h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <BookOpen className="w-8 h-8 text-accent" />
+                  <h3 className="font-serif text-2xl font-bold text-primary">
+                    Faculty Development Programs
+                  </h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                  <Clock size={12} />
+                  <span>
+                    {sortBy === "latest" ? "Sorted: Latest First" : sortBy === "oldest" ? "Sorted: Oldest First" : "Default Order"}
+                  </span>
+                </div>
               </div>
+
               {isLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading...</div>
-              ) : facultyDevelopmentPrograms.length === 0 ? (
+              ) : sortedFDPs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
-                  <p>No programs found.</p>
+                  <p>No programs found matching your criteria.</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
-                  {facultyDevelopmentPrograms.map((program, index) => (
+                  {sortedFDPs.map((program, index) => (
                     <div
                       key={index}
-                      className="group flex items-start gap-3 p-5 bg-card rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
+                      className="group flex items-start justify-between gap-3 p-5 bg-card rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <span className="w-2 h-2 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
-                      <div className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                        <p>
-                          Participated in faculty development programme on{" "}
-                          <strong className="text-foreground">{program.title}</strong>
-                          {program.organizer && (
-                            <> conducted by <strong className="text-foreground">{program.organizer}</strong></>
-                          )}
-                          {program.duration && <> ({program.duration})</>}
-                          {program.year && <> - {program.year}</>}
-                        </p>
-                        {program.description && (
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {program.description}
+                      <div className="flex items-start gap-3 flex-1">
+                        <span className="w-2 h-2 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
+                        <div className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                          <p>
+                            Participated in faculty development programme on{" "}
+                            <strong className="text-foreground">{program.title}</strong>
+                            {program.organizer && (
+                              <> conducted by <strong className="text-foreground">{program.organizer}</strong></>
+                            )}
+                            {program.duration && <> ({program.duration})</>}
                           </p>
-                        )}
+                          {program.description && (
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {program.description}
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      {program.year && (
+                        <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent/15 text-accent border border-accent/25">
+                          {program.year}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -394,26 +618,51 @@ const EducationPage = () => {
 
             {/* Session Chairs & Recognition */}
             <div className="animate-slide-in-right">
-              <div className="flex items-center gap-3 mb-6">
-                <Trophy className="w-8 h-8 text-accent" />
-                <h3 className="font-serif text-2xl font-bold text-primary">
-                  Session Chairs & Recognition
-                </h3>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-8 h-8 text-accent" />
+                  <h3 className="font-serif text-2xl font-bold text-primary">
+                    Session Chairs & Recognition
+                  </h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                  <Clock size={12} />
+                  <span>
+                    {sortBy === "latest" ? "Sorted: Latest First" : sortBy === "oldest" ? "Sorted: Oldest First" : "Default Order"}
+                  </span>
+                </div>
               </div>
-              <div className="grid gap-4">
-                {sessionChairs.map((chair, index) => (
-                  <div
-                    key={index}
-                    className="group flex items-start gap-3 p-5 bg-gradient-to-r from-card to-card/50 rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                  >
-                    <Award className="w-5 h-5 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
-                    <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                      {chair}
-                    </p>
-                  </div>
-                ))}
-              </div>
+
+              {sortedSessionChairs.length === 0 ? (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p>No session chair records match your search.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {sortedSessionChairs.map((chair, index) => {
+                    const badge = extractDisplayYearBadge(chair);
+                    return (
+                      <div
+                        key={index}
+                        className="group flex items-start justify-between gap-3 p-5 bg-gradient-to-r from-card to-card/50 rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
+                        style={{ animationDelay: `${index * 50}ms` }}
+                      >
+                        <div className="flex items-start gap-3 flex-1">
+                          <Award className="w-5 h-5 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
+                          <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                            {chair}
+                          </p>
+                        </div>
+                        {badge && (
+                          <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent/15 text-accent border border-accent/25">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -430,62 +679,95 @@ const EducationPage = () => {
           <div className="space-y-12">
             {/* Academic Contributions */}
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <GraduationCap className="w-10 h-10 text-accent" />
-                <h3 className="font-serif text-3xl font-bold text-primary">
-                  Academic Contributions
-                </h3>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-10 h-10 text-accent" />
+                  <h3 className="font-serif text-3xl font-bold text-primary">
+                    Academic Contributions
+                  </h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                  <Clock size={12} />
+                  <span>
+                    {sortBy === "latest" ? "Sorted: Latest First" : sortBy === "oldest" ? "Sorted: Oldest First" : "Default Order"}
+                  </span>
+                </div>
               </div>
+
               <div className="grid lg:grid-cols-2 gap-8">
-                {academicContributions.map((section, index) => (
+                {sortedAcademicContributions.map((section, index) => (
                   <div 
                     key={index} 
                     className="space-y-4 animate-fade-in-up"
                     style={{ animationDelay: `${index * 100}ms` }}
                   >
-                    <div className="flex items-center gap-2 p-4 bg-accent/10 rounded-lg border-l-4 border-accent">
+                    <div className="flex items-center justify-between p-4 bg-accent/10 rounded-lg border-l-4 border-accent">
                       <h4 className="font-serif text-xl font-semibold text-primary">
                         {section.category}
                       </h4>
+                      <span className="text-xs font-medium text-accent">
+                        {section.category === "Publications & Recognition" ? sortedPubsRecognition.length : section.items.length} items
+                      </span>
                     </div>
+
                     <div className="space-y-3">
                       {section.category === "Publications & Recognition" ? (
                         isLoading ? (
                           <div className="text-center py-4 text-muted-foreground text-sm">Loading...</div>
+                        ) : sortedPubsRecognition.length === 0 ? (
+                          <div className="text-center py-4 text-muted-foreground text-sm">No records match criteria.</div>
                         ) : (
-                          publicationsRecognition.map((item, itemIndex) => (
+                          sortedPubsRecognition.map((item, itemIndex) => (
                             <div
                               key={itemIndex}
-                              className="group flex items-start gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
+                              className="group flex items-start justify-between gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
                             >
-                              <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
-                              <div className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                                <p>
-                                  {item.title}
-                                  {item.issued_by && ` - ${item.issued_by}`}
-                                  {item.year && ` - ${item.year}`}
-                                </p>
-                                {item.description && (
-                                  <p className="mt-1 text-xs text-muted-foreground">
-                                    {item.description}
+                              <div className="flex items-start gap-3 flex-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
+                                <div className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                                  <p>
+                                    {item.title}
+                                    {item.issued_by && ` - ${item.issued_by}`}
                                   </p>
-                                )}
+                                  {item.description && (
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                      {item.description}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
+                              {item.year && (
+                                <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25">
+                                  {item.year}
+                                </span>
+                              )}
                             </div>
                           ))
                         )
+                      ) : section.items.length === 0 ? (
+                        <div className="text-center py-4 text-muted-foreground text-sm">No items match your search.</div>
                       ) : (
-                        section.items.map((item, itemIndex) => (
-                          <div
-                            key={itemIndex}
-                            className="group flex items-start gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
-                            <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                              {item}
-                            </p>
-                          </div>
-                        ))
+                        section.items.map((item, itemIndex) => {
+                          const badge = extractDisplayYearBadge(item);
+                          return (
+                            <div
+                              key={itemIndex}
+                              className="group flex items-start justify-between gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
+                            >
+                              <div className="flex items-start gap-3 flex-1">
+                                <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
+                                <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                                  {item}
+                                </p>
+                              </div>
+                              {badge && (
+                                <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25 whitespace-nowrap">
+                                  {badge}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })
                       )}
                     </div>
                   </div>
@@ -495,54 +777,94 @@ const EducationPage = () => {
 
             {/* Administration Contributions */}
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <Briefcase className="w-10 h-10 text-accent" />
-                <h3 className="font-serif text-3xl font-bold text-primary">
-                  Administration Contributions
-                </h3>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <Briefcase className="w-10 h-10 text-accent" />
+                  <h3 className="font-serif text-3xl font-bold text-primary">
+                    Administration Contributions
+                  </h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                  <Clock size={12} />
+                  <span>
+                    {sortBy === "latest" ? "Sorted: Latest First" : sortBy === "oldest" ? "Sorted: Oldest First" : "Default Order"}
+                  </span>
+                </div>
               </div>
               
-              <div className="mb-8 animate-fade-in-up">
-                <div className="flex items-center gap-2 p-4 bg-accent/10 rounded-lg border-l-4 border-accent mb-4">
-                  <h4 className="font-serif text-xl font-semibold text-primary">
-                    {administrationContributions[0].category}
-                  </h4>
+              {/* Leadership Roles (Top Category) */}
+              {sortedAdministrationContributions[0] && (
+                <div className="mb-8 animate-fade-in-up">
+                  <div className="flex items-center justify-between p-4 bg-accent/10 rounded-lg border-l-4 border-accent mb-4">
+                    <h4 className="font-serif text-xl font-semibold text-primary">
+                      {sortedAdministrationContributions[0].category}
+                    </h4>
+                    <span className="text-xs font-medium text-accent">
+                      {sortedAdministrationContributions[0].items.length} positions
+                    </span>
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {sortedAdministrationContributions[0].items.map((item, itemIndex) => {
+                      const badge = extractDisplayYearBadge(item);
+                      return (
+                        <div
+                          key={itemIndex}
+                          className="group flex flex-col justify-between p-5 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border border-accent/30 hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                        >
+                          <div className="flex items-start gap-3 mb-3">
+                            <Briefcase className="w-5 h-5 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
+                            <p className="text-sm text-foreground/90 leading-relaxed font-medium group-hover:text-foreground transition-colors">
+                              {item}
+                            </p>
+                          </div>
+                          {badge && (
+                            <div className="mt-auto pt-2 border-t border-accent/20 flex justify-end">
+                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent/20 text-accent">
+                                {badge}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {administrationContributions[0].items.map((item, itemIndex) => (
-                    <div
-                      key={itemIndex}
-                      className="group flex items-start gap-3 p-5 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border border-accent/30 hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                    >
-                      <Briefcase className="w-5 h-5 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
-                      <p className="text-sm text-foreground/90 leading-relaxed font-medium group-hover:text-foreground transition-colors">
-                        {item}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              )}
 
+              {/* Other Administration Categories (Committees, Roles, Duties) */}
               <div className="grid lg:grid-cols-2 gap-8 mb-8">
-                {[administrationContributions[1], administrationContributions[2]].map((section, index) => (
+                {sortedAdministrationContributions.slice(1).map((section, index) => (
                   <div key={index} className="space-y-4 animate-fade-in-up">
-                    <div className="flex items-center gap-2 p-4 bg-accent/10 rounded-lg border-l-4 border-accent">
+                    <div className="flex items-center justify-between p-4 bg-accent/10 rounded-lg border-l-4 border-accent">
                       <h4 className="font-serif text-xl font-semibold text-primary">
                         {section.category}
                       </h4>
+                      <span className="text-xs font-medium text-accent">
+                        {section.items.length} items
+                      </span>
                     </div>
                     <div className="space-y-3">
-                      {section.items.map((item, itemIndex) => (
-                        <div
-                          key={itemIndex}
-                          className="group flex items-start gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
-                          <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                            {item}
-                          </p>
-                        </div>
-                      ))}
+                      {section.items.map((item, itemIndex) => {
+                        const badge = extractDisplayYearBadge(item);
+                        return (
+                          <div
+                            key={itemIndex}
+                            className="group flex items-start justify-between gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-md transition-all duration-300 transform hover:-translate-x-1"
+                          >
+                            <div className="flex items-start gap-3 flex-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-accent flex-shrink-0 mt-2 group-hover:scale-150 transition-transform duration-300" />
+                              <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                                {item}
+                              </p>
+                            </div>
+                            {badge && (
+                              <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25 whitespace-nowrap">
+                                {badge}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}
@@ -551,32 +873,54 @@ const EducationPage = () => {
 
             {/* Professional Contributions */}
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <Users className="w-10 h-10 text-accent" />
-                <h3 className="font-serif text-3xl font-bold text-primary">
-                  Professional Contributions
-                </h3>
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <Users className="w-10 h-10 text-accent" />
+                  <h3 className="font-serif text-3xl font-bold text-primary">
+                    Professional Contributions
+                  </h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-xs font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+                  <Clock size={12} />
+                  <span>
+                    {sortBy === "latest" ? "Sorted: Latest First" : sortBy === "oldest" ? "Sorted: Oldest First" : "Default Order"}
+                  </span>
+                </div>
               </div>
+
               <div className="grid lg:grid-cols-3 gap-8">
-                {professionalContributions.map((section, index) => (
+                {sortedProfessionalContributions.map((section, index) => (
                   <div key={index} className="space-y-4 animate-fade-in-up">
-                    <div className="flex items-center gap-2 p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border-l-4 border-accent">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/10 to-accent/5 rounded-lg border-l-4 border-accent">
                       <h4 className="font-serif text-xl font-semibold text-primary">
                         {section.category}
                       </h4>
+                      <span className="text-xs font-medium text-accent">
+                        {section.items.length} items
+                      </span>
                     </div>
                     <div className="space-y-3">
-                      {section.items.map((item, itemIndex) => (
-                        <div
-                          key={itemIndex}
-                          className="group flex items-start gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:scale-105"
-                        >
-                          <Trophy className="w-4 h-4 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
-                          <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
-                            {item}
-                          </p>
-                        </div>
-                      ))}
+                      {section.items.map((item, itemIndex) => {
+                        const badge = extractDisplayYearBadge(item);
+                        return (
+                          <div
+                            key={itemIndex}
+                            className="group flex items-start justify-between gap-3 p-4 bg-card rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                          >
+                            <div className="flex items-start gap-3 flex-1">
+                              <Trophy className="w-4 h-4 text-accent flex-shrink-0 mt-1 group-hover:rotate-12 transition-transform duration-300" />
+                              <p className="text-sm text-foreground/80 leading-relaxed group-hover:text-foreground transition-colors">
+                                {item}
+                              </p>
+                            </div>
+                            {badge && (
+                              <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25 whitespace-nowrap">
+                                {badge}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ))}

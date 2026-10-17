@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -17,7 +17,10 @@ import {
   Filter,
   CheckCircle2,
   Clock,
-  ArrowUpRight
+  ArrowUpRight,
+  ArrowUpDown,
+  ChevronDown,
+  Calendar
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import defaultProjectsJSON from "@/data/projects.json";
@@ -41,6 +44,7 @@ export interface ProjectItem {
   tags?: string[];
   status?: string;
   featured?: boolean;
+  year?: string | number;
   developers?: Developer[];
   created_at?: string;
 }
@@ -49,6 +53,7 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [sortBy, setSortBy] = useState<string>("latest");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -99,16 +104,53 @@ export default function ProjectsPage() {
 
   const categories = ["All", ...Array.from(new Set(projects.map((p) => p.category).filter(Boolean)))];
 
-  const filteredProjects = projects.filter((item) => {
-    const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
-    const matchesSearch =
-      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (item.tags && item.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) ||
-      (item.developers && item.developers.some((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase())));
+  // Helper to extract timestamp or comparable year value
+  const getProjectTimestamp = (p: ProjectItem): number => {
+    if (p.created_at) {
+      const ts = new Date(p.created_at).getTime();
+      if (!isNaN(ts)) return ts;
+    }
+    if (p.year) {
+      const parsedYear = parseInt(String(p.year), 10);
+      if (!isNaN(parsedYear)) return new Date(parsedYear, 0, 1).getTime();
+    }
+    const numId = parseInt(p.id, 10);
+    return !isNaN(numId) ? numId : 0;
+  };
 
-    return matchesCategory && matchesSearch;
-  });
+  const filteredAndSortedProjects = useMemo(() => {
+    const filtered = projects.filter((item) => {
+      const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+      const matchesSearch =
+        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.tags && item.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()))) ||
+        (item.developers && item.developers.some((d) => d.name.toLowerCase().includes(searchQuery.toLowerCase())));
+
+      return matchesCategory && matchesSearch;
+    });
+
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "latest") {
+        return getProjectTimestamp(b) - getProjectTimestamp(a);
+      }
+      if (sortBy === "oldest") {
+        return getProjectTimestamp(a) - getProjectTimestamp(b);
+      }
+      if (sortBy === "featured") {
+        if (a.featured && !b.featured) return -1;
+        if (!a.featured && b.featured) return 1;
+        return getProjectTimestamp(b) - getProjectTimestamp(a);
+      }
+      if (sortBy === "title-asc") {
+        return a.title.localeCompare(b.title);
+      }
+      if (sortBy === "title-desc") {
+        return b.title.localeCompare(a.title);
+      }
+      return 0;
+    });
+  }, [projects, selectedCategory, searchQuery, sortBy]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -164,10 +206,10 @@ export default function ProjectsPage() {
       {/* Main Content Area */}
       <section className="py-12">
         <div className="container-wide px-6 lg:px-12">
-          {/* Controls Bar: Search & Category Pills */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-border/60">
+          {/* Controls Bar: Search & Category Pills & Sort By */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-border/60">
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-none">
+            <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-2 lg:pb-0 scrollbar-none">
               <Filter size={16} className="text-muted-foreground shrink-0 hidden sm:block mr-1" />
               {categories.map((cat) => (
                 <button
@@ -184,16 +226,57 @@ export default function ProjectsPage() {
               ))}
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full md:w-72">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search projects, tech, developers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 text-foreground placeholder:text-muted-foreground/70 shadow-xs"
-              />
+            {/* Right Controls: Search Input + Sort By Selector */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+              {/* Search Input */}
+              <div className="relative w-full sm:w-64">
+                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search projects, tech, developers..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 text-sm bg-card border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 text-foreground placeholder:text-muted-foreground/70 shadow-xs"
+                />
+              </div>
+
+              {/* Sort By Dropdown */}
+              <div className="relative w-full sm:w-52">
+                <ArrowUpDown size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent pointer-events-none" />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full pl-9 pr-9 py-2 text-xs md:text-sm bg-card border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-accent/40 text-foreground shadow-xs appearance-none cursor-pointer font-medium hover:border-accent/40 transition-colors"
+                  aria-label="Sort projects"
+                >
+                  <option value="latest">Sort: Latest First</option>
+                  <option value="oldest">Sort: Oldest First</option>
+                  <option value="featured">Sort: Featured First</option>
+                  <option value="title-asc">Sort: Title (A-Z)</option>
+                  <option value="title-desc">Sort: Title (Z-A)</option>
+                </select>
+                <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Status & Results Summary Bar */}
+          <div className="flex flex-wrap items-center justify-between text-xs text-muted-foreground mb-8 gap-2">
+            <div>
+              Showing <strong className="text-foreground">{filteredAndSortedProjects.length}</strong> of {projects.length} projects
+              {searchQuery && (
+                <span> matching &ldquo;<span className="text-accent">{searchQuery}</span>&rdquo;</span>
+              )}
+            </div>
+            <div className="inline-flex items-center gap-1.5 font-medium text-accent bg-accent/10 px-3 py-1 rounded-full border border-accent/20">
+              <Clock size={12} />
+              <span>
+                {sortBy === "latest" && "Sorted: Latest First"}
+                {sortBy === "oldest" && "Sorted: Oldest First"}
+                {sortBy === "featured" && "Sorted: Featured First"}
+                {sortBy === "title-asc" && "Sorted: Title (A-Z)"}
+                {sortBy === "title-desc" && "Sorted: Title (Z-A)"}
+              </span>
             </div>
           </div>
 
@@ -204,7 +287,7 @@ export default function ProjectsPage() {
                 <div key={i} className="h-96 rounded-2xl bg-muted/40 animate-pulse border border-border/50" />
               ))}
             </div>
-          ) : filteredProjects.length === 0 ? (
+          ) : filteredAndSortedProjects.length === 0 ? (
             <div className="text-center py-20 bg-muted/20 rounded-3xl border border-dashed border-border my-6">
               <Layers size={48} className="mx-auto text-muted-foreground/50 mb-4" />
               <h3 className="text-lg font-semibold text-primary mb-1">No projects found</h3>
@@ -217,6 +300,7 @@ export default function ProjectsPage() {
                 onClick={() => {
                   setSelectedCategory("All");
                   setSearchQuery("");
+                  setSortBy("latest");
                 }}
               >
                 Reset Filters
@@ -224,7 +308,7 @@ export default function ProjectsPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProjects.map((project) => (
+              {filteredAndSortedProjects.map((project) => (
                 <div
                   key={project.id}
                   className="group bg-card rounded-2xl border border-border shadow-sm hover:shadow-xl hover:border-accent/40 transition-all duration-300 flex flex-col overflow-hidden relative"
@@ -249,8 +333,14 @@ export default function ProjectsPage() {
                       </span>
                     </div>
 
-                    {/* Status badge */}
-                    <div className="absolute top-3 right-3">
+                    {/* Status & Year badges */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                      {(project.year || (project.created_at && new Date(project.created_at).getFullYear())) && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-accent/20 text-accent border border-accent/40 backdrop-blur-md shadow-xs">
+                          <Calendar size={11} />
+                          {project.year || new Date(project.created_at!).getFullYear()}
+                        </span>
+                      )}
                       <span
                         className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-md shadow-xs ${
                           project.status === "Live"
