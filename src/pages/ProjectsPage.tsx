@@ -66,11 +66,20 @@ export default function ProjectsPage() {
       // 1. Try local storage cache from Admin if exists
       const localCustom = localStorage.getItem("admin_projects_data");
       if (localCustom) {
-        const parsed = JSON.parse(localCustom);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setProjects(parsed);
-          setIsLoading(false);
-          return;
+        const parsed: ProjectItem[] = JSON.parse(localCustom);
+        if (Array.isArray(parsed)) {
+          const clean = parsed.filter(
+            (p) =>
+              p.id !== "2" &&
+              p.id !== "3" &&
+              !p.title.includes("Smart Campus IoT") &&
+              !p.title.includes("VANETs")
+          );
+          if (clean.length > 0) {
+            setProjects(clean);
+            setIsLoading(false);
+            return;
+          }
         }
       }
 
@@ -82,7 +91,14 @@ export default function ProjectsPage() {
           .order("featured", { ascending: false });
 
         if (!error && data && data.length > 0) {
-          setProjects(data);
+          const clean = data.filter(
+            (p: any) =>
+              p.id !== "2" &&
+              p.id !== "3" &&
+              !p.title?.includes("Smart Campus IoT") &&
+              !p.title?.includes("VANETs")
+          );
+          setProjects(clean.length > 0 ? clean : (defaultProjectsJSON as ProjectItem[]));
           setIsLoading(false);
           return;
         }

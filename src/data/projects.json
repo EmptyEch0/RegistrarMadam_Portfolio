@@ -21,47 +21,5 @@
         "github_url": "https://github.com/Likhith32"
       }
     ]
-  },
-  {
-    "id": "2",
-    "title": "Smart Campus IoT & Environmental Telemetry",
-    "description": "An IoT-enabled campus monitoring system integrating air quality telemetry, distributed sensor networks, and edge ML models for smart institutional energy conservation.",
-    "category": "IoT & Smart Systems",
-    "live_url": "",
-    "github_url": "https://github.com/EmptyEch0/RegistrarMadam_Portfolio",
-    "image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
-    "tags": ["IoT", "ESP32", "Edge AI", "Data Analytics"],
-    "status": "Completed",
-    "featured": false,
-    "year": "2025",
-    "created_at": "2025-06-20T00:00:00.000Z",
-    "developers": [
-      {
-        "name": "Department Research Team",
-        "role": "Student Innovators",
-        "photo_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
-      }
-    ]
-  },
-  {
-    "id": "3",
-    "title": "VANETs Adaptive Congestion Avoidance Protocol",
-    "description": "Simulation research testbed implementing dynamic fuzzification and multi-split decision algorithms to mitigate data dissemination pile-ups in Vehicular Ad-Hoc Networks.",
-    "category": "Research Prototypes",
-    "live_url": "",
-    "github_url": "https://github.com/EmptyEch0/RegistrarMadam_Portfolio",
-    "image_url": "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&auto=format&fit=crop&q=80",
-    "tags": ["VANET", "NS3", "Machine Learning", "Traffic Simulation"],
-    "status": "Completed",
-    "featured": false,
-    "year": "2024",
-    "created_at": "2024-04-12T00:00:00.000Z",
-    "developers": [
-      {
-        "name": "Network Research Lab",
-        "role": "M.Tech & Ph.D. Scholars",
-        "photo_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80"
-      }
-    ]
   }
 ]

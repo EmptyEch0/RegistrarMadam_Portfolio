@@ -2,6 +2,7 @@ import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { cn } from "@/lib/utils";
 import {
   ArrowLeft,
   Play,
@@ -3011,63 +3012,63 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <Header />
+    <div className={cn("bg-background text-foreground flex flex-col", isAdminPortal ? "w-full" : "min-h-screen")}>
+      {!isAdminPortal && <Header />}
 
-      {/* HERO SECTION */}
-      <section className="relative pt-32 pb-16 bg-gradient-to-b from-cream-dark via-cream/40 to-background overflow-hidden border-b border-border/40">
-        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute -bottom-10 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div 
-          className="absolute inset-0 opacity-[0.04] pointer-events-none" 
-          style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.15) 1px, transparent 0)`,
-            backgroundSize: '24px 24px'
-          }}
-        />
+      {/* HERO SECTION (Public Only) */}
+      {!isAdminPortal && (
+        <section className="relative pt-32 pb-16 bg-gradient-to-b from-cream-dark via-cream/40 to-background overflow-hidden border-b border-border/40">
+          <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] pointer-events-none" />
+          <div className="absolute -bottom-10 right-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div 
+            className="absolute inset-0 opacity-[0.04] pointer-events-none" 
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.15) 1px, transparent 0)`,
+              backgroundSize: '24px 24px'
+            }}
+          />
 
-        <div className="container-wide px-6 lg:px-12 relative z-10">
-          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
-            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-              <Link 
-                to="/education" 
-                className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/15 border border-accent/30 rounded-full text-accent text-sm font-medium hover:bg-accent/20 transition-all duration-300"
-              >
-                <ArrowLeft size={14} /> Back to Contributions
-              </Link>
-              <button
-                type="button"
-                onClick={() => setPuzzleModalOpen(true)}
-                className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white rounded-full text-sm font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all duration-300 border border-white/25"
-              >
-                <Gamepad2 size={16} /> <span>Course Puzzles & Leaderboards</span>
-                <span className="bg-white/30 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider">6 Courses</span>
-              </button>
-              {!isAdminPortal && (
+          <div className="container-wide px-6 lg:px-12 relative z-10">
+            <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
+              <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+                <Link 
+                  to="/education" 
+                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent/15 border border-accent/30 rounded-full text-accent text-sm font-medium hover:bg-accent/20 transition-all duration-300"
+                >
+                  <ArrowLeft size={14} /> Back to Contributions
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setPuzzleModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white rounded-full text-sm font-bold shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-105 transition-all duration-300 border border-white/25"
+                >
+                  <Gamepad2 size={16} /> <span>Course Puzzles & Leaderboards</span>
+                  <span className="bg-white/30 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold uppercase tracking-wider">6 Courses</span>
+                </button>
                 <VisitorProfileBadge onProfileChanged={setCurrentVisitor} />
-              )}
-            </div>
-            
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tight leading-tight">
-              QLearn
-              <span className="text-accent block text-2xl md:text-3xl font-sans mt-2 font-medium tracking-normal">
-                Advanced Technology Learning Center
-              </span>
-            </h1>
-            
-            <div className="w-24 h-1 bg-accent rounded-full my-6" />
+              </div>
+              
+              <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tight leading-tight">
+                QLearn
+                <span className="text-accent block text-2xl md:text-3xl font-sans mt-2 font-medium tracking-normal">
+                  Advanced Technology Learning Center
+                </span>
+              </h1>
+              
+              <div className="w-24 h-1 bg-accent rounded-full my-6" />
 
-            <p className="text-lg text-muted-foreground max-w-2xl">
-              An interactive visual laboratory. Explore domains like Quantum Computing, Data Science, AI, and test your skills with word puzzles & live leaderboards.
-            </p>
+              <p className="text-lg text-muted-foreground max-w-2xl">
+                An interactive visual laboratory. Explore domains like Quantum Computing, Data Science, AI, and test your skills with word puzzles & live leaderboards.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* MAIN TOPIC & TABS SECTION */}
-      <section className="flex-1 py-12 bg-background relative z-10">
-        <div className="container-wide px-6 lg:px-12">
+      <section className={cn("flex-1 bg-background relative z-10", isAdminPortal ? "py-4 px-3 sm:px-6" : "py-12")}>
+        <div className={isAdminPortal ? "w-full" : "container-wide px-6 lg:px-12"}>
           
           {activeDomainIndex === null ? (
             activeTab === "puzzles" ? (
@@ -3297,8 +3298,10 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 {/* TABS */}
                 {activeModule && (
                   <>
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-border/80 gap-4 pb-3">
-                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 p-2 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-inner">
+                    {/* TABS CONTAINER */}
+                    <div className="w-full space-y-3 border-b border-border/80 pb-4">
+                      {/* The 6 module tabs */}
+                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-1.5 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-xs">
                         {[
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
@@ -3313,14 +3316,14 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                             <button
                               key={tab.id}
                               onClick={() => handleTabSwitch(tab.id as any)}
-                              className={`flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
+                              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
                                 isActive
                                   ? "bg-card text-accent shadow-md shadow-accent/10 ring-1 ring-accent/30 font-bold transform scale-[1.01]"
                                   : "text-muted-foreground hover:text-foreground hover:bg-card/60"
                               }`}
                             >
-                              <TabIcon size={18} className={isActive ? "text-accent" : "text-muted-foreground"} />
-                              <span className="whitespace-nowrap">{tab.label}</span>
+                              <TabIcon size={17} className={isActive ? "text-accent" : "text-muted-foreground"} />
+                              <span className="whitespace-nowrap truncate">{tab.label}</span>
                               {tab.badge && !isActive && (
                                 <span className="hidden xl:inline-block text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
                                   {tab.badge}
@@ -3331,48 +3334,55 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                         })}
                       </div>
 
-                      {/* Admin upload controls (ONLY rendered when accessed inside protected Admin Portal) */}
+                      {/* Admin upload & maintenance toolbar (ONLY rendered in Admin Portal) */}
                       {isAdminPortal && (
-                        <div className="flex flex-wrap items-center gap-2">
-                          {activeTab === "videos" && (
-                            <Button 
-                              variant="hero" 
+                        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-card border border-border/80 rounded-xl shadow-xs">
+                          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Active Section: <strong className="text-foreground capitalize">{activeTab}</strong></span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2">
+                            {activeTab === "videos" && (
+                              <Button 
+                                variant="hero" 
+                                size="sm"
+                                onClick={() => setVideoModalOpen(true)}
+                                className="flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:shadow-md transition-all"
+                              >
+                                <Plus size={14} /> Upload Video
+                              </Button>
+                            )}
+                            {activeTab === "notes" && (
+                              <Button 
+                                variant="hero" 
+                                size="sm"
+                                onClick={() => setNoteModalOpen(true)}
+                                className="flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:shadow-md transition-all"
+                              >
+                                <Plus size={14} /> Add Notes Slide
+                              </Button>
+                            )}
+                            {activeTab === "ppts" && (
+                              <Button 
+                                variant="hero" 
+                                size="sm"
+                                onClick={() => setPptModalOpen(true)}
+                                className="flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:shadow-md transition-all"
+                              >
+                                <Plus size={14} /> Upload PPT / Drive Link
+                              </Button>
+                            )}
+                            <Button
+                              variant="outline"
                               size="sm"
-                              onClick={() => setVideoModalOpen(true)}
-                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
+                              onClick={handleResetToDefaults}
+                              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/40 transition-all"
+                              title="Reset all content to original defaults"
                             >
-                              <Plus size={14} /> Upload Video
+                              <RefreshCw size={12} /> Reset to Defaults
                             </Button>
-                          )}
-                          {activeTab === "notes" && (
-                            <Button 
-                              variant="hero" 
-                              size="sm"
-                              onClick={() => setNoteModalOpen(true)}
-                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
-                            >
-                              <Plus size={14} /> Add Notes Slide
-                            </Button>
-                          )}
-                          {activeTab === "ppts" && (
-                            <Button 
-                              variant="hero" 
-                              size="sm"
-                              onClick={() => setPptModalOpen(true)}
-                              className="flex items-center gap-2 text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-300"
-                            >
-                              <Plus size={14} /> Upload PPT / Drive Link
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleResetToDefaults}
-                            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-red-500 hover:border-red-500/40 transition-all duration-200"
-                            title="Reset all content to original defaults"
-                          >
-                            <RefreshCw size={12} /> Reset to Defaults
-                          </Button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -4569,7 +4579,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
         />
       )}
 
-      <Footer />
+      {!isAdminPortal && <Footer />}
     </div>
   );
 }

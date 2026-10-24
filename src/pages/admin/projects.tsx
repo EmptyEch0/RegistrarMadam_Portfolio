@@ -77,7 +77,15 @@ export default function AdminProjects() {
       let currentData: ProjectItem[] = [];
 
       if (local) {
-        currentData = JSON.parse(local);
+        const parsed: ProjectItem[] = JSON.parse(local);
+        currentData = parsed.filter(
+          (p) =>
+            p.id !== "2" &&
+            p.id !== "3" &&
+            !p.title.includes("Smart Campus IoT") &&
+            !p.title.includes("VANETs")
+        );
+        localStorage.setItem("admin_projects_data", JSON.stringify(currentData));
       } else {
         // 2. Try Supabase
         if (supabase && import.meta.env.VITE_SUPABASE_URL) {
@@ -87,7 +95,13 @@ export default function AdminProjects() {
             .order("created_at", { ascending: false });
 
           if (!error && data && data.length > 0) {
-            currentData = data;
+            currentData = data.filter(
+              (p) =>
+                p.id !== "2" &&
+                p.id !== "3" &&
+                !p.title.includes("Smart Campus IoT") &&
+                !p.title.includes("VANETs")
+            );
           }
         }
       }

@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Eye,
+  EyeOff,
   LogOut,
   Award,
   BookOpen,
@@ -57,6 +58,7 @@ export function StudentPortalModal({
   // Login form state
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
 
@@ -72,6 +74,8 @@ export function StudentPortalModal({
   const [signupBranch, setSignupBranch] = useState("Information Technology");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [showSignupConfirmPassword, setShowSignupConfirmPassword] = useState(false);
   const [signupError, setSignupError] = useState("");
   const [signupLoading, setSignupLoading] = useState(false);
 
@@ -384,14 +388,25 @@ export function StudentPortalModal({
                       <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                         <Lock size={13} className="text-accent" /> Password *
                       </label>
-                      <input
-                        type="password"
-                        required
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        placeholder="Enter your account password"
-                        className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showLoginPassword ? "text" : "password"}
+                          required
+                          value={loginPassword}
+                          onChange={(e) => setLoginPassword(e.target.value)}
+                          placeholder="Enter your account password"
+                          className="w-full text-sm pl-3.5 pr-11 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowLoginPassword(!showLoginPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                          aria-label={showLoginPassword ? "Hide password" : "Show password"}
+                          title={showLoginPassword ? "Hide password" : "Show password"}
+                        >
+                          {showLoginPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
                     </div>
 
                     <Button
@@ -583,28 +598,50 @@ export function StudentPortalModal({
                         <label className="text-xs font-semibold text-foreground">
                           Password *
                         </label>
-                        <input
-                          type="password"
-                          required
-                          value={signupPassword}
-                          onChange={(e) => setSignupPassword(e.target.value)}
-                          placeholder="At least 4 characters"
-                          className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:outline-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showSignupPassword ? "text" : "password"}
+                            required
+                            value={signupPassword}
+                            onChange={(e) => setSignupPassword(e.target.value)}
+                            placeholder="At least 4 characters"
+                            className="w-full text-sm pl-3.5 pr-10 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignupPassword(!showSignupPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                            aria-label={showSignupPassword ? "Hide password" : "Show password"}
+                            title={showSignupPassword ? "Hide password" : "Show password"}
+                          >
+                            {showSignupPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-foreground">
                           Confirm Password *
                         </label>
-                        <input
-                          type="password"
-                          required
-                          value={signupConfirmPassword}
-                          onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                          placeholder="Re-type password"
-                          className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:outline-none"
-                        />
+                        <div className="relative">
+                          <input
+                            type={showSignupConfirmPassword ? "text" : "password"}
+                            required
+                            value={signupConfirmPassword}
+                            onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                            placeholder="Re-type password"
+                            className="w-full text-sm pl-3.5 pr-10 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowSignupConfirmPassword(!showSignupConfirmPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1"
+                            aria-label={showSignupConfirmPassword ? "Hide password" : "Show password"}
+                            title={showSignupConfirmPassword ? "Hide password" : "Show password"}
+                          >
+                            {showSignupConfirmPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                          </button>
+                        </div>
                       </div>
                     </div>
 

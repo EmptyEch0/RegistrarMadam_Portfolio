@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight } from "lucide-react";
+import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
@@ -43,10 +43,16 @@ export function Header() {
   const [isMobileQLearnOpen, setIsMobileQLearnOpen] = useState(false);
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<StudentAccount | null>(() => getCurrentStudent());
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     setCurrentStudent(getCurrentStudent());
+    try {
+      setIsAdmin(localStorage.getItem("admin_authenticated") === "true");
+    } catch {
+      setIsAdmin(false);
+    }
   }, [location, studentModalOpen]);
 
   /* ---------- Scroll detection ---------- */
@@ -83,6 +89,11 @@ export function Header() {
   const isQLearnActive = location.pathname === "/qlearn" && !location.search.includes("tab=puzzles");
   const isProjectsActive = location.pathname === "/projects";
   const isContactActive = location.pathname === "/contact";
+
+  // Hide the public header completely inside any /admin route
+  if (location.pathname.startsWith("/admin")) {
+    return null;
+  }
 
   return (
     <>
@@ -320,9 +331,18 @@ export function Header() {
               Collaborate
             </Link>
 
-            {/* Student Login / Portal in right-most corner */}
+            {/* Right-most corner: Admin Dashboard OR Student Login */}
             <div className="ml-1 pl-2 border-l border-border/60 flex items-center">
-              {currentStudent ? (
+              {isAdmin ? (
+                <Link
+                  to="/admin/dashboard"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
+                  title="Open Admin Dashboard"
+                >
+                  <ShieldCheck size={15} className="text-amber-600 dark:text-amber-400" />
+                  <span>Admin Dashboard</span>
+                </Link>
+              ) : currentStudent ? (
                 <button
                   type="button"
                   onClick={() => setStudentModalOpen(true)}
@@ -347,16 +367,26 @@ export function Header() {
             </div>
           </div>
 
-          {/* Mobile Right Action Area: Student Login & Hamburger */}
+          {/* Mobile Right Action Area: Admin / Student Login & Hamburger */}
           <div className="flex items-center gap-2 lg:hidden">
-            <button
-              type="button"
-              onClick={() => setStudentModalOpen(true)}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs"
-            >
-              <GraduationCap size={14} />
-              <span>{currentStudent ? (currentStudent.rollNo || "Portal") : "Student Login"}</span>
-            </button>
+            {isAdmin ? (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 font-semibold text-xs"
+              >
+                <ShieldCheck size={14} />
+                <span>Admin</span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStudentModalOpen(true)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs"
+              >
+                <GraduationCap size={14} />
+                <span>{currentStudent ? (currentStudent.rollNo || "Portal") : "Student Login"}</span>
+              </button>
+            )}
 
             <Button
               variant="ghost"
@@ -548,23 +578,34 @@ export function Header() {
                 Collaborate
               </Link>
 
-              {/* Mobile Student Portal Button */}
+              {/* Mobile Student / Admin Portal Button */}
               <div className="pt-2 px-1">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    setStudentModalOpen(true);
-                  }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-accent/20 to-amber-500/20 border border-accent/40 text-primary font-bold text-sm shadow-sm"
-                >
-                  <GraduationCap size={18} className="text-accent" />
-                  <span>
-                    {currentStudent
-                      ? `Student Portal (${currentStudent.rollNo || currentStudent.fullName})`
-                      : "Student Login / Academics Portal"}
-                  </span>
-                </button>
+                {isAdmin ? (
+                  <Link
+                    to="/admin/dashboard"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm"
+                  >
+                    <ShieldCheck size={18} className="text-amber-600" />
+                    <span>Admin Dashboard</span>
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      setStudentModalOpen(true);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-accent/20 to-amber-500/20 border border-accent/40 text-primary font-bold text-sm shadow-sm"
+                  >
+                    <GraduationCap size={18} className="text-accent" />
+                    <span>
+                      {currentStudent
+                        ? `Student Portal (${currentStudent.rollNo || currentStudent.fullName})`
+                        : "Student Login / Academics Portal"}
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
