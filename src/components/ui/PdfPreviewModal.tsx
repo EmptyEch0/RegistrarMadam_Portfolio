@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Download, FileText, ExternalLink, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -21,6 +22,17 @@ export function PdfPreviewModal({
   rollNo,
   submittedAt,
 }: PdfPreviewModalProps) {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   if (!isOpen || !pdfUrl) return null;
 
   const handleDownload = () => {
@@ -37,9 +49,15 @@ export function PdfPreviewModal({
     }
   };
 
-  return (
+  const modalTarget = typeof document !== "undefined"
+    ? document.getElementById("modal-root") || document.body
+    : null;
+
+  if (!modalTarget) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+      className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -108,6 +126,7 @@ export function PdfPreviewModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    modalTarget
   );
 }

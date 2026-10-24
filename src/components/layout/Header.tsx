@@ -85,7 +85,8 @@ export function Header() {
   const isContactActive = location.pathname === "/contact";
 
   return (
-    <header
+    <>
+      <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300 will-change-transform no-print",
         isScrolled
@@ -569,12 +570,13 @@ export function Header() {
           </div>
         )}
       </div>
-
-      {/* Student Portal Modal */}
-      <StudentPortalModal
-        isOpen={studentModalOpen}
-        onClose={() => setStudentModalOpen(false)}
-      />
     </header>
+
+    {/* Student Portal Modal */}
+    <StudentPortalModal
+      isOpen={studentModalOpen}
+      onClose={() => setStudentModalOpen(false)}
+    />
+  </>
   );
 }

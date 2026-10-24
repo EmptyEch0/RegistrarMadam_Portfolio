@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import {
   X,
@@ -258,14 +259,32 @@ export function StudentPortalModal({
     }
   };
 
-  return (
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const modalTarget = typeof document !== "undefined"
+    ? document.getElementById("modal-root") || document.body
+    : null;
+
+  if (!modalTarget) return null;
+
+  return createPortal(
     <>
       <div
-        className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+        className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
         onClick={onClose}
       >
         <div
-          className="bg-card border border-border w-full max-w-2xl max-h-[92vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-slide-up"
+          className="bg-card border border-border w-full max-w-2xl max-h-[90vh] my-auto rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-slide-up"
           onClick={(e) => e.stopPropagation()}
         >
           {/* ================= MODAL HEADER ================= */}
@@ -1022,6 +1041,7 @@ export function StudentPortalModal({
         studentName={student?.fullName}
         rollNo={student?.rollNo}
       />
-    </>
+    </>,
+    modalTarget
   );
 }
