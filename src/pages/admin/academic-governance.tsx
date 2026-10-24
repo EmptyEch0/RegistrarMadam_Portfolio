@@ -62,21 +62,24 @@ export default function AcademicGovernanceAdmin() {
 
   return (
     <AdminLayout>
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Academic Governance</h2>
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif tracking-tight">Academic Governance</h2>
+          <p className="text-sm text-[#64748B] mt-0.5">Manage administrative governance and institutional leadership roles</p>
+        </div>
         <button
           onClick={() => {
             setEditing(null);
             setShowForm(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="inline-flex items-center gap-2 bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           + Add Entry
         </button>
       </div>
 
       {showForm && (
-        <div className="mb-6 bg-white p-4 border rounded">
+        <div className="mb-6 bg-white p-6 border border-[#E7E2D8] rounded-2xl shadow-sm animate-fade-in-up">
           <AdminForm
             fields={[
               { name: "title", label: "Title", type: "text", required: true },
@@ -94,19 +97,21 @@ export default function AcademicGovernanceAdmin() {
       )}
 
       {!loading && (
-        <AdminTable
-          columns={[
-            { key: "title", label: "Title" },
-            { key: "institution", label: "Institution" },
-            { key: "years", label: "Years" },
-          ]}
-          data={data}
-          onEdit={(row) => {
-            setEditing(row);
-            setShowForm(true);
-          }}
-          onDelete={handleDelete}
-        />
+        <div className="bg-white rounded-2xl border border-[#E7E2D8] shadow-sm overflow-hidden">
+          <AdminTable
+            columns={[
+              { key: "title", label: "Title" },
+              { key: "institution", label: "Institution" },
+              { key: "years", label: "Years" },
+            ]}
+            data={data}
+            onEdit={(row) => {
+              setEditing(row);
+              setShowForm(true);
+            }}
+            onDelete={handleDelete}
+          />
+        </div>
       )}
     </AdminLayout>
   );

@@ -227,3 +227,100 @@
     color: inherit;
   }
 }
+
+/* ==========================================================================
+   ADMIN PORTAL DESIGN SYSTEM PALETTE
+   Purpose               Colour          Hex code
+   Main text             Slate           #334155
+   Secondary text        Muted slate     #64748B
+   Borders & dividers    Warm grey       #E7E2D8
+   Success / signed up   Green           #16845B
+   Information / PDF     Blue            #2563EB
+   Warning / pending     Amber           #B86B00
+   Error / delete        Red             #B42318
+   Sidebar background    Midnight navy   #0B132B
+   Icons / active item   Gold            #C59B27
+   Dashboard content bg  Ivory           #FAF8F5
+   Cards                 White           #FFFFFF
+   Headings              Navy            #0B132B
+   Primary buttons       Gold bg, Navy text
+   Secondary buttons     White bg, Navy text, Gold outline
+   ========================================================================== */
+:root {
+  --admin-slate-main: #334155;
+  --admin-slate-secondary: #64748B;
+  --admin-border-warmgrey: #E7E2D8;
+  --admin-success-green: #16845B;
+  --admin-info-blue: #2563EB;
+  --admin-warning-amber: #B86B00;
+  --admin-error-red: #B42318;
+  --admin-midnight-navy: #0B132B;
+  --admin-midnight-navy-light: #152246;
+  --admin-gold: #C59B27;
+  --admin-gold-hover: #B58C1F;
+  --admin-gold-tint: rgba(197, 155, 39, 0.12);
+  --admin-ivory: #FAF8F5;
+  --admin-card-white: #FFFFFF;
+}
+
+.admin-theme {
+  background-color: var(--admin-ivory);
+  color: var(--admin-slate-main);
+}
+
+.admin-btn-primary {
+  background-color: #C59B27 !important;
+  color: #0B132B !important;
+  font-weight: 600 !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.admin-btn-primary:hover:not(:disabled) {
+  background-color: #B58C1F !important;
+  color: #0B132B !important;
+  box-shadow: 0 4px 14px rgba(197, 155, 39, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-btn-secondary {
+  background-color: #FFFFFF !important;
+  color: #0B132B !important;
+  border: 1.5px solid #C59B27 !important;
+  font-weight: 600 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.admin-btn-secondary:hover:not(:disabled) {
+  background-color: #FAF8F5 !important;
+  color: #0B132B !important;
+  box-shadow: 0 4px 12px rgba(197, 155, 39, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+.admin-btn-danger {
+  background-color: #B42318 !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.admin-btn-danger:hover:not(:disabled) {
+  background-color: #991B1B !important;
+  box-shadow: 0 4px 14px rgba(180, 35, 24, 0.3) !important;
+}
+
+.admin-btn-info {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  border: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.admin-btn-info:hover:not(:disabled) {
+  background-color: #1D4ED8 !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
+}
+

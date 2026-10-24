@@ -168,48 +168,48 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
         className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl font-bold text-white drop-shadow">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <h2 className="text-2xl font-bold text-[#0B132B] font-serif">
               Visitors & Access Tracking
             </h2>
             <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border shadow-xs ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                 isCloudSynced
-                  ? "bg-emerald-500/20 text-emerald-100 border-emerald-400/30"
-                  : "bg-amber-500/20 text-amber-100 border-amber-400/30"
+                  ? "bg-[#16845B]/10 text-[#16845B] border-[#16845B]/30"
+                  : "bg-[#B86B00]/10 text-[#B86B00] border-[#B86B00]/30"
               }`}
             >
               <Database size={11} />
               {isCloudSynced ? "Cloud Synced (Supabase)" : "Local Storage Active"}
             </span>
           </div>
-          <p className="text-white/80 text-sm">
-            Log of learners who visited the site, accessed Courses, or played Puzzles
+          <p className="text-[#64748B] text-sm">
+            Activity records of learners who accessed course materials or completed learning challenges
           </p>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={() => setShowSqlModal(true)}
-            className="flex items-center gap-1.5 rounded-xl bg-white/20 backdrop-blur-md px-3.5 py-2 text-xs font-semibold text-white border border-white/30 hover:bg-white/30 transition-all"
+            className="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-semibold text-[#0B132B] border border-[#C59B27] hover:bg-[#FAF8F5] transition-all shadow-xs"
             title="View database table instructions"
           >
-            <Database size={14} /> Schema SQL
+            <Database size={14} className="text-[#C59B27]" /> Schema SQL
           </button>
 
           <button
             onClick={fetchLogs}
             disabled={loading}
-            className="flex items-center gap-1.5 rounded-xl bg-white/80 px-3.5 py-2 text-xs font-semibold text-gray-800 shadow hover:bg-white transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-semibold text-[#0B132B] border border-[#C59B27] hover:bg-[#FAF8F5] transition-all shadow-xs disabled:opacity-50"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+            <RefreshCw size={14} className={loading ? "animate-spin text-[#C59B27]" : "text-[#C59B27]"} /> Refresh
           </button>
 
           <button
             onClick={handleExport}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow hover:bg-emerald-700 transition-all disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[#C59B27] px-4 py-2 text-xs font-semibold text-[#0B132B] shadow-sm hover:bg-[#B58C1F] transition-all disabled:opacity-50"
           >
             <Download size={14} /> Export CSV
           </button>
@@ -217,7 +217,7 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
           {logs.length > 0 && (
             <button
               onClick={handleClear}
-              className="flex items-center gap-1.5 rounded-xl bg-red-600/80 px-3.5 py-2 text-xs font-semibold text-white shadow hover:bg-red-600 transition-all"
+              className="flex items-center gap-1.5 rounded-xl bg-[#B42318] px-3.5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#991B1B] transition-all"
             >
               <Trash2 size={14} /> Clear
             </button>
@@ -230,104 +230,104 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 p-4 shadow-lg"
+          className="rounded-2xl bg-white border border-[#E7E2D8] p-4 shadow-xs"
         >
-          <div className="flex items-center justify-between text-gray-600 text-xs font-medium mb-1">
+          <div className="flex items-center justify-between text-[#64748B] text-xs font-medium mb-1">
             <span>Total Visits</span>
-            <Users size={16} className="text-amber-500" />
+            <Users size={16} className="text-[#C59B27]" />
           </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-          <div className="text-[11px] text-gray-500 mt-1">Courses & Puzzles combined</div>
+          <div className="text-2xl font-bold text-[#0B132B] font-mono">{stats.total}</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Courses & Puzzles combined</div>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 p-4 shadow-lg"
+          className="rounded-2xl bg-white border border-[#E7E2D8] p-4 shadow-xs"
         >
-          <div className="flex items-center justify-between text-gray-600 text-xs font-medium mb-1">
+          <div className="flex items-center justify-between text-[#64748B] text-xs font-medium mb-1">
             <span>Unique Learners</span>
-            <UserCheck size={16} className="text-indigo-500" />
+            <UserCheck size={16} className="text-[#C59B27]" />
           </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.uniqueEmails}</div>
-          <div className="text-[11px] text-gray-500 mt-1">Distinct emails logged</div>
+          <div className="text-2xl font-bold text-[#0B132B] font-mono">{stats.uniqueEmails}</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Distinct learners logged</div>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 p-4 shadow-lg"
+          className="rounded-2xl bg-white border border-[#E7E2D8] p-4 shadow-xs"
         >
-          <div className="flex items-center justify-between text-gray-600 text-xs font-medium mb-1">
+          <div className="flex items-center justify-between text-[#64748B] text-xs font-medium mb-1">
             <span>Course Accesses</span>
-            <GraduationCap size={16} className="text-blue-500" />
+            <GraduationCap size={16} className="text-[#2563EB]" />
           </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.courseVisits}</div>
-          <div className="text-[11px] text-gray-500 mt-1">Domain roadmaps & units</div>
+          <div className="text-2xl font-bold text-[#2563EB] font-mono">{stats.courseVisits}</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Domain roadmaps & units</div>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="rounded-2xl bg-white/70 backdrop-blur-xl border border-white/50 p-4 shadow-lg"
+          className="rounded-2xl bg-white border border-[#E7E2D8] p-4 shadow-xs"
         >
-          <div className="flex items-center justify-between text-gray-600 text-xs font-medium mb-1">
+          <div className="flex items-center justify-between text-[#64748B] text-xs font-medium mb-1">
             <span>Puzzle Plays</span>
-            <Gamepad2 size={16} className="text-rose-500" />
+            <Gamepad2 size={16} className="text-[#B86B00]" />
           </div>
-          <div className="text-2xl font-bold text-gray-900">{stats.puzzleVisits}</div>
-          <div className="text-[11px] text-gray-500 mt-1">Word connect challenges</div>
+          <div className="text-2xl font-bold text-[#B86B00] font-mono">{stats.puzzleVisits}</div>
+          <div className="text-[11px] text-[#64748B] mt-1">Word connect challenges</div>
         </motion.div>
       </div>
 
       {/* CONTROLS (SEARCH & FILTER TABS) */}
-      <div className="rounded-2xl bg-white/80 backdrop-blur-xl border border-white/50 p-4 shadow-lg mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="rounded-2xl bg-white border border-[#E7E2D8] p-4 shadow-xs mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Search */}
         <div className="relative w-full md:w-80">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#64748B]" />
           <input
             type="text"
             placeholder="Search by name, email, or item..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/90 border border-gray-200 rounded-xl text-xs sm:text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+            className="w-full pl-10 pr-4 py-2 bg-[#FAF8F5] border border-[#E7E2D8] rounded-xl text-xs sm:text-sm text-[#334155] focus:outline-none focus:ring-2 focus:ring-[#C59B27]/30 focus:border-[#C59B27] transition-all"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
-          <span className="text-xs text-gray-500 mr-1 flex items-center gap-1">
+        <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+          <span className="text-xs text-[#64748B] mr-1 flex items-center gap-1 font-medium">
             <Filter size={13} /> Filter:
           </span>
           <button
             onClick={() => setFilterType("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               filterType === "all"
-                ? "bg-gray-800 text-white shadow"
-                : "bg-white/70 text-gray-600 hover:bg-white"
+                ? "bg-[#C59B27] text-[#0B132B] shadow-xs"
+                : "bg-white text-[#0B132B] border border-[#C59B27] hover:bg-[#FAF8F5]"
             }`}
           >
             All ({logs.length})
           </button>
           <button
             onClick={() => setFilterType("course")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
               filterType === "course"
-                ? "bg-blue-600 text-white shadow"
-                : "bg-white/70 text-gray-600 hover:bg-white"
+                ? "bg-[#2563EB] text-white shadow-xs"
+                : "bg-white text-[#2563EB] border border-[#2563EB] hover:bg-[#2563EB]/5"
             }`}
           >
             <GraduationCap size={13} /> Courses ({stats.courseVisits})
           </button>
           <button
             onClick={() => setFilterType("puzzle")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
               filterType === "puzzle"
-                ? "bg-rose-600 text-white shadow"
-                : "bg-white/70 text-gray-600 hover:bg-white"
+                ? "bg-[#B86B00] text-white shadow-xs"
+                : "bg-white text-[#B86B00] border border-[#B86B00] hover:bg-[#B86B00]/5"
             }`}
           >
             <Gamepad2 size={13} /> Puzzles ({stats.puzzleVisits})
@@ -336,17 +336,17 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
       </div>
 
       {/* TABLE / CONTENT */}
-      <div className="rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 shadow-xl overflow-hidden">
+      <div className="rounded-2xl bg-white border border-[#E7E2D8] shadow-xs overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-gray-500">
-            <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-amber-500" />
+          <div className="p-12 text-center text-[#64748B]">
+            <RefreshCw size={24} className="animate-spin mx-auto mb-2 text-[#C59B27]" />
             <p className="text-sm font-medium">Loading visitor activity records...</p>
           </div>
         ) : filteredLogs.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">
-            <Users size={36} className="mx-auto mb-3 text-gray-400 opacity-60" />
-            <h4 className="text-base font-semibold text-gray-700">No Visitor Records Found</h4>
-            <p className="text-xs text-gray-500 max-w-md mx-auto mt-1">
+          <div className="p-12 text-center text-[#64748B]">
+            <Users size={36} className="mx-auto mb-3 text-[#64748B] opacity-40" />
+            <h4 className="text-base font-semibold text-[#0B132B]">No Visitor Records Found</h4>
+            <p className="text-xs text-[#64748B] max-w-md mx-auto mt-1">
               {searchQuery || filterType !== "all"
                 ? "No entries match your search query or filter. Try clearing filters."
                 : "When visitors or students click on Courses or Puzzles, their Name, Email, and visit timestamps will appear here automatically."}
@@ -355,34 +355,34 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50/80 border-b border-gray-200/80 text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              <thead className="bg-[#FAF8F5] border-b border-[#E7E2D8] text-[11px] font-bold text-[#0B132B] uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Visitor</th>
-                  <th className="py-3 px-4">Email</th>
-                  <th className="py-3 px-4">Item Accessed</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Date & Time</th>
+                  <th className="py-3.5 px-4">Visitor</th>
+                  <th className="py-3.5 px-4">Email</th>
+                  <th className="py-3.5 px-4">Item Accessed</th>
+                  <th className="py-3.5 px-4">Type</th>
+                  <th className="py-3.5 px-4">Date & Time</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-[#E7E2D8]">
                 {filteredLogs.map((log) => {
                   const isPuzzle = log.access_type === "puzzle";
                   return (
                     <tr
                       key={log.id}
-                      className="hover:bg-amber-50/40 transition-colors"
+                      className="hover:bg-[#FAF8F5] transition-colors"
                     >
                       {/* Name */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-rose-400 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                          <div className="w-8 h-8 rounded-full bg-[#111C3D] text-[#C59B27] flex items-center justify-center font-bold text-xs shrink-0 border border-[#C59B27]/30">
                             {log.visitor_name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="font-semibold text-gray-900 leading-tight">
+                            <div className="font-semibold text-[#0B132B] leading-tight">
                               {log.visitor_name}
                             </div>
-                            <div className="text-[11px] text-gray-400 sm:hidden">
+                            <div className="text-[11px] text-[#64748B] sm:hidden">
                               {log.visitor_email}
                             </div>
                           </div>
@@ -390,20 +390,20 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
                       </td>
 
                       {/* Email */}
-                      <td className="py-3.5 px-4 text-gray-600 font-mono text-xs">
+                      <td className="py-3.5 px-4 text-[#334155] font-mono text-xs">
                         <div className="flex items-center gap-1.5">
-                          <Mail size={13} className="text-gray-400 shrink-0" />
+                          <Mail size={13} className="text-[#64748B] shrink-0" />
                           <span className="truncate max-w-[220px]">{log.visitor_email}</span>
                         </div>
                       </td>
 
                       {/* Accessed Item */}
-                      <td className="py-3.5 px-4 font-medium text-gray-800">
+                      <td className="py-3.5 px-4 font-medium text-[#334155]">
                         <div className="flex items-center gap-1.5">
                           {isPuzzle ? (
-                            <Gamepad2 size={15} className="text-rose-500 shrink-0" />
+                            <Gamepad2 size={15} className="text-[#B86B00] shrink-0" />
                           ) : (
-                            <GraduationCap size={15} className="text-blue-500 shrink-0" />
+                            <GraduationCap size={15} className="text-[#2563EB] shrink-0" />
                           )}
                           <span className="truncate max-w-[260px]">{log.accessed_item}</span>
                         </div>
@@ -414,8 +414,8 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
                         <span
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                             isPuzzle
-                              ? "bg-rose-50 text-rose-700 border-rose-200"
-                              : "bg-blue-50 text-blue-700 border-blue-200"
+                              ? "bg-[#B86B00]/10 text-[#B86B00] border-[#B86B00]/30"
+                              : "bg-[#2563EB]/10 text-[#2563EB] border-[#2563EB]/30"
                           }`}
                         >
                           {isPuzzle ? "Puzzle" : "Course"}
@@ -423,12 +423,12 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
                       </td>
 
                       {/* Date & Time */}
-                      <td className="py-3.5 px-4 text-xs text-gray-600">
-                        <div className="flex items-center gap-1.5 font-medium text-gray-800">
-                          <Clock size={12} className="text-gray-400 shrink-0" />
+                      <td className="py-3.5 px-4 text-xs text-[#64748B]">
+                        <div className="flex items-center gap-1.5 font-medium text-[#334155]">
+                          <Clock size={12} className="text-[#64748B] shrink-0" />
                           <span>{formatDateTime(log.created_at)}</span>
                         </div>
-                        <div className="text-[11px] text-gray-400 pl-4 mt-0.5">
+                        <div className="text-[11px] text-[#64748B] pl-4 mt-0.5">
                           {formatRelativeTime(log.created_at)}
                         </div>
                       </td>
@@ -443,39 +443,39 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
 
       {/* SQL MODAL */}
       {showSqlModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-white rounded-3xl p-6 shadow-2xl border border-gray-200 text-left">
+        <div className="fixed inset-0 z-50 bg-[#0B132B]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white rounded-2xl p-6 shadow-2xl border border-[#E7E2D8] text-left">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Database size={20} className="text-amber-500" />
-                <h3 className="font-bold text-lg text-gray-900">
+                <Database size={20} className="text-[#C59B27]" />
+                <h3 className="font-bold text-lg text-[#0B132B]">
                   Supabase Table Setup (Optional)
                 </h3>
               </div>
               <button
                 onClick={() => setShowSqlModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
+                className="text-[#64748B] hover:text-[#0B132B] p-1 rounded-lg"
               >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs text-gray-600 mb-3">
+            <p className="text-xs text-[#64748B] mb-3">
               Logs are already securely recorded in localStorage and immediately visible here. 
               To enable cloud syncing across all devices, open your Supabase SQL Editor and run this query:
             </p>
 
             <div className="relative">
-              <pre className="p-4 bg-gray-900 text-gray-100 rounded-xl text-xs font-mono overflow-x-auto max-h-60 leading-relaxed">
+              <pre className="p-4 bg-[#0B132B] text-slate-100 rounded-xl text-xs font-mono overflow-x-auto max-h-60 leading-relaxed border border-[#E7E2D8]">
                 {sqlCode}
               </pre>
               <button
                 onClick={copySql}
-                className="absolute top-3 right-3 px-2.5 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-semibold flex items-center gap-1 backdrop-blur-sm transition-all"
+                className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
               >
                 {copiedSql ? (
                   <>
-                    <CheckCircle2 size={13} className="text-emerald-400" /> Copied!
+                    <CheckCircle2 size={13} className="text-[#0B132B]" /> Copied!
                   </>
                 ) : (
                   <>
@@ -488,7 +488,7 @@ grant select, insert on public.visitor_logs to anon, authenticated;`;
             <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setShowSqlModal(false)}
-                className="px-4 py-2 rounded-xl bg-gray-900 text-white text-xs font-semibold hover:bg-gray-800"
+                className="px-4 py-2 rounded-xl bg-white text-[#0B132B] border border-[#C59B27] text-xs font-semibold hover:bg-[#FAF8F5] transition-colors"
               >
                 Close
               </button>

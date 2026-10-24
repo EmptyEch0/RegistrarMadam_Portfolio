@@ -59,21 +59,24 @@ export default function MajorAwardsAdmin() {
 
   return (
     <AdminLayout>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Major Awards</h2>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif tracking-tight">Major Awards & Honours</h2>
+          <p className="text-sm text-[#64748B] mt-0.5">Manage national, state, and academic recognitions and awards</p>
+        </div>
         <button
           onClick={() => {
             setEditing(null);
             setShowForm(true);
           }}
-          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          className="inline-flex items-center gap-2 bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           + Add Award
         </button>
       </div>
 
       {showForm && (
-        <div className="mb-6 rounded border bg-white p-4">
+        <div className="mb-6 bg-white p-6 border border-[#E7E2D8] rounded-2xl shadow-sm animate-fade-in-up">
           <AdminForm
             fields={[
               { name: "title", label: "Award Title", type: "text", required: true },
@@ -99,21 +102,23 @@ export default function MajorAwardsAdmin() {
       )}
 
       {loading ? (
-        <p>Loading...</p>
+        <p className="text-sm text-[#64748B]">Loading...</p>
       ) : (
-        <AdminTable
-          columns={[
-            { key: "title", label: "Title" },
-            { key: "institution", label: "Institution" },
-            { key: "years", label: "Year(s)" },
-          ]}
-          data={data}
-          onEdit={(row) => {
-            setEditing(row);
-            setShowForm(true);
-          }}
-          onDelete={handleDelete}
-        />
+        <div className="bg-white rounded-2xl border border-[#E7E2D8] shadow-sm overflow-hidden">
+          <AdminTable
+            columns={[
+              { key: "title", label: "Title" },
+              { key: "institution", label: "Institution" },
+              { key: "years", label: "Year(s)" },
+            ]}
+            data={data}
+            onEdit={(row) => {
+              setEditing(row);
+              setShowForm(true);
+            }}
+            onDelete={handleDelete}
+          />
+        </div>
       )}
     </AdminLayout>
   );

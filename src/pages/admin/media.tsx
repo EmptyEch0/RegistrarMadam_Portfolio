@@ -240,22 +240,22 @@ export default function AdminMedia() {
         className="mb-8 flex items-center justify-between"
       >
         <div>
-          <h2 className="text-2xl font-bold text-white drop-shadow">
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif">
             Media / Press Coverage
           </h2>
-          <p className="text-white/80 text-sm">
-            Manage portfolio media items
+          <p className="text-[#64748B] text-sm">
+            Manage portfolio media items and newspaper press features
           </p>
         </div>
 
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={handleAdd}
           disabled={isOpen}
-          className="flex items-center gap-2 rounded-xl bg-white/80 px-4 py-2
-                     text-sm font-semibold text-gray-800 shadow-lg
-                     hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 rounded-xl bg-[#C59B27] px-4 py-2.5
+                     text-sm font-semibold text-[#0B132B] shadow-sm
+                     hover:bg-[#B58C1F] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           <Plus size={18} /> Add Media
         </motion.button>
@@ -267,12 +267,12 @@ export default function AdminMedia() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="h-40 animate-pulse rounded-2xl bg-white/40 backdrop-blur"
+              className="h-40 animate-pulse rounded-2xl bg-white border border-[#E7E2D8]"
             />
           ))}
         </div>
       ) : media.length === 0 ? (
-        <div className="rounded-2xl bg-white/60 p-6 text-center text-gray-700">
+        <div className="rounded-2xl bg-white border border-[#E7E2D8] p-8 text-center text-[#64748B]">
           No media added yet.
         </div>
       ) : (
@@ -280,27 +280,27 @@ export default function AdminMedia() {
           {media.map((item) => (
             <motion.div
               key={item.id}
-              whileHover={{ y: -4 }}
+              whileHover={{ y: -3 }}
               className="group relative overflow-hidden rounded-2xl
-                         bg-white/70 backdrop-blur-xl border border-white/40
-                         shadow-lg transition-all"
+                         bg-white border border-[#E7E2D8]
+                         shadow-xs transition-all hover:border-[#C59B27]"
             >
               {/* IMAGE */}
-              <div className="relative aspect-[4/5] bg-gray-100 flex items-center justify-center">
+              <div className="relative aspect-[4/5] bg-[#FAF8F5] border-b border-[#E7E2D8] flex items-center justify-center p-2">
                 <img
                   src={item.image_url}
                   alt={item.title}
-                  className="max-h-full max-w-full object-contain"
+                  className="max-h-full max-w-full object-contain rounded-lg"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition" />
+                <div className="absolute inset-0 bg-[#0B132B]/0 group-hover:bg-[#0B132B]/10 transition" />
               </div>
 
               {/* INFO */}
               <div className="p-4">
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-[#64748B] font-medium">
                   {item.source} • {item.year}
                 </p>
-                <h3 className="mt-1 text-sm font-semibold text-gray-800 line-clamp-2">
+                <h3 className="mt-1 text-sm font-bold text-[#0B132B] line-clamp-2">
                   {item.title}
                 </h3>
               </div>
@@ -309,13 +309,15 @@ export default function AdminMedia() {
               <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                 <button
                   onClick={() => handleEdit(item)}
-                  className="rounded-full bg-white/90 p-2 shadow hover:bg-white"
+                  className="rounded-lg bg-white border border-[#C59B27] p-2 text-[#0B132B] shadow-sm hover:bg-[#FAF8F5] transition-colors"
+                  title="Edit Media"
                 >
                   <Edit size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="rounded-full bg-red-500/90 p-2 text-white shadow hover:bg-red-600"
+                  className="rounded-lg bg-[#B42318] p-2 text-white shadow-sm hover:bg-[#991B1B] transition-colors"
+                  title="Delete Media"
                 >
                   <Trash2 size={14} />
                 </button>

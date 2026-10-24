@@ -73,13 +73,16 @@ export default function DailyActivitiesAdmin() {
     <AdminLayout>
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold">Daily Activities</h2>
+        <div>
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif tracking-tight">Daily Activities</h2>
+          <p className="text-sm text-[#64748B] mt-0.5">Log administrative operations, institutional events, and meetings</p>
+        </div>
         <button
           onClick={() => {
             setEditing(null);
             setShowForm(true);
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+          className="inline-flex items-center gap-2 bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold px-4 py-2.5 rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
         >
           + Add Today's Report
         </button>
@@ -87,7 +90,7 @@ export default function DailyActivitiesAdmin() {
 
       {/* Form */}
       {showForm && (
-        <div className="mb-6 bg-white p-4 border rounded">
+        <div className="mb-6 bg-white p-6 border border-[#E7E2D8] rounded-2xl shadow-sm animate-fade-in-up">
           <AdminForm
             fields={fields}
             initialData={
@@ -106,17 +109,19 @@ export default function DailyActivitiesAdmin() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-sm text-gray-600">Loading daily activities…</div>
+        <div className="text-sm text-[#64748B]">Loading daily activities…</div>
       ) : (
-        <AdminTable
-          columns={columns}
-          data={data}
-          onEdit={(row) => {
-            setEditing(row);
-            setShowForm(true);
-          }}
-          onDelete={handleDelete}
-        />
+        <div className="bg-white rounded-2xl border border-[#E7E2D8] shadow-sm overflow-hidden">
+          <AdminTable
+            columns={columns}
+            data={data}
+            onEdit={(row) => {
+              setEditing(row);
+              setShowForm(true);
+            }}
+            onDelete={handleDelete}
+          />
+        </div>
       )}
     </AdminLayout>
   );

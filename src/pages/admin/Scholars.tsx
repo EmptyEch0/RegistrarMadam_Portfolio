@@ -398,16 +398,16 @@ export default function ScholarsAdmin() {
       {/* Feedback Banner */}
       {feedback && (
         <div
-          className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium shadow-md transition-all ${
+          className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium shadow-xs transition-all ${
             feedback.type === "success"
-              ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-              : "bg-rose-50 text-rose-800 border border-rose-200"
+              ? "bg-[#16845B]/10 text-[#16845B] border border-[#16845B]/30"
+              : "bg-[#B42318]/10 text-[#B42318] border border-[#B42318]/30"
           }`}
         >
           {feedback.type === "success" ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-[#16845B] shrink-0" />
           ) : (
-            <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+            <AlertCircle className="w-5 h-5 text-[#B42318] shrink-0" />
           )}
           <span>{feedback.message}</span>
         </div>
@@ -416,8 +416,8 @@ export default function ScholarsAdmin() {
       {/* ---------- HEADER ---------- */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Scholars Management</h2>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif tracking-tight">Scholars Management</h2>
+          <p className="text-sm text-[#64748B] mt-0.5">
             Manage Ph.D., MCA, M.Tech, and B.Tech scholars and mentorship records
           </p>
         </div>
@@ -427,15 +427,15 @@ export default function ScholarsAdmin() {
             setEditing(null);
             setShowForm(true);
           }}
-          className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium px-5 py-2.5 rounded-xl shadow-md transition-all duration-200 hover:shadow-lg active:scale-95"
+          className="inline-flex items-center gap-2 bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold px-5 py-2.5 rounded-xl shadow-xs transition-all duration-200 active:scale-95"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4 h-4 text-[#0B132B]" />
           Add {TYPE_LABELS[type].replace(" Scholars", "")} Scholar
         </button>
       </div>
 
       {/* ---------- TABS ---------- */}
-      <div className="flex flex-wrap gap-2.5 mb-6 p-1.5 bg-gray-100/80 rounded-2xl border border-gray-200/60 max-w-fit">
+      <div className="flex flex-wrap gap-2 mb-6 p-1.5 bg-white rounded-2xl border border-[#E7E2D8] max-w-fit shadow-xs">
         {TAB_BUTTONS.map((t) => (
           <button
             key={t.key}
@@ -446,8 +446,8 @@ export default function ScholarsAdmin() {
             }}
             className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               type === t.key
-                ? "bg-white text-blue-700 shadow-sm border border-gray-200/80 scale-[1.02]"
-                : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                ? "bg-[#C59B27] text-[#0B132B] font-bold shadow-xs scale-[1.02]"
+                : "text-[#64748B] hover:text-[#0B132B] hover:bg-[#FAF8F5]"
             }`}
           >
             {t.label}
@@ -457,12 +457,12 @@ export default function ScholarsAdmin() {
 
       {/* ---------- FORM (MODAL / INLINE) ---------- */}
       {showForm && (
-        <div className="mb-8 bg-white/90 backdrop-blur-md p-6 border border-blue-100 rounded-2xl shadow-xl animate-fade-in-up">
-          <div className="flex justify-between items-center mb-4 pb-3 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-800">
+        <div className="mb-8 bg-white p-6 border border-[#E7E2D8] rounded-2xl shadow-sm animate-fade-in-up">
+          <div className="flex justify-between items-center mb-4 pb-3 border-b border-[#E7E2D8]">
+            <h3 className="text-lg font-bold text-[#0B132B] font-serif">
               {editing ? `Edit ${TYPE_LABELS[type]}` : `Add New ${TYPE_LABELS[type]}`}
             </h3>
-            <span className="text-xs px-3 py-1 bg-blue-50 text-blue-700 font-semibold rounded-full uppercase">
+            <span className="text-xs px-3 py-1 bg-[#FAF8F5] text-[#0B132B] border border-[#E7E2D8] font-bold rounded-full uppercase tracking-wider">
               {type}
             </span>
           </div>
@@ -482,7 +482,7 @@ export default function ScholarsAdmin() {
 
       {/* ---------- TABLE ---------- */}
       {!loading && (
-        <div className="bg-white rounded-2xl border border-gray-200/70 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E7E2D8] shadow-sm overflow-hidden">
           <AdminTable
             columns={columnsByType[type]}
             data={data}

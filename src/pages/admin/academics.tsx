@@ -307,52 +307,48 @@ export default function AdminAcademics() {
     <AdminLayout>
       <div className="space-y-6 max-w-7xl mx-auto pb-12">
         {/* ================= HEADER ================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-card border border-border rounded-2xl shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white border border-[#E7E2D8] rounded-2xl shadow-xs">
           <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-xl bg-accent/15 text-accent flex items-center justify-center shrink-0 border border-accent/25">
+            <div className="w-12 h-12 rounded-xl bg-[#FAF8F5] text-[#C59B27] flex items-center justify-center shrink-0 border border-[#C59B27]/30">
               <GraduationCap size={26} />
             </div>
             <div>
-              <h1 className="font-serif text-2xl font-bold text-primary flex items-center gap-2">
+              <h1 className="font-serif text-2xl font-bold text-[#0B132B] flex items-center gap-2">
                 Academics Portal & Batch Management
               </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <p className="text-xs text-[#64748B] mt-0.5">
                 Manage B.Tech / M.Tech batches, monitor student account signups, evaluate assignment PDFs & publish mid marks
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap">
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => setNewAssignmentModalOpen(true)}
               disabled={!activeBatch}
-              className="text-xs flex items-center gap-1.5 font-semibold"
+              className="text-xs flex items-center gap-1.5 font-semibold px-3.5 py-2 rounded-xl bg-white border border-[#C59B27] text-[#0B132B] hover:bg-[#FAF8F5] transition-all disabled:opacity-50"
             >
-              <FileText size={14} className="text-blue-500" /> New Assignment
-            </Button>
-            <Button
-              variant="hero"
-              size="sm"
+              <FileText size={14} className="text-[#2563EB]" /> New Assignment
+            </button>
+            <button
               onClick={() => setNewBatchModalOpen(true)}
-              className="text-xs flex items-center gap-1.5 font-semibold shadow-sm"
+              className="text-xs flex items-center gap-1.5 font-semibold px-4 py-2 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] shadow-xs transition-all"
             >
               <Plus size={15} /> Create Academic Batch
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* ================= BATCH SELECTOR & TABS ================= */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-              <Users size={13} className="text-accent" /> Active Batches ({batches.length})
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0B132B] flex items-center gap-1.5">
+              <Users size={13} className="text-[#C59B27]" /> Active Batches ({batches.length})
             </h2>
             {activeBatch && (
               <button
                 onClick={handleDeleteBatch}
-                className="text-[11px] text-destructive hover:underline flex items-center gap-1"
+                className="text-[11px] text-[#B42318] hover:underline flex items-center gap-1 font-semibold"
               >
                 <Trash2 size={12} /> Delete Current Batch
               </button>
@@ -371,33 +367,33 @@ export default function AdminAcademics() {
                   onClick={() => setSelectedBatchId(batch.id)}
                   className={`cursor-pointer p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between space-y-2 ${
                     isSelected
-                      ? "bg-accent/10 border-accent shadow-md ring-1 ring-accent/30"
-                      : "bg-card border-border hover:border-accent/40 hover:bg-muted/40"
+                      ? "bg-[#FAF8F5] border-2 border-[#C59B27] shadow-sm"
+                      : "bg-white border-[#E7E2D8] hover:border-[#C59B27]/50 hover:bg-[#FAF8F5]/50"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent/15 text-accent border border-accent/25 uppercase tracking-wider">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FAF8F5] text-[#C59B27] border border-[#C59B27]/30 uppercase tracking-wider">
                       {batch.program} · {batch.year}
                     </span>
-                    <span className="text-xs font-mono font-bold text-muted-foreground">
+                    <span className="text-xs font-mono font-bold text-[#64748B]">
                       {batch.batchYear}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="font-serif font-bold text-sm text-primary line-clamp-1">
+                    <h3 className="font-serif font-bold text-sm text-[#0B132B] line-clamp-1">
                       {batch.name}
                     </h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <p className="text-[11px] text-[#64748B] mt-0.5">
                       {batch.branch}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground font-medium">
+                  <div className="pt-2 border-t border-[#E7E2D8] flex items-center justify-between text-[11px]">
+                    <span className="text-[#64748B] font-medium">
                       {stdCount} Students
                     </span>
-                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                    <span className="font-bold text-[#16845B]">
                       {registered} Signed Up
                     </span>
                   </div>
@@ -412,47 +408,47 @@ export default function AdminAcademics() {
           <div className="space-y-5">
             {/* Batch Stats KPI Strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-xl bg-card border border-border shadow-xs">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              <div className="p-4 rounded-xl bg-white border border-[#E7E2D8] shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
                   Total Students
                 </span>
-                <p className="text-2xl font-bold font-mono text-primary mt-1">
+                <p className="text-2xl font-bold font-mono text-[#0B132B] mt-1">
                   {totalStudents}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-emerald-500/20 shadow-xs">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <div className="p-4 rounded-xl bg-white border border-[#16845B]/30 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#16845B] flex items-center gap-1">
                   <CheckCircle2 size={12} /> Accounts Created
                 </span>
-                <p className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+                <p className="text-2xl font-bold font-mono text-[#16845B] mt-1">
                   {accountsCreatedCount} / {totalStudents}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-blue-500/20 shadow-xs">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center gap-1">
+              <div className="p-4 rounded-xl bg-white border border-[#2563EB]/30 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#2563EB] flex items-center gap-1">
                   <FileText size={12} /> PDF Submissions
                 </span>
-                <p className="text-2xl font-bold font-mono text-blue-600 dark:text-blue-400 mt-1">
+                <p className="text-2xl font-bold font-mono text-[#2563EB] mt-1">
                   {submissionsCount} / {totalStudents}
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-card border border-amber-500/20 shadow-xs">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 flex items-center gap-1">
+              <div className="p-4 rounded-xl bg-white border border-[#B86B00]/30 shadow-xs">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#B86B00] flex items-center gap-1">
                   <Award size={12} /> Marks Evaluated
                 </span>
-                <p className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">
+                <p className="text-2xl font-bold font-mono text-[#B86B00] mt-1">
                   {evaluatedCount} / {totalStudents}
                 </p>
               </div>
             </div>
 
             {/* Assignments Bar for Current Batch */}
-            <div className="p-4 rounded-2xl bg-card border border-border flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="p-4 rounded-2xl bg-white border border-[#E7E2D8] flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#0B132B] uppercase tracking-wider">
                   Select Assignment:
                 </span>
                 {activeAssignments.length > 0 ? (
@@ -462,22 +458,22 @@ export default function AdminAcademics() {
                       onClick={() => setSelectedAssignmentId(ass.id)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         currentAssignment?.id === ass.id
-                          ? "bg-accent text-accent-foreground shadow-xs font-bold"
-                          : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                          ? "bg-[#C59B27] text-[#0B132B] shadow-xs font-bold"
+                          : "bg-[#FAF8F5] text-[#334155] border border-[#E7E2D8] hover:border-[#C59B27]"
                       }`}
                     >
                       {ass.title}
                     </button>
                   ))
                 ) : (
-                  <span className="text-xs text-muted-foreground italic">
+                  <span className="text-xs text-[#64748B] italic">
                     No assignments created yet for this batch.
                   </span>
                 )}
               </div>
 
               {currentAssignment && (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2 text-xs text-[#64748B]">
                   <span>Due: {currentAssignment.dueDate}</span>
                   <span>·</span>
                   <span>Max Marks: {currentAssignment.maxMarks}</span>
@@ -489,13 +485,13 @@ export default function AdminAcademics() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
               <div className="flex items-center gap-2 flex-1 max-w-md">
                 <div className="relative w-full">
-                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#64748B]" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by roll number or student name..."
-                    className="w-full text-xs pl-9 pr-3 py-2 rounded-xl bg-card border border-border focus:border-accent focus:outline-none"
+                    className="w-full text-xs pl-9 pr-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#E7E2D8] text-[#334155] focus:border-[#C59B27] focus:outline-none"
                   />
                 </div>
               </div>
@@ -505,7 +501,7 @@ export default function AdminAcademics() {
                 <select
                   value={filterMode}
                   onChange={(e) => setFilterMode(e.target.value as any)}
-                  className="text-xs py-2 px-3 rounded-xl bg-card border border-border focus:border-accent focus:outline-none text-foreground"
+                  className="text-xs py-2 px-3 rounded-xl bg-[#FAF8F5] border border-[#E7E2D8] text-[#0B132B] focus:border-[#C59B27] focus:outline-none font-semibold"
                 >
                   <option value="all">Show All Students</option>
                   <option value="accounts_created">Account Created Only</option>
@@ -513,23 +509,21 @@ export default function AdminAcademics() {
                   <option value="pending_marks">Pending Marks Only</option>
                 </select>
 
-                <Button
-                  variant="hero"
-                  size="sm"
+                <button
                   onClick={() => setAddStudentModalOpen(true)}
-                  className="text-xs flex items-center gap-1.5 font-semibold"
+                  className="text-xs flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] shadow-xs transition-all"
                 >
                   <Plus size={14} /> Add Students to Batch
-                </Button>
+                </button>
               </div>
             </div>
 
             {/* ================= STUDENT MANAGEMENT ROSTER TABLE ================= */}
-            <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-white border border-[#E7E2D8] rounded-2xl overflow-hidden shadow-xs">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-muted/60 border-b border-border text-muted-foreground font-bold">
+                    <tr className="bg-[#FAF8F5] border-b border-[#E7E2D8] text-[#0B132B] font-bold">
                       <th className="py-3 px-3.5 w-10">#</th>
                       <th className="py-3 px-3.5">Roll Number</th>
                       <th className="py-3 px-3.5">Student Name</th>
@@ -542,7 +536,7 @@ export default function AdminAcademics() {
                       <th className="py-3 px-3.5 text-right w-24">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/60">
+                  <tbody className="divide-y divide-[#E7E2D8]">
                     {filteredStudents.length > 0 ? (
                       filteredStudents.map((student, idx) => {
                         const norm = normalizeRollNo(student.rollNo);
@@ -563,22 +557,22 @@ export default function AdminAcademics() {
                         return (
                           <tr
                             key={norm}
-                            className="hover:bg-muted/30 transition-colors group"
+                            className="hover:bg-[#FAF8F5] transition-colors group"
                           >
-                            <td className="py-3 px-3.5 text-muted-foreground font-mono">
+                            <td className="py-3 px-3.5 text-[#64748B] font-mono">
                               {idx + 1}
                             </td>
 
                             {/* Roll Number */}
-                            <td className="py-3 px-3.5 font-mono font-bold text-primary whitespace-nowrap">
+                            <td className="py-3 px-3.5 font-mono font-bold text-[#0B132B] whitespace-nowrap">
                               {norm}
                             </td>
 
                             {/* Student Name */}
-                            <td className="py-3 px-3.5 font-semibold text-foreground whitespace-nowrap">
+                            <td className="py-3 px-3.5 font-semibold text-[#334155] whitespace-nowrap">
                               {student.name}
                               {student.email && (
-                                <span className="block text-[10px] text-muted-foreground font-normal">
+                                <span className="block text-[10px] text-[#64748B] font-normal">
                                   {student.email}
                                 </span>
                               )}
@@ -587,11 +581,11 @@ export default function AdminAcademics() {
                             {/* Account Status Badge */}
                             <td className="py-3 px-3.5 text-center whitespace-nowrap">
                               {account ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 text-[11px] font-bold shadow-xs">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#16845B]/10 text-[#16845B] border border-[#16845B]/30 text-[11px] font-bold shadow-xs">
                                   <CheckCircle2 size={12} /> Account Created
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border text-[11px] font-medium">
+                                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#B86B00]/10 text-[#B86B00] border border-[#B86B00]/30 text-[11px] font-medium">
                                   <Clock size={11} /> Pending Signup
                                 </span>
                               )}
@@ -601,26 +595,24 @@ export default function AdminAcademics() {
                             <td className="py-3 px-3.5 whitespace-nowrap">
                               {submission ? (
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                                  <span className="text-[11px] font-semibold text-[#2563EB] flex items-center gap-1">
                                     <FileText size={13} /> Submitted
                                   </span>
-                                  <Button
-                                    variant="outline"
-                                    size="xs"
+                                  <button
                                     onClick={() => {
                                       setPreviewPdfUrl(submission.fileDataUrl);
                                       setPreviewFileName(submission.fileName);
                                       setPreviewStudentName(student.name);
                                       setPreviewRollNo(norm);
                                     }}
-                                    className="text-[10px] py-1 px-2 h-7 font-bold text-accent hover:bg-accent hover:text-accent-foreground flex items-center gap-1"
+                                    className="text-[10px] py-1 px-2.5 h-7 font-bold bg-[#2563EB] text-white hover:bg-[#1D4ED8] rounded-lg flex items-center gap-1 shadow-xs transition-colors"
                                     title="View submitted PDF"
                                   >
                                     <Eye size={12} /> View PDF
-                                  </Button>
+                                  </button>
                                 </div>
                               ) : (
-                                <span className="text-muted-foreground text-[11px] italic">
+                                <span className="text-[#64748B] text-[11px] italic">
                                   Not submitted
                                 </span>
                               )}
@@ -641,7 +633,7 @@ export default function AdminAcademics() {
                                     },
                                   }))
                                 }
-                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none font-mono"
+                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#E7E2D8] text-[#334155] focus:border-[#C59B27] focus:bg-white focus:outline-none font-mono"
                               />
                             </td>
 
@@ -660,7 +652,7 @@ export default function AdminAcademics() {
                                     },
                                   }))
                                 }
-                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none font-mono"
+                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#E7E2D8] text-[#334155] focus:border-[#C59B27] focus:bg-white focus:outline-none font-mono"
                               />
                             </td>
 
@@ -679,7 +671,7 @@ export default function AdminAcademics() {
                                     },
                                   }))
                                 }
-                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none font-mono"
+                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#E7E2D8] text-[#334155] focus:border-[#C59B27] focus:bg-white focus:outline-none font-mono"
                               />
                             </td>
 
@@ -698,38 +690,36 @@ export default function AdminAcademics() {
                                     },
                                   }))
                                 }
-                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none"
+                                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-[#FAF8F5] border border-[#E7E2D8] text-[#334155] focus:border-[#C59B27] focus:bg-white focus:outline-none"
                               />
                             </td>
 
                             {/* Save Action */}
                             <td className="py-2.5 px-3 text-right whitespace-nowrap">
                               <div className="flex items-center justify-end gap-1.5">
-                                <Button
-                                  variant={edit.justSaved ? "outline" : "hero"}
-                                  size="xs"
+                                <button
                                   onClick={() => handleSaveMarks(norm, student.name)}
-                                  className={`text-[10px] py-1 px-2.5 h-7 font-bold transition-all ${
+                                  className={`text-[10px] py-1 px-2.5 h-7 font-bold rounded-lg transition-all ${
                                     edit.justSaved
-                                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600"
-                                      : ""
+                                      ? "bg-[#16845B]/15 border border-[#16845B]/30 text-[#16845B]"
+                                      : "bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] shadow-xs"
                                   }`}
                                   title="Save Marks for this student"
                                 >
                                   {edit.justSaved ? (
-                                    <>
+                                    <span className="flex items-center">
                                       <Check size={11} className="mr-1" /> Saved!
-                                    </>
+                                    </span>
                                   ) : (
-                                    <>
+                                    <span className="flex items-center">
                                       <Save size={11} className="mr-1" /> Save
-                                    </>
+                                    </span>
                                   )}
-                                </Button>
+                                </button>
 
                                 <button
                                   onClick={() => handleRemoveStudent(norm)}
-                                  className="p-1.5 text-muted-foreground hover:text-destructive rounded-lg transition-colors"
+                                  className="p-1.5 text-[#B42318] hover:bg-[#B42318]/10 rounded-lg transition-colors"
                                   title="Remove from batch"
                                 >
                                   <Trash2 size={13} />

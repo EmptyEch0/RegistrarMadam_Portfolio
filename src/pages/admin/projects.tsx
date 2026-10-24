@@ -258,18 +258,18 @@ export default function AdminProjects() {
     <AdminLayout>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white drop-shadow-md flex items-center gap-2">
-            <FolderGit2 className="text-amber-300" size={26} />
+          <h2 className="text-2xl font-bold text-[#0B132B] font-serif flex items-center gap-2.5">
+            <FolderGit2 className="text-[#C59B27]" size={26} />
             Projects & Innovations Management
           </h2>
-          <p className="text-white/80 text-sm">
+          <p className="text-[#64748B] text-sm">
             Manage guided student projects, live platforms, and developer contributor profiles
           </p>
         </div>
 
         <button
           onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-gray-900 font-bold shadow-lg transition-all duration-200 transform hover:scale-105 shrink-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold shadow-sm transition-all duration-200 transform hover:scale-[1.02] shrink-0"
         >
           <Plus size={18} />
           <span>Add New Project</span>
@@ -278,10 +278,10 @@ export default function AdminProjects() {
 
       {message && (
         <div
-          className={`mb-6 p-4 rounded-xl flex items-center gap-2 text-sm font-semibold shadow-md ${
+          className={`mb-6 p-4 rounded-xl flex items-center gap-2 text-sm font-semibold shadow-xs ${
             message.type === "success"
-              ? "bg-emerald-500 text-white"
-              : "bg-red-500 text-white"
+              ? "bg-[#16845B]/10 text-[#16845B] border border-[#16845B]/30"
+              : "bg-[#B42318]/10 text-[#B42318] border border-[#B42318]/30"
           }`}
         >
           <CheckCircle2 size={18} />
@@ -294,45 +294,45 @@ export default function AdminProjects() {
         {projects.map((proj) => (
           <div
             key={proj.id}
-            className="rounded-2xl bg-white/85 backdrop-blur-xl border border-white/50 p-6 shadow-xl flex flex-col justify-between"
+            className="rounded-2xl bg-white border border-[#E7E2D8] p-6 shadow-xs flex flex-col justify-between hover:border-[#C59B27] transition-all"
           >
             <div>
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FAF8F5] text-[#C59B27] border border-[#C59B27]/40">
                     {proj.category}
                   </span>
-                  <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                  <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#16845B]/10 text-[#16845B] border border-[#16845B]/30">
                     {proj.status || "Live"}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => openEditModal(proj)}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-amber-100 text-gray-700 hover:text-amber-700 transition-colors"
+                    className="p-2 rounded-lg bg-white border border-[#C59B27] text-[#0B132B] hover:bg-[#FAF8F5] transition-colors"
                     title="Edit Project"
                   >
-                    <Edit2 size={16} />
+                    <Edit2 size={15} />
                   </button>
                   <button
                     onClick={() => handleDeleteProject(proj.id)}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-700 transition-colors"
+                    className="p-2 rounded-lg bg-white border border-[#B42318]/40 text-[#B42318] hover:bg-[#B42318] hover:text-white transition-colors"
                     title="Delete Project"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
 
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{proj.title}</h3>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-3">{proj.description}</p>
+              <h3 className="text-lg font-bold text-[#0B132B] mb-2">{proj.title}</h3>
+              <p className="text-sm text-[#334155] mb-4 line-clamp-3">{proj.description}</p>
 
               {proj.tags && proj.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mb-4">
+                <div className="flex flex-wrap gap-1.5 mb-4">
                   {proj.tags.map((t, idx) => (
                     <span
                       key={idx}
-                      className="px-2 py-0.5 bg-gray-200/70 text-gray-700 text-[11px] rounded"
+                      className="px-2.5 py-0.5 bg-[#FAF8F5] text-[#64748B] text-[11px] rounded border border-[#E7E2D8]"
                     >
                       #{t}
                     </span>
@@ -342,33 +342,33 @@ export default function AdminProjects() {
 
               {/* Developers list */}
               {proj.developers && proj.developers.length > 0 && (
-                <div className="pt-3 border-t border-gray-200 mb-4">
-                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Users size={12} /> Developers ({proj.developers.length})
+                <div className="pt-3 border-t border-[#E7E2D8] mb-4">
+                  <p className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-2 flex items-center gap-1">
+                    <Users size={12} className="text-[#C59B27]" /> Developers ({proj.developers.length})
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {proj.developers.map((dev, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-2 px-2.5 py-1 bg-white/90 rounded-lg border border-gray-200 shadow-xs"
+                        className="flex items-center gap-2 px-2.5 py-1 bg-[#FAF8F5] rounded-lg border border-[#E7E2D8] shadow-xs"
                       >
                         <img
                           src={
                             dev.photo_url ||
                             `https://ui-avatars.com/api/?name=${encodeURIComponent(
                               dev.name
-                            )}&background=f59e0b&color=fff`
+                            )}&background=C59B27&color=0B132B`
                           }
                           alt={dev.name}
-                          className="w-5 h-5 rounded-full object-cover"
+                          className="w-5 h-5 rounded-full object-cover border border-[#C59B27]/40"
                         />
-                        <span className="text-xs font-medium text-gray-800">{dev.name}</span>
+                        <span className="text-xs font-medium text-[#0B132B]">{dev.name}</span>
                         {dev.linkedin_url && (
                           <a
                             href={dev.linkedin_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
+                            className="text-[#2563EB] hover:underline"
                           >
                             <Linkedin size={12} />
                           </a>
@@ -380,13 +380,13 @@ export default function AdminProjects() {
               )}
             </div>
 
-            <div className="flex items-center gap-3 pt-3 border-t border-gray-100 text-xs text-gray-600">
+            <div className="flex items-center gap-3 pt-3 border-t border-[#E7E2D8] text-xs text-[#64748B]">
               {proj.live_url && (
                 <a
                   href={proj.live_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-amber-700 font-semibold hover:underline"
+                  className="flex items-center gap-1 text-[#2563EB] font-semibold hover:underline"
                 >
                   <ExternalLink size={13} /> {proj.live_url.replace("https://", "")}
                 </a>
@@ -396,7 +396,7 @@ export default function AdminProjects() {
                   href={proj.github_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-gray-700 hover:underline"
+                  className="flex items-center gap-1 text-[#334155] hover:text-[#0B132B] hover:underline"
                 >
                   <Github size={13} /> Repo
                 </a>
@@ -632,18 +632,18 @@ export default function AdminProjects() {
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#E7E2D8]">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-semibold text-sm hover:bg-gray-100 transition-colors"
+                  className="px-5 py-2.5 rounded-xl border border-[#C59B27] bg-white text-[#0B132B] font-semibold text-sm hover:bg-[#FAF8F5] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold text-sm shadow-md transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold text-sm shadow-sm transition-all"
                 >
                   {saving ? "Saving..." : editingProject ? "Update Project" : "Create Project"}
                 </button>

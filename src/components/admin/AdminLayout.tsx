@@ -220,7 +220,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         .admin-layout-container {
           display: flex;
           min-height: 100vh;
-          background: linear-gradient(135deg, #fde047 0%, #f472b6 35%, #a78bfa 65%, #60a5fa 100%);
+          background: #FAF8F5; /* Ivory background */
+          color: #334155; /* Slate main text */
           font-family: 'Inter', system-ui, -apple-system, sans-serif;
           position: relative;
         }
@@ -233,11 +234,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           left: 0;
           right: 0;
           z-index: 100;
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+          background: #0B132B; /* Midnight navy */
+          border-bottom: 1px solid #E7E2D8;
           padding: 16px 20px;
+          box-shadow: 0 4px 20px rgba(11, 19, 43, 0.15);
         }
 
         .mobile-header-content {
@@ -250,23 +250,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           display: flex;
           gap: 12px;
           align-items: center;
-          color: white;
+          color: #FFFFFF;
         }
 
         .mobile-title {
           font-size: 16px;
           font-weight: 700;
+          color: #FFFFFF;
         }
 
         .mobile-subtitle {
           font-size: 12px;
-          opacity: 0.9;
+          color: #94A3B8;
         }
 
         .mobile-menu-btn {
-          background: rgba(255, 255, 255, 0.25);
-          border: none;
-          color: white;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(197, 155, 39, 0.4);
+          color: #C59B27; /* Gold */
           padding: 10px;
           border-radius: 12px;
           cursor: pointer;
@@ -277,7 +278,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         }
 
         .mobile-menu-btn:hover {
-          background: rgba(255, 255, 255, 0.35);
+          background: rgba(197, 155, 39, 0.15);
         }
 
         /* ========== MOBILE OVERLAY & SIDEBAR ========== */
@@ -285,7 +286,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           display: none;
           position: fixed;
           inset: 0;
-          background: rgba(0, 0, 0, 0.5);
+          background: rgba(11, 19, 43, 0.6);
+          backdrop-filter: blur(4px);
           z-index: 150;
         }
 
@@ -297,69 +299,83 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           bottom: 0;
           width: 280px;
           z-index: 200;
-          background: rgba(255, 255, 255, 0.25);
-          backdrop-filter: blur(30px);
-          -webkit-backdrop-filter: blur(30px);
-          border-right: 1px solid rgba(255, 255, 255, 0.3);
+          background: #0B132B; /* Midnight navy */
+          border-right: 1px solid #162248;
           padding: 80px 20px 20px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          box-shadow: 10px 0 40px rgba(0, 0, 0, 0.1);
+          box-shadow: 10px 0 40px rgba(0, 0, 0, 0.3);
+          overflow-y: auto;
         }
 
         .mobile-nav {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
         }
 
         /* ========== DESKTOP SIDEBAR ========== */
         .desktop-sidebar {
           width: 280px;
-          padding: 28px 22px;
-          color: white;
-          background: rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(30px);
-          -webkit-backdrop-filter: blur(30px);
-          border-right: 1px solid rgba(255, 255, 255, 0.3);
+          min-width: 280px;
+          padding: 24px 18px;
+          color: #FFFFFF;
+          background: #0B132B; /* Midnight navy background */
+          border-right: 1px solid #162248;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          box-shadow: 5px 0 30px rgba(0, 0, 0, 0.08);
+          box-shadow: 4px 0 25px rgba(11, 19, 43, 0.15);
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: #162248 transparent;
+        }
+
+        .desktop-sidebar::-webkit-scrollbar {
+          width: 5px;
+        }
+
+        .desktop-sidebar::-webkit-scrollbar-thumb {
+          background: #162248;
+          border-radius: 4px;
         }
 
         .sidebar-header {
           display: flex;
           gap: 14px;
           align-items: center;
-          margin-bottom: 32px;
+          margin-bottom: 24px;
           padding: 16px;
-          background: rgba(255, 255, 255, 0.15);
-          border-radius: 16px;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: #111C3D;
+          border-radius: 14px;
+          border: 1px solid rgba(197, 155, 39, 0.25);
         }
 
         .sparkle-icon {
-          filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+          color: #C59B27; /* Gold */
+          filter: drop-shadow(0 0 8px rgba(197, 155, 39, 0.5));
         }
 
         .sidebar-title {
-          font-size: 19px;
+          font-size: 17px;
           font-weight: 700;
-          text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          color: #FFFFFF; /* White */
         }
 
         .sidebar-subtitle {
-          font-size: 13px;
-          opacity: 0.9;
+          font-size: 12px;
+          color: #94A3B8;
           font-weight: 500;
         }
 
         .desktop-nav {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 6px;
           flex: 1;
         }
 
@@ -367,92 +383,106 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         .nav-item {
           display: flex;
           align-items: center;
-          gap: 14px;
-          padding: 14px 18px;
-          border-radius: 14px;
-          color: white;
+          gap: 12px;
+          padding: 11px 16px;
+          border-radius: 12px;
+          color: #FFFFFF; /* White navigation labels */
           text-decoration: none;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 500;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          opacity: 0.85;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          opacity: 0.9;
           border: 1px solid transparent;
           position: relative;
-          overflow: hidden;
         }
 
-        .nav-item::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-          opacity: 0;
-          transition: opacity 0.3s ease;
+        /* Gold icons */
+        .nav-item svg {
+          color: #C59B27; /* Gold icons */
+          flex-shrink: 0;
+          transition: transform 0.2s ease, color 0.2s ease;
         }
 
         .nav-item:hover {
-          background: rgba(255, 255, 255, 0.2);
-          border-color: rgba(255, 255, 255, 0.3);
+          background: rgba(255, 255, 255, 0.08);
+          color: #FFFFFF;
           opacity: 1;
-          transform: translateX(5px);
-          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+          transform: translateX(4px);
         }
 
-        .nav-item:hover::before {
-          opacity: 1;
+        .nav-item:hover svg {
+          color: #E5A93C;
+          transform: scale(1.08);
         }
 
+        /* Gold active-item highlight */
         .nav-item.active {
-          background: rgba(255, 255, 255, 0.3);
-          border-color: rgba(255, 255, 255, 0.4);
+          background: rgba(197, 155, 39, 0.16);
+          border: 1px solid rgba(197, 155, 39, 0.5);
+          color: #FFFFFF; /* White navigation labels */
           opacity: 1;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.3);
-          transform: translateX(8px);
+          box-shadow: 0 4px 16px rgba(197, 155, 39, 0.15), inset 3px 0 0 #C59B27;
+          transform: translateX(4px);
+          font-weight: 600;
         }
 
-        /* ========== LOGOUT BUTTON ========== */
+        .nav-item.active svg {
+          color: #E5A93C; /* Bright gold on active item */
+          filter: drop-shadow(0 0 6px rgba(197, 155, 39, 0.6));
+        }
+
+        /* ========== LOGOUT BUTTON (White button with navy text and gold outline) ========== */
         .sidebar-footer {
-          margin-top: 24px;
+          margin-top: 20px;
+          padding-top: 16px;
+          border-top: 1px solid rgba(231, 226, 216, 0.15);
         }
 
         .logout-btn {
           width: 100%;
-          padding: 14px;
-          border-radius: 14px;
-          border: 1px solid rgba(239, 68, 68, 0.3);
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1.5px solid #C59B27; /* Gold outline */
           cursor: pointer;
-          background: rgba(239, 68, 68, 0.8);
-          color: white;
+          background: #FFFFFF; /* White button */
+          color: #0B132B; /* Navy text */
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 10px;
-          font-size: 15px;
+          font-size: 14px;
           font-weight: 600;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+          transition: all 0.25s ease;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-btn svg {
+          color: #B42318; /* Error/delete red icon */
         }
 
         .logout-btn:hover {
-          background: rgba(220, 38, 38, 0.9);
-          box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
+          background: #FAF8F5; /* Ivory hover */
+          border-color: #B58C1F;
+          box-shadow: 0 4px 15px rgba(197, 155, 39, 0.3);
+          transform: translateY(-1px);
         }
 
-        /* ========== MAIN CONTENT ========== */
+        /* ========== MAIN DASHBOARD CONTENT ========== */
         .main-content {
           flex: 1;
           padding: 32px;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          background: #FAF8F5; /* Ivory background */
           overflow-y: auto;
+          color: #334155; /* Slate main text */
+          min-width: 0;
         }
 
         /* ========== RESPONSIVE STYLES ========== */
         @media (max-width: 1024px) {
           .desktop-sidebar {
-            width: 240px;
-            padding: 24px 18px;
+            width: 250px;
+            min-width: 250px;
+            padding: 20px 14px;
           }
 
           .main-content {
@@ -460,12 +490,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           }
 
           .sidebar-title {
-            font-size: 17px;
+            font-size: 16px;
           }
 
           .nav-item {
-            padding: 12px 16px;
-            font-size: 14px;
+            padding: 10px 14px;
+            font-size: 13.5px;
           }
         }
 
@@ -487,8 +517,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           }
 
           .main-content {
-            padding: 20px;
-            margin-top: 72px;
+            padding: 20px 16px;
+            margin-top: 68px;
           }
 
           .nav-item:hover {
@@ -496,7 +526,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           }
 
           .nav-item.active {
-            transform: translateX(5px);
+            transform: translateX(4px);
           }
         }
 
@@ -518,22 +548,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           }
 
           .main-content {
-            padding: 16px;
+            padding: 16px 12px;
           }
 
           .nav-item {
-            padding: 12px 14px;
-            font-size: 14px;
-          }
-        }
-
-        /* ========== ANIMATIONS ========== */
-        @keyframes shimmer {
-          0% {
-            background-position: -200% 0;
-          }
-          100% {
-            background-position: 200% 0;
+            padding: 11px 14px;
+            font-size: 13.5px;
           }
         }
 
@@ -546,7 +566,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             opacity: 1;
           }
           50% {
-            opacity: 0.7;
+            opacity: 0.75;
           }
         }
       `}</style>
