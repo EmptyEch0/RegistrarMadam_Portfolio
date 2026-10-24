@@ -3,6 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
+import { getCurrentStudent, StudentAccount } from "@/lib/academicsStorage";
 
 const mainNavItems = [
   { label: "Home", href: "/" },
@@ -39,7 +41,13 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
   const [isMobileQLearnOpen, setIsMobileQLearnOpen] = useState(false);
+  const [studentModalOpen, setStudentModalOpen] = useState(false);
+  const [currentStudent, setCurrentStudent] = useState<StudentAccount | null>(() => getCurrentStudent());
   const location = useLocation();
+
+  useEffect(() => {
+    setCurrentStudent(getCurrentStudent());
+  }, [location, studentModalOpen]);
 
   /* ---------- Scroll detection ---------- */
   useEffect(() => {
@@ -310,18 +318,54 @@ export function Header() {
             >
               Collaborate
             </Link>
+
+            {/* Student Login / Portal in right-most corner */}
+            <div className="ml-1 pl-2 border-l border-border/60 flex items-center">
+              {currentStudent ? (
+                <button
+                  type="button"
+                  onClick={() => setStudentModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent font-semibold text-xs transition-all shadow-xs"
+                  title="Open Student Portal"
+                >
+                  <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
+                    {currentStudent.fullName.charAt(0)}
+                  </span>
+                  <span className="max-w-[100px] truncate">{currentStudent.rollNo || currentStudent.fullName}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setStudentModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-accent/15 via-accent/10 to-amber-500/15 hover:from-accent/25 hover:to-amber-500/25 border border-accent/40 text-primary hover:text-accent font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
+                >
+                  <GraduationCap size={15} className="text-accent" />
+                  <span>Student Login</span>
+                </button>
+              )}
+            </div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle navigation menu"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </Button>
+          {/* Mobile Right Action Area: Student Login & Hamburger */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              type="button"
+              onClick={() => setStudentModalOpen(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs"
+            >
+              <GraduationCap size={14} />
+              <span>{currentStudent ? (currentStudent.rollNo || "Portal") : "Student Login"}</span>
+            </button>
+
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </Button>
+          </div>
         </nav>
 
         {/* Mobile Navigation */}
@@ -502,10 +546,35 @@ export function Header() {
               >
                 Collaborate
               </Link>
+
+              {/* Mobile Student Portal Button */}
+              <div className="pt-2 px-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setStudentModalOpen(true);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-accent/20 to-amber-500/20 border border-accent/40 text-primary font-bold text-sm shadow-sm"
+                >
+                  <GraduationCap size={18} className="text-accent" />
+                  <span>
+                    {currentStudent
+                      ? `Student Portal (${currentStudent.rollNo || currentStudent.fullName})`
+                      : "Student Login / Academics Portal"}
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
+
+      {/* Student Portal Modal */}
+      <StudentPortalModal
+        isOpen={studentModalOpen}
+        onClose={() => setStudentModalOpen(false)}
+      />
     </header>
   );
 }

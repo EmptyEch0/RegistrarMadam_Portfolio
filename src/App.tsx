@@ -41,6 +41,7 @@ import AdminProjects from "./pages/admin/projects";
 import AdminVisitors from "./pages/admin/visitors";
 
 import AdminQLearn from "./pages/admin/qlearn";
+import AdminAcademics from "./pages/admin/academics";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +88,7 @@ export default function App() {
               <Route path="scholars" element={<ScholarsAdmin />} />
               <Route path="visitors" element={<AdminVisitors />} />
               <Route path="qlearn" element={<AdminQLearn />} />
+              <Route path="academics" element={<AdminAcademics />} />
               <Route path="projects" element={<AdminProjects />} />
 
               {/* ✅ DAILY ACTIVITIES */}

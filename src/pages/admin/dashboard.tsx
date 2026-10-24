@@ -44,6 +44,14 @@ const sections = [
     count: null
   },
   { 
+    title: "Academics & Batches", 
+    path: "/admin/academics", 
+    icon: GraduationCap, 
+    color: "text-blue-600",
+    bgGradient: "from-blue-500/20 to-indigo-400/20",
+    count: null
+  },
+  { 
     title: "Major Awards", 
     path: "/admin/major-awards", 
     icon: Award, 

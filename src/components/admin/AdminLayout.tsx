@@ -28,6 +28,7 @@ const navItems = [
   { label: "Visitor Logs", to: "/admin/visitors", icon: Users },
   { label: "Projects & Labs", to: "/admin/projects", icon: FolderGit2 },
   { label: "QLearn Hub", to: "/admin/qlearn", icon: Sparkles },
+  { label: "Academics Portal", to: "/admin/academics", icon: GraduationCap },
   { label: "Major Awards", to: "/admin/major-awards", icon: Award },
   { label: "Academic Governance", to: "/admin/academic-governance", icon: BookOpen },
   { label: "Committee Roles", to: "/admin/committee-roles", icon: Users },

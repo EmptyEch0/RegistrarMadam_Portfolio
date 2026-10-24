@@ -2458,6 +2458,22 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [answerSubmitted, setAnswerSubmitted] = useState(false);
   const [quizScore, setQuizScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
+  const [quizPlayerName, setQuizPlayerName] = useState<string>(() => {
+    try {
+      const savedStudent = localStorage.getItem("qlearn_current_student_session");
+      if (savedStudent) {
+        const parsed = JSON.parse(savedStudent);
+        return parsed.fullName || parsed.rollNo || "";
+      }
+      return (
+        localStorage.getItem("qlearn_quiz_player_name") ||
+        localStorage.getItem("qlearn_puzzle_player_name") ||
+        ""
+      );
+    } catch {
+      return "";
+    }
+  });
 
   // Upload modals states
   const [videoModalOpen, setVideoModalOpen] = useState(false);
@@ -2563,7 +2579,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
       setActiveTab("videos");
     }
 
-    // Check visitor gate if on public site
+    // Silent access logging if visitor exists; courses open freely without blocking
     if (!isAdminPortal) {
       const v = getSavedVisitor();
       const isPuzzle = tab === "puzzles";
@@ -2571,11 +2587,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
         ? (subjectParam ? `Puzzle: ${subjectParam}` : "All Puzzles Hub")
         : (subjectParam ? `Course: ${subjectParam}` : "Courses & Roadmaps");
 
-      if (!v) {
-        setTargetItemPrompt(targetDesc);
-        setTargetTypePrompt(isPuzzle ? "puzzle" : "course");
-        setVisitorModalOpen(true);
-      } else {
+      if (v) {
         logVisitorAccess(targetDesc, isPuzzle ? "puzzle" : "course");
       }
     }
@@ -2851,6 +2863,10 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
   // Quiz interactive triggers
   const startQuiz = () => {
+    const finalPlayer = quizPlayerName.trim() || "Student Learner";
+    try {
+      localStorage.setItem("qlearn_quiz_player_name", finalPlayer);
+    } catch {}
     setQuizStarted(true);
     setCurrentQuestionIndex(0);
     setSelectedOption(null);
@@ -2893,7 +2909,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     }
   };
 
-  // Switch domain handler
+  // Switch domain handler - courses open freely without login prompt
   const handleDomainSelect = (idx: number) => {
     const domainList = domains.length > 0 ? domains : DEFAULT_DOMAINS;
     const domain = domainList[idx];
@@ -2901,22 +2917,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
     if (!isAdminPortal) {
       const visitor = getSavedVisitor();
-      if (!visitor) {
-        setPendingAction(() => () => {
-          setActiveDomainIndex(idx);
-          setActiveModuleIndex(0);
-          setActiveNoteIndex(0);
-          setActivePptIndex(0);
-          setActiveTab("videos");
-          setQuizStarted(false);
-          setQuizFinished(false);
-        });
-        setTargetItemPrompt(targetLabel);
-        setTargetTypePrompt("course");
-        setVisitorModalOpen(true);
-        return;
+      if (visitor) {
+        logVisitorAccess(targetLabel, "course");
       }
-      logVisitorAccess(targetLabel, "course");
     }
 
     setActiveDomainIndex(idx);
@@ -2936,27 +2939,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
 
     if (!isAdminPortal) {
       const visitor = getSavedVisitor();
-      if (!visitor) {
-        setPendingAction(() => () => {
-          setActiveDomainIndex(domainIdx);
-          setActiveModuleIndex(0);
-          setActiveNoteIndex(0);
-          setActivePptIndex(0);
-          setActiveTab("puzzles");
-          setQuizStarted(false);
-          setQuizFinished(false);
-          setPuzzleModalOpen(false);
-          if (domain) {
-            setSearchParams({ tab: "puzzles", subject: domain.id });
-          }
-          window.scrollTo({ top: 380, behavior: "smooth" });
-        });
-        setTargetItemPrompt(targetLabel);
-        setTargetTypePrompt("puzzle");
-        setVisitorModalOpen(true);
-        return;
+      if (visitor) {
+        logVisitorAccess(targetLabel, "puzzle");
       }
-      logVisitorAccess(targetLabel, "puzzle");
     }
 
     setActiveDomainIndex(domainIdx);
@@ -2980,11 +2965,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
       const visitor = getSavedVisitor();
       const domainName = activeDomain?.name || "General";
       const targetLabel = tabId === "puzzles" ? `Puzzle: ${domainName}` : `Course ${tabId.toUpperCase()}: ${domainName}`;
-      if (!visitor) {
-        setTargetItemPrompt(targetLabel);
-        setTargetTypePrompt(tabId === "puzzles" ? "puzzle" : "course");
-        setVisitorModalOpen(true);
-      } else {
+      if (visitor) {
         logVisitorAccess(targetLabel, tabId === "puzzles" ? "puzzle" : "course");
       }
     }
@@ -3757,6 +3738,24 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                   A curated {activeModule.quiz.length}-question multiple-choice quiz designed to validate your core comprehension of <strong>{activeModule.name}</strong>.
                                 </p>
                               </div>
+
+                              {/* Student / Player Name Input Field */}
+                              <div className="max-w-xs mx-auto text-left space-y-1.5 p-4 rounded-xl bg-muted/40 border border-border">
+                                <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                                  <GraduationCap size={14} className="text-accent" />
+                                  Enter Your Name / Roll Number
+                                </label>
+                                <input
+                                  type="text"
+                                  value={quizPlayerName}
+                                  onChange={(e) => setQuizPlayerName(e.target.value)}
+                                  placeholder="e.g. 23VV1A1232 or Your Name"
+                                  className="w-full text-xs sm:text-sm px-3.5 py-2 rounded-lg bg-card border border-border focus:border-accent focus:outline-none"
+                                />
+                                <span className="text-[10px] text-muted-foreground block">
+                                  Your name will be displayed on the assessment summary.
+                                </span>
+                              </div>
                               
                               <Button 
                                 variant="hero" 
@@ -3774,8 +3773,11 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               </div>
                               <div className="space-y-1">
                                 <h3 className="font-serif text-3xl font-bold text-primary">
-                                  Module Completed
+                                  Module Assessment Completed
                                 </h3>
+                                <p className="text-sm text-accent font-semibold">
+                                  Participant: {quizPlayerName.trim() || "Student Learner"}
+                                </p>
                               </div>
                               <div className="w-32 h-32 rounded-full border-4 border-accent flex flex-col items-center justify-center mx-auto bg-accent/5 shadow-lg shadow-accent/5">
                                 <span className="text-3xl font-extrabold text-primary">
@@ -3805,7 +3807,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               <div className="flex items-center justify-between border-b border-border pb-4">
                                 <div>
                                   <span className="text-xs text-accent uppercase font-bold tracking-wider">
-                                    Assessment Mode
+                                    Assessment Mode · {quizPlayerName.trim() || "Student"}
                                   </span>
                                   <h4 className="font-serif text-lg font-semibold text-primary">
                                     Question {currentQuestionIndex + 1} of {activeModule.quiz.length}
