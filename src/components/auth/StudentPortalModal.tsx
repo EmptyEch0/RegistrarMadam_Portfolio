@@ -768,80 +768,95 @@ export function StudentPortalModal({
                       </div>
                     </div>
 
-                    {studentMarks ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        {/* Mid 1 Marks Card */}
-                        <div className="p-4 rounded-xl border border-border bg-card/70 flex flex-col justify-between space-y-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {/* Dynamic Marks Grid (Mid-1 Marks space reserved and always visible) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* Mid 1 Marks Card */}
+                      <div className="p-4 rounded-xl border border-accent/30 bg-card shadow-xs flex flex-col justify-between space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-accent">
                             Mid-1 Examination
                           </span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                              {studentMarks.midMarks || "—"}
-                            </span>
-                          </div>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                            IoT Core
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-1 my-1">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
+                            {studentMarks?.midMarks || "—"}
+                          </span>
+                          {studentMarks?.midMarks && (
+                            <span className="text-xs text-muted-foreground font-mono">/ 30</span>
+                          )}
+                        </div>
+                        {studentMarks?.midMarks ? (
                           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                             <CheckCircle2 size={12} /> Evaluated & Published
                           </span>
-                        </div>
+                        ) : (
+                          <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
+                            ⏳ Mid-1 marks will be updated soon
+                          </span>
+                        )}
+                      </div>
 
-                        {/* Mid 2 Marks Card */}
-                        <div className="p-4 rounded-xl border border-border bg-card/70 flex flex-col justify-between space-y-2">
+                      {/* Mid 2 Marks Card */}
+                      <div className="p-4 rounded-xl border border-border bg-card/70 flex flex-col justify-between space-y-2">
+                        <div className="flex items-center justify-between">
                           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
                             Mid-2 Examination
                           </span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                              {studentMarks.mid2Marks || "—"}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground">
-                            {studentMarks.mid2Marks ? "Official score" : "Pending evaluation"}
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                            Upcoming
                           </span>
                         </div>
-
-                        {/* Assignment Marks Card */}
-                        <div className="p-4 rounded-xl border border-border bg-card/70 flex flex-col justify-between space-y-2">
-                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Assignment & Lab
+                        <div className="flex items-baseline gap-1 my-1">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
+                            {studentMarks?.mid2Marks || "—"}
                           </span>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                              {studentMarks.assignmentMarks || "—"}
-                            </span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground">
-                            PDF Submissions
-                          </span>
+                          {studentMarks?.mid2Marks && (
+                            <span className="text-xs text-muted-foreground font-mono">/ 30</span>
+                          )}
                         </div>
-
-                        {/* Remarks if any */}
-                        {studentMarks.remarks && (
-                          <div className="sm:col-span-3 p-3.5 rounded-xl bg-accent/5 border border-accent/20 text-xs">
-                            <span className="font-bold text-accent block mb-1">
-                              Faculty Remarks:
-                            </span>
-                            <p className="text-muted-foreground leading-relaxed italic">
-                              "{studentMarks.remarks}"
-                            </p>
-                          </div>
-                        )}
+                        <span className="text-[10px] text-muted-foreground">
+                          {studentMarks?.mid2Marks ? "Official score" : "Pending 2nd mid exam"}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="p-8 rounded-2xl border border-dashed border-border text-center space-y-3 bg-muted/20">
-                        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
-                          <Award size={22} />
+
+                      {/* Assignment Marks Card */}
+                      <div className="p-4 rounded-xl border border-border bg-card/70 flex flex-col justify-between space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Assignments (3 Total)
+                          </span>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                            PDF Uploads
+                          </span>
                         </div>
-                        <div className="space-y-1">
-                          <h5 className="font-semibold text-sm text-foreground">
-                            No marks published yet for {student.rollNo || "your profile"}
-                          </h5>
-                          <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            Mid examination and assignment marks will automatically display here as soon as Dr. Jaya Suma evaluates and updates them in the Academics Portal.
+                        <div className="flex items-baseline gap-1 my-1">
+                          <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
+                            {studentMarks?.assignmentMarks || "—"}
+                          </span>
+                          {studentMarks?.assignmentMarks && (
+                            <span className="text-xs text-muted-foreground font-mono">/ 10</span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">
+                          {studentMarks?.assignmentMarks ? "Evaluated by faculty" : "Calculated from 3 submissions"}
+                        </span>
+                      </div>
+
+                      {/* Remarks if any */}
+                      {studentMarks?.remarks && (
+                        <div className="sm:col-span-3 p-3.5 rounded-xl bg-accent/5 border border-accent/20 text-xs">
+                          <span className="font-bold text-accent block mb-1">
+                            Faculty Remarks:
+                          </span>
+                          <p className="text-muted-foreground leading-relaxed italic">
+                            "{studentMarks.remarks}"
                           </p>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -859,27 +874,50 @@ export function StudentPortalModal({
                       </div>
                     </div>
 
-                    {/* Active Assignment Selector if multiple */}
-                    {relevantAssignments.length > 1 && (
-                      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                        {relevantAssignments.map((assign) => (
-                          <button
-                            key={assign.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedAssignmentId(assign.id);
-                              setUploadError("");
-                              setUploadSuccess("");
-                            }}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                              currentAssignment?.id === assign.id
-                                ? "bg-accent text-accent-foreground shadow-xs"
-                                : "bg-muted text-muted-foreground hover:text-foreground"
-                            }`}
-                          >
-                            {assign.title}
-                          </button>
-                        ))}
+                    {/* Active Assignment Selector for All Assignments */}
+                    {relevantAssignments.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pb-1">
+                        {relevantAssignments.map((assign, idx) => {
+                          const isSub = student?.rollNo ? Boolean(getSubmissionForStudent(student.rollNo, assign.id)) : false;
+                          const isSelected = currentAssignment?.id === assign.id;
+                          return (
+                            <button
+                              key={assign.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedAssignmentId(assign.id);
+                                setUploadError("");
+                                setUploadSuccess("");
+                              }}
+                              className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                                isSelected
+                                  ? "bg-accent/15 border-accent text-primary shadow-xs ring-1 ring-accent/30"
+                                  : "bg-card/70 border-border text-muted-foreground hover:border-accent/40 hover:bg-card"
+                              }`}
+                            >
+                              <div className="flex items-center justify-between w-full mb-1">
+                                <span className="text-[11px] font-bold text-accent uppercase tracking-wider">
+                                  {assign.assignmentType || `Assignment ${idx + 1}`}
+                                </span>
+                                {isSub ? (
+                                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                                    <CheckCircle2 size={10} /> Done
+                                  </span>
+                                ) : (
+                                  <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded-full">
+                                    Pending
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs font-semibold text-foreground line-clamp-1">
+                                {assign.title}
+                              </p>
+                              <span className="text-[10px] text-muted-foreground mt-1 block">
+                                Due: {assign.dueDate}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
 

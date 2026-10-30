@@ -7,7 +7,13 @@ import RegistrarImage from "../assets/Registrar.jpeg";
 
 import CountUp from "react-countup";
 
+import { useState } from "react";
+import { PortalCarousel } from "@/components/ui/PortalCarousel";
+import { GalleryCarousel } from "@/components/ui/GalleryCarousel";
+import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
+
 const HomePage = () => {
+  const [studentModalOpen, setStudentModalOpen] = useState(false);
   const highlights = [
     {
       icon: GraduationCap,
@@ -169,6 +175,15 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Academics & Notices Carousel Banner */}
+      <section className="py-10 bg-muted/40 border-y border-border/60">
+        <div className="container-wide px-6 lg:px-12">
+          <div className="max-w-5xl mx-auto">
+            <PortalCarousel onOpenStudentPortal={() => setStudentModalOpen(true)} />
+          </div>
+        </div>
+      </section>
+
       {/* Quick Links Section */}
       <section className="section-padding">
         <div className="container-wide">
@@ -257,6 +272,18 @@ const HomePage = () => {
           </div>
         </div>
       </section>
+
+      {/* Photo Gallery & Institutional Moments Carousel (2-Second Panoramic Strip) */}
+      <section className="section-padding bg-background border-t border-border/60">
+        <div className="container-wide">
+          <GalleryCarousel />
+        </div>
+      </section>
+
+      <StudentPortalModal
+        isOpen={studentModalOpen}
+        onClose={() => setStudentModalOpen(false)}
+      />
 
       <Footer />
     </div>
