@@ -782,13 +782,13 @@ export function StudentPortalModal({
                         </div>
                         <div className="flex items-baseline gap-1 my-1">
                           <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                            {studentMarks?.midMarks || "—"}
+                            {studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== ""
+                              ? studentMarks.midMarks
+                              : "0"}
                           </span>
-                          {studentMarks?.midMarks && (
-                            <span className="text-xs text-muted-foreground font-mono">/ 30</span>
-                          )}
+                          <span className="text-xs text-muted-foreground font-mono">/ 30</span>
                         </div>
-                        {studentMarks?.midMarks ? (
+                        {studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== "" ? (
                           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                             <CheckCircle2 size={12} /> Evaluated & Published
                           </span>

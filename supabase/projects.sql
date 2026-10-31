@@ -53,3 +53,4 @@ create policy "Allow delete on projects"
 
 -- Grant privileges
 grant select, insert, update, delete on public.projects to anon, authenticated;
+

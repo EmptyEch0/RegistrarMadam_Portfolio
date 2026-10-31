@@ -44,6 +44,8 @@ import {
   getAllStudentAccounts,
   findStudentAccountByRoll,
   normalizeRollNo,
+  IOT_BATCH_ID,
+  IOT_BATCH_MID1_MARKS,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -134,11 +136,18 @@ export default function AdminAcademics() {
       const existing = marksRecords.find(
         (m) => normalizeRollNo(m.rollNo) === norm && m.batchId === activeBatch.id
       );
+      const defaultMid = activeBatch.id === IOT_BATCH_ID
+        ? (IOT_BATCH_MID1_MARKS[norm]?.midMarks ?? "0")
+        : "";
+      const defaultRemarks = activeBatch.id === IOT_BATCH_ID
+        ? (IOT_BATCH_MID1_MARKS[norm]?.remarks ?? "")
+        : "";
+
       initialEdits[norm] = {
-        midMarks: existing?.midMarks || "",
+        midMarks: existing?.midMarks !== undefined && existing?.midMarks !== "" ? existing.midMarks : defaultMid,
         mid2Marks: existing?.mid2Marks || "",
         assignmentMarks: existing?.assignmentMarks || "",
-        remarks: existing?.remarks || "",
+        remarks: existing?.remarks || defaultRemarks,
         justSaved: false,
       };
     }
@@ -264,6 +273,26 @@ export default function AdminAcademics() {
     }, 2000);
 
     loadData();
+  };
+
+  // Handle Save All Marks for the entire active batch in one click
+  const handleSaveAllMarks = () => {
+    if (!activeBatch) return;
+    for (const st of activeBatch.students) {
+      const norm = normalizeRollNo(st.rollNo);
+      const rowEdit = marksEdits[norm];
+      if (rowEdit) {
+        saveStudentMarks(activeBatch.id, norm, {
+          studentName: st.name,
+          midMarks: rowEdit.midMarks,
+          mid2Marks: rowEdit.mid2Marks,
+          assignmentMarks: rowEdit.assignmentMarks,
+          remarks: rowEdit.remarks,
+        });
+      }
+    }
+    loadData();
+    alert(`✅ Successfully saved and recorded marks for all ${activeBatch.students.length} students!`);
   };
 
   // Filter students
@@ -510,6 +539,14 @@ export default function AdminAcademics() {
                 </select>
 
                 <button
+                  onClick={handleSaveAllMarks}
+                  className="text-xs flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#126B4A] text-white shadow-xs transition-all"
+                  title="Save and publish all entered marks for this entire batch"
+                >
+                  <Check size={14} /> Save All Marks
+                </button>
+
+                <button
                   onClick={() => setAddStudentModalOpen(true)}
                   className="text-xs flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] shadow-xs transition-all"
                 >
@@ -529,8 +566,8 @@ export default function AdminAcademics() {
                       <th className="py-3 px-3.5">Student Name</th>
                       <th className="py-3 px-3.5 text-center">Account Status</th>
                       <th className="py-3 px-3.5">Assignment PDF</th>
-                      <th className="py-3 px-3.5 w-28">Mid 1 (e.g. 30/40)</th>
-                      <th className="py-3 px-3.5 w-28">Mid 2 (e.g. 35/40)</th>
+                      <th className="py-3 px-3.5 w-28">Mid-1 (Out of 30)</th>
+                      <th className="py-3 px-3.5 w-28">Mid-2 (Out of 30)</th>
                       <th className="py-3 px-3.5 w-24">Assign Marks</th>
                       <th className="py-3 px-3.5">Remarks / Feedback</th>
                       <th className="py-3 px-3.5 text-right w-24">Actions</th>
@@ -622,7 +659,7 @@ export default function AdminAcademics() {
                             <td className="py-2.5 px-3">
                               <input
                                 type="text"
-                                placeholder="e.g. 30/40"
+                                placeholder="Marks / 30"
                                 value={edit.midMarks}
                                 onChange={(e) =>
                                   setMarksEdits((prev) => ({
@@ -641,7 +678,7 @@ export default function AdminAcademics() {
                             <td className="py-2.5 px-3">
                               <input
                                 type="text"
-                                placeholder="e.g. 35/40"
+                                placeholder="Marks / 30"
                                 value={edit.mid2Marks}
                                 onChange={(e) =>
                                   setMarksEdits((prev) => ({

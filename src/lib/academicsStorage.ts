@@ -82,8 +82,8 @@ const STORAGE_KEYS = {
   LAST_QUIZ_PLAYER: "qlearn_quiz_player_name",
 };
 
-// Generate 70 students for B.Tech 4th Year (2023-2027) IoT Batch (23VV1A1201 to 23VV1A1270)
-export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from({ length: 70 }, (_, i) => {
+// Generate 74 students for B.Tech 4th Year (2023-2027) IoT Batch (23VV1A1201 to 23VV1A1274)
+export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from({ length: 74 }, (_, i) => {
   const num = String(i + 1).padStart(2, "0");
   const roll = `23VV1A12${num}`;
   return {
@@ -94,6 +94,85 @@ export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from
 });
 
 export const IOT_BATCH_ID = "batch-2023-2027-btech-4th-iot";
+
+// Official Mid-I Marks (out of 30) for B.Tech 4th Year (2023-2027) IoT Batch
+// Default is 0 for any missing student, Roll 4 explicitly neglected/absent = 0
+export const IOT_BATCH_MID1_MARKS: Record<string, { midMarks: string; remarks?: string }> = {
+  "23VV1A1201": { midMarks: "12" },
+  "23VV1A1202": { midMarks: "11.5" },
+  "23VV1A1203": { midMarks: "21" },
+  "23VV1A1204": { midMarks: "0", remarks: "Neglected / No score recorded in sheet - set to default 0" },
+  "23VV1A1205": { midMarks: "17" },
+  "23VV1A1206": { midMarks: "14.5" },
+  "23VV1A1207": { midMarks: "13" },
+  "23VV1A1208": { midMarks: "20" },
+  "23VV1A1209": { midMarks: "23" },
+  "23VV1A1210": { midMarks: "22" },
+  "23VV1A1211": { midMarks: "22" },
+  "23VV1A1212": { midMarks: "14" },
+  "23VV1A1213": { midMarks: "22" },
+  "23VV1A1214": { midMarks: "11" },
+  "23VV1A1215": { midMarks: "11" },
+  "23VV1A1216": { midMarks: "24" },
+  "23VV1A1217": { midMarks: "17" },
+  "23VV1A1218": { midMarks: "19" },
+  "23VV1A1219": { midMarks: "16" },
+  "23VV1A1220": { midMarks: "23" },
+  "23VV1A1221": { midMarks: "16" },
+  "23VV1A1222": { midMarks: "19" },
+  "23VV1A1223": { midMarks: "21" },
+  "23VV1A1224": { midMarks: "21" },
+  "23VV1A1225": { midMarks: "24" },
+  "23VV1A1226": { midMarks: "11" },
+  "23VV1A1227": { midMarks: "18" },
+  "23VV1A1228": { midMarks: "8" },
+  "23VV1A1229": { midMarks: "24" },
+  "23VV1A1230": { midMarks: "18" },
+  "23VV1A1231": { midMarks: "16" },
+  "23VV1A1232": { midMarks: "22.5", remarks: "Likhith Kumar - Good performance" },
+  "23VV1A1233": { midMarks: "16" },
+  "23VV1A1234": { midMarks: "17" },
+  "23VV1A1235": { midMarks: "11" },
+  "23VV1A1236": { midMarks: "23.5" },
+  "23VV1A1237": { midMarks: "22" },
+  "23VV1A1238": { midMarks: "26" },
+  "23VV1A1239": { midMarks: "19" },
+  "23VV1A1240": { midMarks: "20" },
+  "23VV1A1241": { midMarks: "28" },
+  "23VV1A1242": { midMarks: "26.5" },
+  "23VV1A1243": { midMarks: "15.5" },
+  "23VV1A1244": { midMarks: "25" },
+  "23VV1A1245": { midMarks: "11" },
+  "23VV1A1246": { midMarks: "22" },
+  "23VV1A1247": { midMarks: "17" },
+  "23VV1A1248": { midMarks: "19" },
+  "23VV1A1249": { midMarks: "24" },
+  "23VV1A1250": { midMarks: "24.5" },
+  "23VV1A1251": { midMarks: "28" },
+  "23VV1A1252": { midMarks: "7" },
+  "23VV1A1253": { midMarks: "26" },
+  "23VV1A1254": { midMarks: "26.5" },
+  "23VV1A1255": { midMarks: "17" },
+  "23VV1A1256": { midMarks: "17.5" },
+  "23VV1A1257": { midMarks: "16" },
+  "23VV1A1258": { midMarks: "18" },
+  "23VV1A1259": { midMarks: "25" },
+  "23VV1A1260": { midMarks: "24" },
+  "23VV1A1261": { midMarks: "24" },
+  "23VV1A1262": { midMarks: "22" },
+  "23VV1A1263": { midMarks: "28.5" },
+  "23VV1A1264": { midMarks: "23" },
+  "23VV1A1265": { midMarks: "26.5" },
+  "23VV1A1266": { midMarks: "25" },
+  "23VV1A1267": { midMarks: "22" },
+  "23VV1A1268": { midMarks: "25.5" },
+  "23VV1A1269": { midMarks: "25" },
+  "23VV1A1270": { midMarks: "22" },
+  "23VV1A1271": { midMarks: "25.5" },
+  "23VV1A1272": { midMarks: "22" },
+  "23VV1A1273": { midMarks: "17.5" },
+  "23VV1A1274": { midMarks: "20.5" },
+};
 
 // Initial default batches for immediate ready-to-use experience
 const DEFAULT_BATCHES: AcademicBatch[] = [
@@ -836,7 +915,27 @@ export function getMarksForStudent(rollNo: string): StudentMarksRecord | undefin
   const normRoll = normalizeRollNo(rollNo);
   if (!normRoll) return undefined;
   const all = getAllMarksRecords();
-  return all.find((m) => normalizeRollNo(m.rollNo) === normRoll);
+  const existing = all.find((m) => normalizeRollNo(m.rollNo) === normRoll);
+  if (existing) {
+    if (existing.midMarks === undefined || existing.midMarks === "") {
+      const def = IOT_BATCH_MID1_MARKS[normRoll];
+      existing.midMarks = def?.midMarks ?? "0";
+      existing.remarks = existing.remarks || def?.remarks;
+    }
+    return existing;
+  }
+
+  // If not found in records yet, return auto-populated entry from IOT_BATCH_MID1_MARKS or default 0
+  const defaultInfo = IOT_BATCH_MID1_MARKS[normRoll];
+  return {
+    id: `mark_seed_${normRoll.toLowerCase()}`,
+    batchId: IOT_BATCH_ID,
+    rollNo: normRoll,
+    studentName: normRoll === "23VV1A1232" ? "Likhith Kumar" : `Student ${normRoll}`,
+    midMarks: defaultInfo?.midMarks ?? "0",
+    remarks: defaultInfo?.remarks,
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function saveStudentMarks(
@@ -875,21 +974,76 @@ export function saveStudentMarks(
   }
 
   saveAllMarksRecords(newRecords);
+
+  // Sync to Supabase Cloud if available
+  try {
+    const client = supabaseAdmin || supabase;
+    if (client) {
+      client.from("student_marks_records").upsert({
+        id: updatedRecord.id,
+        batch_id: updatedRecord.batchId,
+        roll_no: updatedRecord.rollNo,
+        student_name: updatedRecord.studentName,
+        mid_marks: updatedRecord.midMarks,
+        mid2_marks: updatedRecord.mid2Marks,
+        assignment_marks: updatedRecord.assignmentMarks,
+        remarks: updatedRecord.remarks,
+        updated_at: updatedRecord.updatedAt,
+      }).then(({ error }) => {
+        if (error) console.warn("Supabase student_marks_records sync notice:", error.message);
+      });
+    }
+  } catch (err) {
+    // Graceful offline fallback
+  }
+
   return updatedRecord;
 }
 
-// Seed initial demo marks for Likhith Kumar so the user can immediately experience the marks view!
-(function initDefaultMarks() {
+// Initialize all 74 IoT batch students with their official Mid-1 Marks (out of 30)
+// Default is 0 for any missing student, Roll 4 explicitly neglected/absent = 0
+export function initDefaultMarks(): void {
   try {
-    const records = getAllMarksRecords();
-    if (records.length === 0) {
-      saveStudentMarks("batch-2026-btech-3rd-it", "23VV1A1232", {
-        studentName: "Likhith Kumar",
-        midMarks: "34/40",
-        mid2Marks: "38/40",
-        assignmentMarks: "10/10",
-        remarks: "Excellent problem solving in Machine Learning and Quantum Computing.",
-      });
+    let records = getAllMarksRecords();
+    let updated = false;
+
+    for (const student of BTECH_4TH_YEAR_2023_2027_STUDENTS) {
+      const normRoll = normalizeRollNo(student.rollNo);
+      const existingIdx = records.findIndex(
+        (r) => r.batchId === IOT_BATCH_ID && normalizeRollNo(r.rollNo) === normRoll
+      );
+
+      const defaultInfo = IOT_BATCH_MID1_MARKS[normRoll];
+      const targetMidMark = defaultInfo?.midMarks ?? "0";
+      const targetRemarks = defaultInfo?.remarks;
+
+      if (existingIdx === -1) {
+        records.push({
+          id: `mark_${normRoll.toLowerCase()}`,
+          batchId: IOT_BATCH_ID,
+          rollNo: normRoll,
+          studentName: student.name,
+          midMarks: targetMidMark,
+          remarks: targetRemarks,
+          updatedAt: new Date().toISOString(),
+        });
+        updated = true;
+      } else if (!records[existingIdx].midMarks || records[existingIdx].midMarks === "") {
+        records[existingIdx].midMarks = targetMidMark;
+        if (targetRemarks && !records[existingIdx].remarks) {
+          records[existingIdx].remarks = targetRemarks;
+        }
+        updated = true;
+      }
     }
-  } catch {}
-})();
+
+    if (updated) {
+      saveAllMarksRecords(records);
+    }
+  } catch (err) {
+    console.warn("Failed to initialize default marks:", err);
+  }
+}
+
+// Run on load
+initDefaultMarks();
