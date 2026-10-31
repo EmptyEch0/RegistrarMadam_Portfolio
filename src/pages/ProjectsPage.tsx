@@ -22,7 +22,7 @@ import {
   ChevronDown,
   Calendar
 } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import defaultProjectsJSON from "@/data/projects.json";
 
 export interface Developer {
@@ -63,7 +63,35 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     setIsLoading(true);
     try {
-      // 1. Try local storage cache from Admin if exists
+      const client = supabaseAdmin || supabase;
+
+      // 1. First query Supabase Cloud so all devices & desktops show identical live projects
+      if (client && import.meta.env.VITE_SUPABASE_URL) {
+        const { data, error } = await client
+          .from("projects")
+          .select("*")
+          .order("featured", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          const clean = data.filter(
+            (p: any) =>
+              p.id !== "2" &&
+              p.id !== "3" &&
+              !p.title?.includes("Smart Campus IoT") &&
+              !p.title?.includes("VANETs")
+          );
+          if (clean.length > 0) {
+            setProjects(clean);
+            try {
+              localStorage.setItem("admin_projects_data", JSON.stringify(clean));
+            } catch {}
+            setIsLoading(false);
+            return;
+          }
+        }
+      }
+
+      // 2. Fallback to local storage cache if offline or on admin's device
       const localCustom = localStorage.getItem("admin_projects_data");
       if (localCustom) {
         const parsed: ProjectItem[] = JSON.parse(localCustom);
@@ -80,27 +108,6 @@ export default function ProjectsPage() {
             setIsLoading(false);
             return;
           }
-        }
-      }
-
-      // 2. Try Supabase
-      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        const { data, error } = await supabase
-          .from("projects")
-          .select("*")
-          .order("featured", { ascending: false });
-
-        if (!error && data && data.length > 0) {
-          const clean = data.filter(
-            (p: any) =>
-              p.id !== "2" &&
-              p.id !== "3" &&
-              !p.title?.includes("Smart Campus IoT") &&
-              !p.title?.includes("VANETs")
-          );
-          setProjects(clean.length > 0 ? clean : (defaultProjectsJSON as ProjectItem[]));
-          setIsLoading(false);
-          return;
         }
       }
 

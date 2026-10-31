@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import AdminLayout from "@/components/admin/AdminLayout";
 import {
   FolderGit2,
@@ -14,7 +14,11 @@ import {
   CheckCircle2,
   X,
   Layers,
-  Image as ImageIcon
+  Image as ImageIcon,
+  CloudUpload,
+  Download,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
 import defaultProjectsJSON from "@/data/projects.json";
 
@@ -67,35 +71,99 @@ export default function AdminProjects() {
   const [devGithub, setDevGithub] = useState("");
 
   const [saving, setSaving] = useState(false);
+  const [syncingCloud, setSyncingCloud] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState<"synced" | "local_only" | "checking">("checking");
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  // Sync projects from local device up to Supabase Cloud so all devices & users can see them
+  const syncProjectsToCloud = async (projectsToSync = projects) => {
+    if (!projectsToSync || projectsToSync.length === 0) return;
+    setSyncingCloud(true);
+    const client = supabaseAdmin || supabase;
+
+    try {
+      let failedCount = 0;
+      for (const p of projectsToSync) {
+        const { error } = await client.from("projects").upsert(p);
+        if (error) {
+          failedCount++;
+          console.warn("Sync error for project:", p.title, error.message);
+        }
+      }
+
+      if (failedCount === 0) {
+        setCloudStatus("synced");
+        setMessage({
+          text: `✅ All ${projectsToSync.length} projects successfully synchronized to Supabase Cloud! Visible on all desktops.`,
+          type: "success",
+        });
+      } else {
+        setCloudStatus("local_only");
+        setMessage({
+          text: `⚠️ Saved locally, but Supabase Cloud rejected sync (${failedCount} errors). Please run 'supabase/projects.sql' in Supabase SQL Editor.`,
+          type: "error",
+        });
+      }
+    } catch (err: any) {
+      setCloudStatus("local_only");
+      console.warn("Exception during cloud sync:", err);
+      setMessage({
+        text: `⚠️ Cloud sync notice: ${err?.message || "Storage table missing"}. Projects are safe locally on this machine.`,
+        type: "error",
+      });
+    } finally {
+      setSyncingCloud(false);
+    }
+  };
+
+  const exportProjectsJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(projects, null, 2));
+    const downloadAnchor = document.createElement("a");
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `projects_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+
+    navigator.clipboard?.writeText(JSON.stringify(projects, null, 2));
+    setMessage({ text: "📋 Projects JSON copied to clipboard & downloaded as file!", type: "success" });
+  };
 
   const fetchProjects = async () => {
     setLoading(true);
+    setCloudStatus("checking");
+    const client = supabaseAdmin || supabase;
+
     try {
-      // 1. Check local storage
+      let cloudData: ProjectItem[] | null = null;
+
+      // 1. First query Supabase Cloud (the true cross-device shared database)
+      if (client && import.meta.env.VITE_SUPABASE_URL) {
+        const { data, error } = await client
+          .from("projects")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          cloudData = data.filter(
+            (p) =>
+              p.id !== "2" &&
+              p.id !== "3" &&
+              !p.title.includes("Smart Campus IoT") &&
+              !p.title.includes("VANETs")
+          );
+        }
+      }
+
+      // 2. Check local storage
       const local = localStorage.getItem("admin_projects_data");
-      let currentData: ProjectItem[] = [];
+      let localData: ProjectItem[] = [];
 
       if (local) {
-        const parsed: ProjectItem[] = JSON.parse(local);
-        currentData = parsed.filter(
-          (p) =>
-            p.id !== "2" &&
-            p.id !== "3" &&
-            !p.title.includes("Smart Campus IoT") &&
-            !p.title.includes("VANETs")
-        );
-        localStorage.setItem("admin_projects_data", JSON.stringify(currentData));
-      } else {
-        // 2. Try Supabase
-        if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-          const { data, error } = await supabase
-            .from("projects")
-            .select("*")
-            .order("created_at", { ascending: false });
-
-          if (!error && data && data.length > 0) {
-            currentData = data.filter(
+        try {
+          const parsed: ProjectItem[] = JSON.parse(local);
+          if (Array.isArray(parsed)) {
+            localData = parsed.filter(
               (p) =>
                 p.id !== "2" &&
                 p.id !== "3" &&
@@ -103,17 +171,27 @@ export default function AdminProjects() {
                 !p.title.includes("VANETs")
             );
           }
-        }
+        } catch {}
       }
 
-      if (currentData.length === 0) {
-        currentData = defaultProjectsJSON as ProjectItem[];
+      // 3. Resolve projects and auto-sync if this machine has local projects not yet in cloud!
+      if (cloudData && cloudData.length > 0) {
+        setProjects(cloudData);
+        setCloudStatus("synced");
+        localStorage.setItem("admin_projects_data", JSON.stringify(cloudData));
+      } else if (localData.length > 0) {
+        setProjects(localData);
+        setCloudStatus("local_only");
+        // Automatically attempt to sync local projects into Supabase Cloud
+        syncProjectsToCloud(localData);
+      } else {
+        setProjects(defaultProjectsJSON as ProjectItem[]);
+        setCloudStatus("local_only");
       }
-
-      setProjects(currentData);
     } catch (err) {
       console.error("Error fetching projects:", err);
       setProjects(defaultProjectsJSON as ProjectItem[]);
+      setCloudStatus("local_only");
     } finally {
       setLoading(false);
     }
@@ -217,25 +295,35 @@ export default function AdminProjects() {
     localStorage.setItem("admin_projects_data", JSON.stringify(updatedList));
     setProjects(updatedList);
 
-    // Also attempt Supabase upsert
+    // Save to Supabase Cloud
+    let cloudSynced = false;
     try {
-      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        if (editingProject) {
-          await supabase.from("projects").update(payload).eq("id", payload.id);
+      const client = supabaseAdmin || supabase;
+      if (client && import.meta.env.VITE_SUPABASE_URL) {
+        const { error: upsertErr } = await client.from("projects").upsert(payload);
+        if (upsertErr) {
+          console.warn("Supabase project sync notice:", upsertErr.message);
+          setMessage({
+            text: `Saved locally on this PC! (Note: run 'supabase/projects.sql' in Supabase to sync across all computers: ${upsertErr.message})`,
+            type: "error",
+          });
         } else {
-          await supabase.from("projects").insert(payload);
+          cloudSynced = true;
+          setCloudStatus("synced");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.warn("Supabase project sync note (saved locally):", err);
     }
 
     setSaving(false);
-    setMessage({ text: "Project saved successfully!", type: "success" });
+    if (cloudSynced) {
+      setMessage({ text: "Project saved to Cloud successfully! Visible on all desktops.", type: "success" });
+    }
     setTimeout(() => {
       setShowModal(false);
       setMessage(null);
-    }, 1000);
+    }, 1500);
   };
 
   const handleDeleteProject = async (id: string) => {
@@ -246,8 +334,9 @@ export default function AdminProjects() {
     setProjects(updated);
 
     try {
-      if (supabase && import.meta.env.VITE_SUPABASE_URL) {
-        await supabase.from("projects").delete().eq("id", id);
+      const client = supabaseAdmin || supabase;
+      if (client && import.meta.env.VITE_SUPABASE_URL) {
+        await client.from("projects").delete().eq("id", id);
       }
     } catch (err) {
       console.warn("Deleted locally:", err);
@@ -258,22 +347,54 @@ export default function AdminProjects() {
     <AdminLayout>
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[#0B132B] font-serif flex items-center gap-2.5">
-            <FolderGit2 className="text-[#C59B27]" size={26} />
-            Projects & Innovations Management
-          </h2>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-2xl font-bold text-[#0B132B] font-serif flex items-center gap-2.5">
+              <FolderGit2 className="text-[#C59B27]" size={26} />
+              Projects & Innovations Management
+            </h2>
+            {cloudStatus === "synced" ? (
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 border border-emerald-500/30 flex items-center gap-1">
+                <CheckCircle2 size={12} /> Cloud Synced
+              </span>
+            ) : (
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-700 border border-amber-500/30 flex items-center gap-1">
+                <AlertCircle size={12} /> Local Cache Only
+              </span>
+            )}
+          </div>
           <p className="text-[#64748B] text-sm">
             Manage guided student projects, live platforms, and developer contributor profiles
           </p>
         </div>
 
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold shadow-sm transition-all duration-200 transform hover:scale-[1.02] shrink-0"
-        >
-          <Plus size={18} />
-          <span>Add New Project</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => syncProjectsToCloud()}
+            disabled={syncingCloud}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-semibold shadow-xs transition-colors"
+            title="Sync all projects to Supabase Cloud so all computers can see them"
+          >
+            <CloudUpload size={14} className={syncingCloud ? "animate-bounce text-accent" : "text-accent"} />
+            <span>{syncingCloud ? "Syncing..." : "Sync with Cloud"}</span>
+          </button>
+
+          <button
+            onClick={exportProjectsJSON}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card border border-border text-foreground hover:bg-muted text-xs font-semibold shadow-xs transition-colors"
+            title="Export / Download JSON backup of all projects"
+          >
+            <Download size={14} className="text-blue-500" />
+            <span>Export JSON</span>
+          </button>
+
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#C59B27] hover:bg-[#B58C1F] text-[#0B132B] font-bold shadow-sm transition-all duration-200 transform hover:scale-[1.02] shrink-0 text-sm"
+          >
+            <Plus size={18} />
+            <span>Add New Project</span>
+          </button>
+        </div>
       </div>
 
       {message && (
