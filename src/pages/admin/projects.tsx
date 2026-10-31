@@ -18,7 +18,9 @@ import {
   CloudUpload,
   Download,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Share2,
+  Check
 } from "lucide-react";
 import defaultProjectsJSON from "@/data/projects.json";
 
@@ -74,6 +76,22 @@ export default function AdminProjects() {
   const [syncingCloud, setSyncingCloud] = useState(false);
   const [cloudStatus, setCloudStatus] = useState<"synced" | "local_only" | "checking">("checking");
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [copiedShareId, setCopiedShareId] = useState<string | null>(null);
+
+  const handleCopyShareLink = async (proj: ProjectItem) => {
+    const shareUrl = `${window.location.origin}/projects?project=${encodeURIComponent(proj.id)}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopiedShareId(proj.id);
+      setMessage({
+        text: `✅ Copied direct share link for "${proj.title}"! Anyone opening this link will see this project.`,
+        type: "success",
+      });
+      setTimeout(() => setCopiedShareId(null), 2500);
+    } catch {
+      window.prompt("Direct share link:", shareUrl);
+    }
+  };
 
   // Sync projects from local device up to Supabase Cloud so all devices & users can see them
   const syncProjectsToCloud = async (projectsToSync = projects) => {
@@ -428,6 +446,17 @@ export default function AdminProjects() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleCopyShareLink(proj)}
+                    className={`p-2 rounded-lg border transition-all ${
+                      copiedShareId === proj.id
+                        ? "bg-[#16845B]/15 border-[#16845B] text-[#16845B]"
+                        : "bg-white border-[#E7E2D8] text-[#334155] hover:text-[#C59B27] hover:border-[#C59B27]"
+                    }`}
+                    title="Copy direct shareable project link"
+                  >
+                    {copiedShareId === proj.id ? <Check size={15} /> : <Share2 size={15} />}
+                  </button>
                   <button
                     onClick={() => openEditModal(proj)}
                     className="p-2 rounded-lg bg-white border border-[#C59B27] text-[#0B132B] hover:bg-[#FAF8F5] transition-colors"
