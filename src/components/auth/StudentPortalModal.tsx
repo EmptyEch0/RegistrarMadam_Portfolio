@@ -127,7 +127,7 @@ export function StudentPortalModal({
     setLoginLoading(true);
 
     setTimeout(() => {
-      const res = loginStudent(loginIdentifier, loginPassword);
+      const res = loginStudent(loginIdentifier.trim(), loginPassword);
       setLoginLoading(false);
       if (res.success && res.account) {
         setStudent(res.account);
@@ -374,16 +374,24 @@ export function StudentPortalModal({
                     )}
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                        <User size={13} className="text-accent" /> Username or Roll Number *
+                      <label className="text-xs font-semibold text-foreground flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <User size={13} className="text-accent" /> Username or Roll Number *
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          (23VV1A1232 or 23vv1a1232)
+                        </span>
                       </label>
                       <input
                         type="text"
                         required
                         value={loginIdentifier}
                         onChange={(e) => setLoginIdentifier(e.target.value)}
-                        placeholder="e.g. 23VV1A1232 or your username"
-                        className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all"
+                        placeholder="e.g. 23VV1A1232 or 23vv1a1232"
+                        className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all font-mono"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck="false"
                       />
                     </div>
 
@@ -498,9 +506,12 @@ export function StudentPortalModal({
                             type="text"
                             required
                             value={signupRollNo}
-                            onChange={(e) => setSignupRollNo(e.target.value.toUpperCase())}
-                            placeholder="e.g. 23VV1A1232"
-                            className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none uppercase font-mono font-medium"
+                            onChange={(e) => setSignupRollNo(e.target.value)}
+                            placeholder="e.g. 23VV1A1232 or 23vv1a1232"
+                            className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none font-mono font-medium"
+                            autoCapitalize="none"
+                            autoCorrect="off"
+                            spellCheck="false"
                           />
                         </div>
 

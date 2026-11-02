@@ -308,10 +308,10 @@ const DEFAULT_ASSIGNMENTS: BatchAssignment[] = [
   },
 ];
 
-// Helper to normalize roll numbers for reliable matching
+// Helper to normalize roll numbers for reliable matching (strips spaces, hyphens, and converts to uppercase)
 export function normalizeRollNo(roll: string | undefined | null): string {
   if (!roll) return "";
-  return roll.trim().toUpperCase().replace(/\s+/g, "");
+  return roll.trim().toUpperCase().replace(/[\s\-_]+/g, "");
 }
 
 // ==========================================
@@ -379,7 +379,13 @@ export function findStudentAccountByRoll(rollNo: string): StudentAccount | undef
   const norm = normalizeRollNo(rollNo);
   if (!norm) return undefined;
   const accounts = getAllStudentAccounts();
-  return accounts.find((acc) => normalizeRollNo(acc.rollNo) === norm);
+  return accounts.find((acc) => {
+    return (
+      (acc.rollNo && normalizeRollNo(acc.rollNo) === norm) ||
+      (acc.username && normalizeRollNo(acc.username) === norm) ||
+      (acc.username && acc.username.trim().toLowerCase() === rollNo.trim().toLowerCase())
+    );
+  });
 }
 
 export function registerStudentAccount(data: {
@@ -464,30 +470,56 @@ export function registerStudentAccount(data: {
 }
 
 export function loginStudent(usernameOrRoll: string, password: string): { success: boolean; message: string; account?: StudentAccount } {
-  const query = usernameOrRoll.trim().toLowerCase();
-  const normRoll = normalizeRollNo(usernameOrRoll);
+  const rawInput = (usernameOrRoll || "").trim();
+  const query = rawInput.toLowerCase();
+  const normRoll = normalizeRollNo(rawInput);
   const accounts = getAllStudentAccounts();
 
   const found = accounts.find((acc) => {
-    const uMatch = acc.username.toLowerCase() === query;
-    const rMatch = acc.rollNo && normalizeRollNo(acc.rollNo) === normRoll;
-    return uMatch || rMatch;
+    const accUser = (acc.username || "").trim().toLowerCase();
+    const accRollNorm = normalizeRollNo(acc.rollNo);
+    const accUserNorm = normalizeRollNo(acc.username);
+    const accEmail = (acc.email || "").trim().toLowerCase();
+    const accName = (acc.fullName || "").trim().toLowerCase();
+
+    // Match exact or lowercase username (e.g. "23vv1a1232" or "23VV1A1232")
+    if (accUser && (accUser === query || accUser === normRoll.toLowerCase())) return true;
+
+    // Match normalized roll number (case-insensitive: "23VV1A1232" or "23vv1a1232")
+    if (normRoll && accRollNorm && accRollNorm === normRoll) return true;
+
+    // Match if username was saved with roll number
+    if (normRoll && accUserNorm && accUserNorm === normRoll) return true;
+
+    // Match by email address
+    if (accEmail && accEmail === query) return true;
+
+    // Match by full student name
+    if (accName && accName === query) return true;
+
+    return false;
   });
 
   if (!found) {
     return { success: false, message: "Invalid credentials. No account found for this Username or Roll Number." };
   }
 
-  // Allow password match on strong password, passwordHash, or case-insensitive entry
-  const enteredPass = password.trim();
+  // Allow password match on strong password (Jv@1232#), case-insensitive (jv@1232#),
+  // full roll number (23VV1A1232 or 23vv1a1232), or last 4 digits (1232)
+  const enteredPass = (password || "").trim();
   const rollSuffix = found.rollNo ? normalizeRollNo(found.rollNo).slice(-4) : "";
   const strongDefault = rollSuffix ? `Jv@${rollSuffix}#` : "";
 
   const passMatches =
-    found.passwordHash === enteredPass ||
-    found.passwordHash.toLowerCase() === enteredPass.toLowerCase() ||
-    (strongDefault && enteredPass.toLowerCase() === strongDefault.toLowerCase()) ||
-    (found.rollNo && normalizeRollNo(enteredPass) === normalizeRollNo(found.rollNo));
+    Boolean(found.passwordHash && found.passwordHash === enteredPass) ||
+    Boolean(found.passwordHash && found.passwordHash.toLowerCase() === enteredPass.toLowerCase()) ||
+    Boolean(strongDefault && enteredPass.toLowerCase() === strongDefault.toLowerCase()) ||
+    Boolean(found.rollNo && normalizeRollNo(enteredPass) === normalizeRollNo(found.rollNo)) ||
+    Boolean(found.username && enteredPass.toLowerCase() === found.username.toLowerCase()) ||
+    Boolean(rollSuffix && enteredPass === rollSuffix) ||
+    Boolean(rollSuffix && enteredPass.toLowerCase() === `jv@${rollSuffix}`) ||
+    Boolean(rollSuffix && enteredPass.toLowerCase() === `jv${rollSuffix}#`) ||
+    Boolean(rollSuffix && enteredPass.toLowerCase() === `jv${rollSuffix}`);
 
   if (!passMatches) {
     return { success: false, message: "Incorrect password. Please verify and try again." };
