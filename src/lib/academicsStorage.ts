@@ -79,6 +79,7 @@ const STORAGE_KEYS = {
   BATCH_ASSIGNMENTS: "qlearn_batch_assignments",
   ASSIGNMENT_SUBMISSIONS: "qlearn_assignment_submissions",
   STUDENT_MARKS: "qlearn_student_marks_records",
+  MARKS_PUBLISHED: "qlearn_publish_student_marks",
   LAST_QUIZ_PLAYER: "qlearn_quiz_player_name",
 };
 
@@ -919,6 +920,30 @@ export async function submitStudentAssignment({
 // ==========================================
 // STUDENT MARKS MANAGEMENT
 // ==========================================
+
+/**
+ * Check whether faculty/admin has published marks to students.
+ * Default is FALSE (students see "Record not added yet").
+ */
+export function isMarksPublished(): boolean {
+  try {
+    const val = localStorage.getItem(STORAGE_KEYS.MARKS_PUBLISHED);
+    return val === "true";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Set faculty/admin publish status for student marks.
+ */
+export function setMarksPublished(published: boolean): void {
+  try {
+    localStorage.setItem(STORAGE_KEYS.MARKS_PUBLISHED, published ? "true" : "false");
+  } catch (err) {
+    console.error("Failed to set marks publish status:", err);
+  }
+}
 
 export function getAllMarksRecords(): StudentMarksRecord[] {
   try {

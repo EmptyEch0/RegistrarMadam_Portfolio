@@ -9,6 +9,7 @@ import {
   Clock,
   FileText,
   Eye,
+  EyeOff,
   Save,
   Trash2,
   Calendar,
@@ -46,6 +47,8 @@ import {
   normalizeRollNo,
   IOT_BATCH_ID,
   IOT_BATCH_MID1_MARKS,
+  isMarksPublished,
+  setMarksPublished,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -97,6 +100,7 @@ export default function AdminAcademics() {
   // Filter & Search
   const [searchQuery, setSearchQuery] = useState("");
   const [filterMode, setFilterMode] = useState<"all" | "accounts_created" | "submitted" | "pending_marks">("all");
+  const [marksPublished, setMarksPublishedState] = useState<boolean>(isMarksPublished());
 
   // PDF Preview Modal
   const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
@@ -293,6 +297,18 @@ export default function AdminAcademics() {
     }
     loadData();
     alert(`✅ Successfully saved and recorded marks for all ${activeBatch.students.length} students!`);
+  };
+
+  // Toggle whether marks are published to students or hidden as "Record not added yet"
+  const handleTogglePublishMarks = () => {
+    const nextVal = !marksPublished;
+    setMarksPublished(nextVal);
+    setMarksPublishedState(nextVal);
+    alert(
+      nextVal
+        ? "✅ Marks are now PUBLISHED to students! Students will see their exact marks upon logging into their dashboard."
+        : "🔒 Marks are now HIDDEN from students. Students will see 'Record not added yet' on their dashboard."
+    );
   };
 
   // Filter students
@@ -541,9 +557,32 @@ export default function AdminAcademics() {
                 <button
                   onClick={handleSaveAllMarks}
                   className="text-xs flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl bg-[#16845B] hover:bg-[#126B4A] text-white shadow-xs transition-all"
-                  title="Save and publish all entered marks for this entire batch"
+                  title="Save all entered marks for this entire batch"
                 >
                   <Check size={14} /> Save All Marks
+                </button>
+
+                {/* Display Marks to Students Toggle */}
+                <button
+                  onClick={handleTogglePublishMarks}
+                  className={`text-xs flex items-center gap-1.5 font-bold px-4 py-2 rounded-xl border transition-all ${
+                    marksPublished
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700 shadow-xs"
+                      : "bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300"
+                  }`}
+                  title="Toggle whether marks are visible to students or show 'Record not added yet'"
+                >
+                  {marksPublished ? (
+                    <>
+                      <Eye size={14} />
+                      <span>Marks: Visible to Students</span>
+                    </>
+                  ) : (
+                    <>
+                      <EyeOff size={14} />
+                      <span>Marks: Hidden from Students</span>
+                    </>
+                  )}
                 </button>
 
                 <button
@@ -552,6 +591,32 @@ export default function AdminAcademics() {
                 >
                   <Plus size={14} /> Add Students to Batch
                 </button>
+              </div>
+            </div>
+
+            {/* Marks Visibility Status Notice */}
+            <div className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-3 ${
+              marksPublished
+                ? "bg-emerald-50 border-emerald-200 text-emerald-900"
+                : "bg-amber-50 border-amber-200 text-amber-900"
+            }`}>
+              <div className="flex items-center gap-2">
+                {marksPublished ? (
+                  <Eye size={16} className="text-emerald-700 shrink-0" />
+                ) : (
+                  <EyeOff size={16} className="text-amber-700 shrink-0" />
+                )}
+                <span>
+                  {marksPublished ? (
+                    <>
+                      <strong>Marks Published:</strong> All entered Mid-1, Mid-2, and Assignment marks are currently visible to students on their individual dashboards upon login.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Marks Hidden (Default):</strong> Students currently see <em>"Record not added yet"</em> on their dashboard. You can enter or edit marks here in admin, and click <strong>"Marks: Hidden"</strong> above to publish them to students at any time.
+                    </>
+                  )}
+                </span>
               </div>
             </div>
 

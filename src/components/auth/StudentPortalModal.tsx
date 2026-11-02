@@ -38,6 +38,7 @@ import {
   BatchAssignment,
   AssignmentSubmission,
   StudentMarksRecord,
+  isMarksPublished,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -185,6 +186,7 @@ export function StudentPortalModal({
   const studentMarks: StudentMarksRecord | undefined = student?.rollNo
     ? getMarksForStudent(student.rollNo)
     : undefined;
+  const marksPublished = isMarksPublished();
 
   // Assignments query
   const allAssignments = getAllAssignments();
@@ -782,19 +784,21 @@ export function StudentPortalModal({
                         </div>
                         <div className="flex items-baseline gap-1 my-1">
                           <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                            {studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== ""
+                            {marksPublished && studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== ""
                               ? studentMarks.midMarks
-                              : "0"}
+                              : "—"}
                           </span>
-                          <span className="text-xs text-muted-foreground font-mono">/ 30</span>
+                          {marksPublished && studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== "" && (
+                            <span className="text-xs text-muted-foreground font-mono">/ 30</span>
+                          )}
                         </div>
-                        {studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== "" ? (
+                        {marksPublished && studentMarks?.midMarks !== undefined && studentMarks?.midMarks !== "" ? (
                           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1">
                             <CheckCircle2 size={12} /> Evaluated & Published
                           </span>
                         ) : (
                           <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
-                            ⏳ Mid-1 marks will be updated soon
+                            <Clock size={12} /> Record not added yet
                           </span>
                         )}
                       </div>
@@ -811,14 +815,14 @@ export function StudentPortalModal({
                         </div>
                         <div className="flex items-baseline gap-1 my-1">
                           <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                            {studentMarks?.mid2Marks || "—"}
+                            {marksPublished && studentMarks?.mid2Marks ? studentMarks.mid2Marks : "—"}
                           </span>
-                          {studentMarks?.mid2Marks && (
+                          {marksPublished && studentMarks?.mid2Marks && (
                             <span className="text-xs text-muted-foreground font-mono">/ 30</span>
                           )}
                         </div>
                         <span className="text-[10px] text-muted-foreground">
-                          {studentMarks?.mid2Marks ? "Official score" : "Pending 2nd mid exam"}
+                          {marksPublished && studentMarks?.mid2Marks ? "Official score" : "Record not added yet"}
                         </span>
                       </div>
 
@@ -834,19 +838,19 @@ export function StudentPortalModal({
                         </div>
                         <div className="flex items-baseline gap-1 my-1">
                           <span className="text-2xl sm:text-3xl font-extrabold text-primary font-mono">
-                            {studentMarks?.assignmentMarks || "—"}
+                            {marksPublished && studentMarks?.assignmentMarks ? studentMarks.assignmentMarks : "—"}
                           </span>
-                          {studentMarks?.assignmentMarks && (
+                          {marksPublished && studentMarks?.assignmentMarks && (
                             <span className="text-xs text-muted-foreground font-mono">/ 10</span>
                           )}
                         </div>
                         <span className="text-[10px] text-muted-foreground">
-                          {studentMarks?.assignmentMarks ? "Evaluated by faculty" : "Calculated from 3 submissions"}
+                          {marksPublished && studentMarks?.assignmentMarks ? "Evaluated by faculty" : "Record not added yet"}
                         </span>
                       </div>
 
-                      {/* Remarks if any */}
-                      {studentMarks?.remarks && (
+                      {/* Remarks if any (only visible when marks are published) */}
+                      {marksPublished && studentMarks?.remarks && (
                         <div className="sm:col-span-3 p-3.5 rounded-xl bg-accent/5 border border-accent/20 text-xs">
                           <span className="font-bold text-accent block mb-1">
                             Faculty Remarks:
