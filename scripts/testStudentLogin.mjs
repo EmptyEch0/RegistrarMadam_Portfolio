@@ -12,6 +12,7 @@ const BTECH_4TH_YEAR_2023_2027_STUDENTS = Array.from({ length: 74 }, (_, i) => {
 });
 
 const LATERAL_ENTRY_2024_2027_STUDENTS = [
+  { rollNo: "24VV5A1268", name: "Student 24VV5A1268 (LES)", email: "24vv5a1268@jntugv.edu.in" },
   { rollNo: "24VV5A1269", name: "Student 24VV5A1269 (LES)", email: "24vv5a1269@jntugv.edu.in" },
   { rollNo: "24VV5A1270", name: "Student 24VV5A1270 (LES)", email: "24vv5a1270@jntugv.edu.in" },
   { rollNo: "24VV5A1271", name: "Student 24VV5A1271 (LES)", email: "24vv5a1271@jntugv.edu.in" },
@@ -113,6 +114,12 @@ const tests = [
   ["23vv1a1232", "23vv1a1232"],
   ["23VV1A1232", "23VV1A1232"],
   ["23VV1A1232", "1232"],
+  // 68 tests
+  ["23VV1A1268", "Jv@1268#"],
+  ["23vv1a1268", "Jv@1268#"],
+  ["24VV5A1268", "Jv@1268#"],
+  ["24vv5a1268", "Jv@1268#"],
+  ["24vv5a1268", "1268"],
   // Other students
   ["23VV1A1201", "Jv@1201#"],
   ["23vv1a1201", "Jv@1201#"],

@@ -94,8 +94,9 @@ export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from
   };
 });
 
-// Lateral Entry (LES) students for 2024-2027 (24VV5A1269 to 24VV5A1274)
+// Lateral Entry (LES) students for 2024-2027 (24VV5A1268 to 24VV5A1274)
 export const LATERAL_ENTRY_2024_2027_STUDENTS: BatchStudentEntry[] = [
+  { rollNo: "24VV5A1268", name: "Student 24VV5A1268 (Lateral Entry)", email: "24vv5a1268@jntugv.edu.in" },
   { rollNo: "24VV5A1269", name: "Student 24VV5A1269 (Lateral Entry)", email: "24vv5a1269@jntugv.edu.in" },
   { rollNo: "24VV5A1270", name: "Student 24VV5A1270 (Lateral Entry)", email: "24vv5a1270@jntugv.edu.in" },
   { rollNo: "24VV5A1271", name: "Student 24VV5A1271 (Lateral Entry)", email: "24vv5a1271@jntugv.edu.in" },
@@ -188,7 +189,8 @@ export const IOT_BATCH_MID1_MARKS: Record<string, { midMarks: string; remarks?: 
   "23VV1A1272": { midMarks: "22" },
   "23VV1A1273": { midMarks: "17.5" },
   "23VV1A1274": { midMarks: "20.5" },
-  // Lateral Entry Students (24VV5A1269 to 24VV5A1274)
+  // Lateral Entry Students (24VV5A1268 to 24VV5A1274)
+  "24VV5A1268": { midMarks: "25.5", remarks: "Lateral Entry (LES) Student" },
   "24VV5A1269": { midMarks: "25", remarks: "Lateral Entry (LES) Student" },
   "24VV5A1270": { midMarks: "22", remarks: "Lateral Entry (LES) Student" },
   "24VV5A1271": { midMarks: "25.5", remarks: "Lateral Entry (LES) Student" },
