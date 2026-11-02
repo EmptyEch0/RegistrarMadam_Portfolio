@@ -11,10 +11,20 @@ const marksData = {
   71: "25.5", 72: "22", 73: "17.5", 74: "20.5"
 };
 
+const lateralEntryMarks = {
+  "24VV5A1269": "25",
+  "24VV5A1270": "22",
+  "24VV5A1271": "25.5",
+  "24VV5A1272": "22",
+  "24VV5A1273": "17.5",
+  "24VV5A1274": "20.5"
+};
+
 const rows = [
   ["S.No", "Roll Number", "Username", "Full Name", "Email Address", "Password (8 Chars)", "Password Structure", "Mid-1 Marks (/30)", "Batch", "Year", "Course"]
 ];
 
+// Regular entries (23VV1A1201 to 23VV1A1274)
 for (let i = 1; i <= 74; i++) {
   const num = String(i).padStart(2, "0");
   const roll = `23VV1A12${num}`;
@@ -28,7 +38,21 @@ for (let i = 1; i <= 74; i++) {
   rows.push([i, roll, username, name, email, pwd, pwdStruct, mark, "2023-2027", "4th Year", "Internet of Things (IoT)"]);
 }
 
+// Lateral Entry entries (24VV5A1269 to 24VV5A1274)
+const lateralRolls = ["24VV5A1269", "24VV5A1270", "24VV5A1271", "24VV5A1272", "24VV5A1273", "24VV5A1274"];
+for (let i = 0; i < lateralRolls.length; i++) {
+  const roll = lateralRolls[i];
+  const num = roll.slice(-2);
+  const username = roll.toLowerCase();
+  const name = `Student ${roll} (Lateral Entry)`;
+  const email = `${username}@jntugv.edu.in`;
+  const pwd = `Jv@12${num}#`;
+  const pwdStruct = `Char(Jv) + Symbol(@) + Int(12${num}) + Symbol(#)`;
+  const mark = lateralEntryMarks[roll] || "0";
+
+  rows.push([74 + i + 1, roll, username, name, email, pwd, pwdStruct, mark, "2024-2027", "4th Year (LES)", "Internet of Things (IoT)"]);
+}
+
 const csvContent = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
 fs.writeFileSync("students_credentials_2023_2027.csv", csvContent, "utf8");
 console.log(`Successfully generated students_credentials_2023_2027.csv with ${rows.length - 1} student records.`);
-

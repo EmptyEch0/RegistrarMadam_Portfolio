@@ -93,6 +93,21 @@ export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from
   };
 });
 
+// Lateral Entry (LES) students for 2024-2027 (24VV5A1269 to 24VV5A1274)
+export const LATERAL_ENTRY_2024_2027_STUDENTS: BatchStudentEntry[] = [
+  { rollNo: "24VV5A1269", name: "Student 24VV5A1269 (LES)", email: "24vv5a1269@jntugv.edu.in" },
+  { rollNo: "24VV5A1270", name: "Student 24VV5A1270 (LES)", email: "24vv5a1270@jntugv.edu.in" },
+  { rollNo: "24VV5A1271", name: "Student 24VV5A1271 (LES)", email: "24vv5a1271@jntugv.edu.in" },
+  { rollNo: "24VV5A1272", name: "Student 24VV5A1272 (LES)", email: "24vv5a1272@jntugv.edu.in" },
+  { rollNo: "24VV5A1273", name: "Student 24VV5A1273 (LES)", email: "24vv5a1273@jntugv.edu.in" },
+  { rollNo: "24VV5A1274", name: "Student 24VV5A1274 (LES)", email: "24vv5a1274@jntugv.edu.in" },
+];
+
+export const ALL_IOT_BATCH_STUDENTS: BatchStudentEntry[] = [
+  ...BTECH_4TH_YEAR_2023_2027_STUDENTS,
+  ...LATERAL_ENTRY_2024_2027_STUDENTS,
+];
+
 export const IOT_BATCH_ID = "batch-2023-2027-btech-4th-iot";
 
 // Official Mid-I Marks (out of 30) for B.Tech 4th Year (2023-2027) IoT Batch
@@ -172,6 +187,13 @@ export const IOT_BATCH_MID1_MARKS: Record<string, { midMarks: string; remarks?: 
   "23VV1A1272": { midMarks: "22" },
   "23VV1A1273": { midMarks: "17.5" },
   "23VV1A1274": { midMarks: "20.5" },
+  // Lateral Entry Students (24VV5A1269 to 24VV5A1274)
+  "24VV5A1269": { midMarks: "25", remarks: "Lateral Entry (LES) Student" },
+  "24VV5A1270": { midMarks: "22", remarks: "Lateral Entry (LES) Student" },
+  "24VV5A1271": { midMarks: "25.5", remarks: "Lateral Entry (LES) Student" },
+  "24VV5A1272": { midMarks: "22", remarks: "Lateral Entry (LES) Student" },
+  "24VV5A1273": { midMarks: "17.5", remarks: "Lateral Entry (LES) Student" },
+  "24VV5A1274": { midMarks: "20.5", remarks: "Lateral Entry (LES) Student" },
 };
 
 // Initial default batches for immediate ready-to-use experience
@@ -184,7 +206,7 @@ const DEFAULT_BATCHES: AcademicBatch[] = [
     branch: "Information Technology (IoT)",
     name: "B.Tech 4th Year (2023-2027) - Internet of Things (IoT)",
     createdAt: new Date().toISOString(),
-    students: BTECH_4TH_YEAR_2023_2027_STUDENTS,
+    students: ALL_IOT_BATCH_STUDENTS,
   },
   {
     id: "batch-2026-btech-3rd-it",
@@ -301,9 +323,9 @@ export function getAllStudentAccounts(): StudentAccount[] {
     let accounts: StudentAccount[] = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(accounts)) accounts = [];
 
-    // Ensure all 70 students of B.Tech 4th Year (2023-2027) IoT Batch (23VV1A1201 - 23VV1A1270) have accounts created with strong 8-character passwords
+    // Ensure all students of B.Tech 4th Year (2023-2027) IoT Batch (regular & lateral entry) have accounts created with strong 8-character passwords
     let updated = false;
-    for (const s of BTECH_4TH_YEAR_2023_2027_STUDENTS) {
+    for (const s of ALL_IOT_BATCH_STUDENTS) {
       const normRoll = normalizeRollNo(s.rollNo);
       const rollSuffix = normRoll.slice(-4);
       const strongPassword = `Jv@${rollSuffix}#`; // 8 chars: Char(Jv) + Symbol(@) + Int(suffix) + Symbol(#)
@@ -530,9 +552,18 @@ export function getAllBatches(): AcademicBatch[] {
     if (Array.isArray(parsed) && parsed.length > 0) {
       let changed = false;
       for (const def of DEFAULT_BATCHES) {
-        if (!parsed.some((b: AcademicBatch) => b.id === def.id)) {
+        const found = parsed.find((b: AcademicBatch) => b.id === def.id);
+        if (!found) {
           parsed.unshift(def);
           changed = true;
+        } else if (def.id === IOT_BATCH_ID) {
+          // Merge any lateral entry students if missing from cached batch
+          for (const st of def.students) {
+            if (!found.students.some((s: BatchStudentEntry) => normalizeRollNo(s.rollNo) === normalizeRollNo(st.rollNo))) {
+              found.students.push(st);
+              changed = true;
+            }
+          }
         }
       }
       if (changed) {
@@ -1000,14 +1031,14 @@ export function saveStudentMarks(
   return updatedRecord;
 }
 
-// Initialize all 74 IoT batch students with their official Mid-1 Marks (out of 30)
+// Initialize all IoT batch students (regular & lateral entry) with their official Mid-1 Marks (out of 30)
 // Default is 0 for any missing student, Roll 4 explicitly neglected/absent = 0
 export function initDefaultMarks(): void {
   try {
     let records = getAllMarksRecords();
     let updated = false;
 
-    for (const student of BTECH_4TH_YEAR_2023_2027_STUDENTS) {
+    for (const student of ALL_IOT_BATCH_STUDENTS) {
       const normRoll = normalizeRollNo(student.rollNo);
       const existingIdx = records.findIndex(
         (r) => r.batchId === IOT_BATCH_ID && normalizeRollNo(r.rollNo) === normRoll
