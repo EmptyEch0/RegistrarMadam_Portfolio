@@ -105,24 +105,24 @@ export function Header() {
           : "bg-card py-4 border-b border-border/10"
       )}
     >
-      <div className="container-wide px-6 lg:px-12">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
         <nav className="flex items-center justify-between">
           {/* Logo */}
           <Link
             to="/"
-            className="flex flex-col transition-opacity hover:opacity-80"
+            className="flex flex-col transition-opacity hover:opacity-80 shrink-0 mr-2 xl:mr-4"
             aria-label="Go to home page"
           >
-            <span className="font-serif text-lg md:text-xl font-semibold text-primary tracking-wide">
+            <span className="font-serif text-base md:text-lg xl:text-xl font-semibold text-primary tracking-wide whitespace-nowrap">
               Dr. G. Jaya Suma
             </span>
-            <span className="text-[11px] md:text-xs text-muted-foreground font-medium tracking-wide">
+            <span className="text-[10px] md:text-[11px] xl:text-xs text-muted-foreground font-medium tracking-wide whitespace-nowrap">
               Professor of Information Technology · JNTU-GV
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2">
+          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
             {/* Render first three items: Home, About, Experience */}
             {mainNavItems.map((item) => {
               const isActive = location.pathname === item.href;
@@ -132,8 +132,8 @@ export function Header() {
                   to={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={cn(
-                    "px-3.5 py-2 text-[15px] xl:text-base font-medium relative transition-colors",
-                    "after:absolute after:left-3.5 after:right-3.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+                    "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
+                    "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
                     "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
                     "hover:after:scale-x-100",
                     isActive
@@ -141,7 +141,14 @@ export function Header() {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  {item.label}
+                  {item.href === "/experience" ? (
+                    <>
+                      <span className="hidden xl:inline">Experience & Education</span>
+                      <span className="xl:hidden">Experience</span>
+                    </>
+                  ) : (
+                    item.label
+                  )}
                 </Link>
               );
             })}
@@ -150,7 +157,7 @@ export function Header() {
             <div className="relative group py-2">
               <button
                 className={cn(
-                  "flex items-center gap-1 px-3.5 py-2 text-[15px] xl:text-base font-medium transition-colors text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-1 px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap transition-colors text-muted-foreground hover:text-foreground",
                   isDropdownActive && "text-accent font-semibold"
                 )}
               >
@@ -194,7 +201,7 @@ export function Header() {
             <div className="relative group py-2">
               <button
                 className={cn(
-                  "flex items-center gap-1 px-3.5 py-2 text-[15px] xl:text-base font-medium transition-colors text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-1 px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap transition-colors text-muted-foreground hover:text-foreground",
                   isQLearnActive && "text-accent font-semibold"
                 )}
               >
@@ -285,8 +292,8 @@ export function Header() {
               to="/projects"
               aria-current={isProjectsActive ? "page" : undefined}
               className={cn(
-                "px-3.5 py-2 text-[15px] xl:text-base font-medium relative transition-colors",
-                "after:absolute after:left-3.5 after:right-3.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
+                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
                 "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
                 "hover:after:scale-x-100",
                 isProjectsActive
@@ -302,8 +309,8 @@ export function Header() {
               to="/qlearn?tab=puzzles"
               aria-current={isPuzzlesActive ? "page" : undefined}
               className={cn(
-                "px-3.5 py-2 text-[15px] xl:text-base font-medium relative transition-colors",
-                "after:absolute after:left-3.5 after:right-3.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
+                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
                 "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
                 "hover:after:scale-x-100",
                 isPuzzlesActive
@@ -319,8 +326,8 @@ export function Header() {
               to="/contact"
               aria-current={isContactActive ? "page" : undefined}
               className={cn(
-                "px-3.5 py-2 text-[15px] xl:text-base font-medium relative transition-colors",
-                "after:absolute after:left-3.5 after:right-3.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
+                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
                 "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
                 "hover:after:scale-x-100",
                 isContactActive
@@ -332,7 +339,7 @@ export function Header() {
             </Link>
 
             {/* Right-most corner: Admin Dashboard OR Student Login */}
-            <div className="ml-1 pl-2 border-l border-border/60 flex items-center">
+            <div className="ml-1 pl-2 border-l border-border/60 flex items-center shrink-0">
               {isAdmin ? (
                 <Link
                   to="/admin/dashboard"

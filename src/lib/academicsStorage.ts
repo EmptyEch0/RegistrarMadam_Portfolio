@@ -96,12 +96,12 @@ export const BTECH_4TH_YEAR_2023_2027_STUDENTS: BatchStudentEntry[] = Array.from
 
 // Lateral Entry (LES) students for 2024-2027 (24VV5A1269 to 24VV5A1274)
 export const LATERAL_ENTRY_2024_2027_STUDENTS: BatchStudentEntry[] = [
-  { rollNo: "24VV5A1269", name: "Student 24VV5A1269 (LES)", email: "24vv5a1269@jntugv.edu.in" },
-  { rollNo: "24VV5A1270", name: "Student 24VV5A1270 (LES)", email: "24vv5a1270@jntugv.edu.in" },
-  { rollNo: "24VV5A1271", name: "Student 24VV5A1271 (LES)", email: "24vv5a1271@jntugv.edu.in" },
-  { rollNo: "24VV5A1272", name: "Student 24VV5A1272 (LES)", email: "24vv5a1272@jntugv.edu.in" },
-  { rollNo: "24VV5A1273", name: "Student 24VV5A1273 (LES)", email: "24vv5a1273@jntugv.edu.in" },
-  { rollNo: "24VV5A1274", name: "Student 24VV5A1274 (LES)", email: "24vv5a1274@jntugv.edu.in" },
+  { rollNo: "24VV5A1269", name: "Student 24VV5A1269 (Lateral Entry)", email: "24vv5a1269@jntugv.edu.in" },
+  { rollNo: "24VV5A1270", name: "Student 24VV5A1270 (Lateral Entry)", email: "24vv5a1270@jntugv.edu.in" },
+  { rollNo: "24VV5A1271", name: "Student 24VV5A1271 (Lateral Entry)", email: "24vv5a1271@jntugv.edu.in" },
+  { rollNo: "24VV5A1272", name: "Student 24VV5A1272 (Lateral Entry)", email: "24vv5a1272@jntugv.edu.in" },
+  { rollNo: "24VV5A1273", name: "Student 24VV5A1273 (Lateral Entry)", email: "24vv5a1273@jntugv.edu.in" },
+  { rollNo: "24VV5A1274", name: "Student 24VV5A1274 (Lateral Entry)", email: "24vv5a1274@jntugv.edu.in" },
 ];
 
 export const ALL_IOT_BATCH_STUDENTS: BatchStudentEntry[] = [
@@ -379,13 +379,38 @@ export function findStudentAccountByRoll(rollNo: string): StudentAccount | undef
   const norm = normalizeRollNo(rollNo);
   if (!norm) return undefined;
   const accounts = getAllStudentAccounts();
-  return accounts.find((acc) => {
+  const existing = accounts.find((acc) => {
     return (
       (acc.rollNo && normalizeRollNo(acc.rollNo) === norm) ||
       (acc.username && normalizeRollNo(acc.username) === norm) ||
       (acc.username && acc.username.trim().toLowerCase() === rollNo.trim().toLowerCase())
     );
   });
+  if (existing) return existing;
+
+  // On-the-fly fallback guarantee for lateral entry & batch students
+  const defaultStudent = ALL_IOT_BATCH_STUDENTS.find((s) => normalizeRollNo(s.rollNo) === norm);
+  if (defaultStudent) {
+    const rollSuffix = norm.slice(-4);
+    const strongPassword = `Jv@${rollSuffix}#`;
+    const autoAccount: StudentAccount = {
+      id: `std_${norm.toLowerCase()}`,
+      username: norm.toLowerCase(),
+      fullName: defaultStudent.name,
+      email: defaultStudent.email,
+      program: "B.Tech",
+      rollNo: norm,
+      year: "4th Year",
+      batchYear: "2027",
+      branch: "Information Technology (IoT)",
+      passwordHash: strongPassword,
+      createdAt: new Date().toISOString(),
+    };
+    accounts.push(autoAccount);
+    saveAllStudentAccounts(accounts);
+    return autoAccount;
+  }
+  return undefined;
 }
 
 export function registerStudentAccount(data: {
@@ -475,7 +500,7 @@ export function loginStudent(usernameOrRoll: string, password: string): { succes
   const normRoll = normalizeRollNo(rawInput);
   const accounts = getAllStudentAccounts();
 
-  const found = accounts.find((acc) => {
+  let found = accounts.find((acc) => {
     const accUser = (acc.username || "").trim().toLowerCase();
     const accRollNorm = normalizeRollNo(acc.rollNo);
     const accUserNorm = normalizeRollNo(acc.username);
@@ -499,6 +524,33 @@ export function loginStudent(usernameOrRoll: string, password: string): { succes
 
     return false;
   });
+
+  // On-the-fly fallback guarantee for lateral entry (e.g. 24VV5A1269) and batch students
+  if (!found) {
+    const defaultStudent = ALL_IOT_BATCH_STUDENTS.find(
+      (s) => normalizeRollNo(s.rollNo) === normRoll || s.rollNo.toLowerCase() === query
+    );
+    if (defaultStudent) {
+      const rollSuffix = normalizeRollNo(defaultStudent.rollNo).slice(-4);
+      const strongPassword = `Jv@${rollSuffix}#`;
+      const autoAccount: StudentAccount = {
+        id: `std_${normalizeRollNo(defaultStudent.rollNo).toLowerCase()}`,
+        username: normalizeRollNo(defaultStudent.rollNo).toLowerCase(),
+        fullName: defaultStudent.name,
+        email: defaultStudent.email,
+        program: "B.Tech",
+        rollNo: normalizeRollNo(defaultStudent.rollNo),
+        year: "4th Year",
+        batchYear: "2027",
+        branch: "Information Technology (IoT)",
+        passwordHash: strongPassword,
+        createdAt: new Date().toISOString(),
+      };
+      accounts.push(autoAccount);
+      saveAllStudentAccounts(accounts);
+      found = autoAccount;
+    }
+  }
 
   if (!found) {
     return { success: false, message: "Invalid credentials. No account found for this Username or Roll Number." };

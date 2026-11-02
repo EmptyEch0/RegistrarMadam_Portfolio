@@ -140,7 +140,7 @@
   }
 
   .container-wide {
-    @apply max-w-7xl mx-auto;
+    @apply max-w-[1440px] 2xl:max-w-[1560px] mx-auto;
   }
 
   .text-gradient-gold {

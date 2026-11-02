@@ -318,7 +318,7 @@ export default function ProjectsPage() {
 
       {/* Main Content Area */}
       <section className="py-12">
-        <div className="container-wide px-6 lg:px-12">
+        <div className="container-wide px-4 sm:px-6 lg:px-8 xl:px-10">
           {/* Controls Bar: Search & Category Pills & Sort By */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 pb-6 border-b border-border/60">
             {/* Category Filter Pills */}
