@@ -850,11 +850,72 @@ export function getAllSubmissions(): AssignmentSubmission[] {
   }
 }
 
+// IndexedDB storage for assignment PDFs to prevent localStorage quota issues
+function openFilesDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === "undefined") {
+      return reject(new Error("IndexedDB not supported"));
+    }
+    const request = indexedDB.open("qlearn_pdf_files", 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains("submissions")) {
+        db.createObjectStore("submissions", { keyPath: "id" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function storePdfInIndexedDB(id: string, fileData: string): Promise<boolean> {
+  try {
+    const db = await openFilesDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction("submissions", "readwrite");
+      const store = tx.objectStore("submissions");
+      store.put({ id, data: fileData, storedAt: Date.now() });
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  } catch {
+    return false;
+  }
+}
+
+export async function getPdfFromIndexedDB(id: string): Promise<string | null> {
+  try {
+    const db = await openFilesDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction("submissions", "readonly");
+      const store = tx.objectStore("submissions");
+      const req = store.get(id);
+      req.onsuccess = () => resolve(req.result ? req.result.data : null);
+      req.onerror = () => resolve(null);
+    });
+  } catch {
+    return null;
+  }
+}
+
 export function saveAllSubmissions(submissions: AssignmentSubmission[]): void {
   try {
     localStorage.setItem(STORAGE_KEYS.ASSIGNMENT_SUBMISSIONS, JSON.stringify(submissions));
   } catch (err) {
-    console.error("Failed to save submissions:", err);
+    console.warn("Storage quota limit reached when saving full submissions, saving lightweight metadata:", err);
+    try {
+      // If quota exceeded, strip large Data URLs from older submissions but preserve metadata
+      const lightweight = submissions.map((s, idx) => {
+        if (idx === 0) return s; // Keep the newest one full
+        return {
+          ...s,
+          fileDataUrl: s.fileDataUrl?.startsWith("http") ? s.fileDataUrl : "",
+        };
+      });
+      localStorage.setItem(STORAGE_KEYS.ASSIGNMENT_SUBMISSIONS, JSON.stringify(lightweight));
+    } catch (e2) {
+      console.error("Critical: Could not save submissions to localStorage:", e2);
+    }
   }
 }
 
@@ -907,17 +968,17 @@ export async function submitStudentAssignment({
     };
   }
 
-  // 2. Strict File Size Check (< 1 MB)
-  const MAX_BYTES = 1048576; // 1 MB = 1024 * 1024 bytes
-  if (file.size >= MAX_BYTES) {
+  // 2. File Size Check (Up to 10 MB)
+  const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+  if (file.size > MAX_BYTES) {
     const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
     return {
       success: false,
-      message: `File size exceeds the 1 MB limit (${sizeInMb} MB). Please compress your PDF below 1 MB before uploading.`,
+      message: `File size exceeds the 10 MB limit (${sizeInMb} MB). Please compress your PDF below 10 MB before uploading.`,
     };
   }
 
-  // 3. Upload to Supabase Storage Bucket ('assignments') with graceful fallback
+  // 3. Upload to Supabase Storage Bucket ('assignments') with graceful timeout fallback
   const normRoll = normalizeRollNo(rollNo);
   const client = supabaseAdmin || supabase;
   let fileUrl = "";
@@ -926,12 +987,18 @@ export async function submitStudentAssignment({
     const ext = file.name.split(".").pop() || "pdf";
     const cleanPath = `iot/${assignmentId}/${normRoll}_${Date.now()}.${ext}`;
 
-    const { data: uploadData, error: uploadErr } = await client.storage
+    const uploadPromise = client.storage
       .from("assignments")
       .upload(cleanPath, file, {
         contentType: "application/pdf",
         upsert: true,
       });
+
+    const timeoutPromise = new Promise<{ data: null; error: { message: string } }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: { message: "Storage timeout - falling back to local data" } }), 3500)
+    );
+
+    const { data: uploadData, error: uploadErr } = await Promise.race([uploadPromise, timeoutPromise]);
 
     if (!uploadErr && uploadData) {
       const { data: urlData } = client.storage
@@ -969,6 +1036,11 @@ export async function submitStudentAssignment({
     submittedAt: new Date().toISOString(),
     comment: comment?.trim(),
   };
+
+  // Store in IndexedDB for reliable high-capacity retrieval
+  if (fileUrl) {
+    await storePdfInIndexedDB(newSubmission.id, fileUrl);
+  }
 
   // Attempt database sync to 'assignment_submissions' table if available
   try {

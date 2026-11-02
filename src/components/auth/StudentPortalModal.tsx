@@ -21,6 +21,7 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,6 +40,7 @@ import {
   AssignmentSubmission,
   StudentMarksRecord,
   isMarksPublished,
+  getPdfFromIndexedDB,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -222,12 +224,12 @@ export function StudentPortalModal({
       return;
     }
 
-    // 2. Strict < 1 MB Check (1024 * 1024 = 1,048,576 bytes)
-    const MAX_SIZE = 1048576;
-    if (file.size >= MAX_SIZE) {
+    // 2. File Size Check (Max 10 MB)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
       const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
       setUploadError(
-        `File is too large (${sizeMB} MB). Assignment submissions strictly require PDF files less than 1.0 MB. Please compress your PDF and try again.`
+        `File is too large (${sizeMB} MB). Maximum supported PDF file size is 10.0 MB. Please choose a smaller PDF.`
       );
       setSelectedFile(null);
       e.target.value = "";
@@ -989,8 +991,12 @@ export function StudentPortalModal({
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => {
-                                  setPreviewPdfUrl(studentSubmission.fileDataUrl);
+                                onClick={async () => {
+                                  let url = studentSubmission.fileDataUrl;
+                                  if (!url) {
+                                    url = (await getPdfFromIndexedDB(studentSubmission.id)) || "";
+                                  }
+                                  setPreviewPdfUrl(url);
                                   setPreviewFileName(studentSubmission.fileName);
                                 }}
                                 className="text-xs shrink-0 flex items-center gap-1.5 font-semibold"
@@ -1025,7 +1031,7 @@ export function StudentPortalModal({
                             <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                               <span>Select Assignment PDF File *</span>
                               <span className="text-[10px] text-accent font-bold">
-                                Only PDF · Max Size 1.0 MB
+                                Only PDF · Max Size 10 MB
                               </span>
                             </label>
 
