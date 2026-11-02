@@ -224,12 +224,12 @@ export function StudentPortalModal({
       return;
     }
 
-    // 2. File Size Check (Max 10 MB)
-    const MAX_SIZE = 10 * 1024 * 1024;
+    // 2. Strict File Size Check: Maximum 500 KB (500 * 1024 = 512,000 bytes) to save Supabase bucket storage
+    const MAX_SIZE = 500 * 1024; // 500 KB
     if (file.size > MAX_SIZE) {
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const sizeKB = (file.size / 1024).toFixed(1);
       setUploadError(
-        `File is too large (${sizeMB} MB). Maximum supported PDF file size is 10.0 MB. Please choose a smaller PDF.`
+        `File is too large (${sizeKB} KB). Assignment submissions strictly require PDF files less than 500 KB to optimize cloud storage. Please compress your PDF below 500 KB and try again.`
       );
       setSelectedFile(null);
       e.target.value = "";
@@ -877,7 +877,7 @@ export function StudentPortalModal({
                   </div>
                 )}
 
-                {/* ---------------- ASSIGNMENTS TAB (PDF STRICTLY < 1MB) ---------------- */}
+                {/* ---------------- ASSIGNMENTS TAB (PDF STRICTLY < 500 KB) ---------------- */}
                 {dashboardTab === "assignments" && (
                   <div className="space-y-4 animate-fade-in">
                     <div className="flex items-center justify-between pb-2 border-b border-border/80">
@@ -886,7 +886,7 @@ export function StudentPortalModal({
                           Course Assignments & PDF Submission
                         </h4>
                         <p className="text-xs text-muted-foreground">
-                          Submit your assignment PDF document (Strict limit: &lt; 1 MB)
+                          Submit your assignment PDF document (Strict limit: &lt; 500 KB)
                         </p>
                       </div>
                     </div>
@@ -1031,7 +1031,7 @@ export function StudentPortalModal({
                             <label className="text-xs font-semibold text-foreground flex items-center justify-between">
                               <span>Select Assignment PDF File *</span>
                               <span className="text-[10px] text-accent font-bold">
-                                Only PDF · Max Size 10 MB
+                                Only PDF · Max Size 500 KB
                               </span>
                             </label>
 

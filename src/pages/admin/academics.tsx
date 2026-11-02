@@ -1176,7 +1176,7 @@ export default function AdminAcademics() {
                   rows={3}
                   value={assignDesc}
                   onChange={(e) => setAssignDesc(e.target.value)}
-                  placeholder="Instructions for students (e.g. PDF format only, max 1MB)..."
+                  placeholder="Instructions for students (e.g. PDF format only, max 500KB)..."
                   className="w-full text-xs p-3 rounded-xl bg-muted/40 border border-border focus:border-accent focus:outline-none"
                 />
               </div>

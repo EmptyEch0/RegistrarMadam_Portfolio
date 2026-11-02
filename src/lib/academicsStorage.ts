@@ -262,7 +262,7 @@ const DEFAULT_ASSIGNMENTS: BatchAssignment[] = [
     id: "assign-iot-1",
     batchId: IOT_BATCH_ID,
     title: "IoT Assignment 1: Architecture, Protocols & Sensing Layers",
-    description: "Submit a comprehensive analytical report on IoT 4-layer architecture, sensor telemetry, and comparisons between CoAP and MQTT protocols. PDF strictly < 1 MB.",
+    description: "Submit a comprehensive analytical report on IoT 4-layer architecture, sensor telemetry, and comparisons between CoAP and MQTT protocols. PDF strictly < 500 KB.",
     dueDate: "2026-11-15",
     maxMarks: 10,
     assignmentType: "Assignment 1",
@@ -272,7 +272,7 @@ const DEFAULT_ASSIGNMENTS: BatchAssignment[] = [
     id: "assign-iot-2",
     batchId: IOT_BATCH_ID,
     title: "IoT Assignment 2: Embedded Sensors, Actuators & Interfacing",
-    description: "Document microcontroller interfacing (ESP32/Raspberry Pi/Arduino), GPIO pinouts, analog-to-digital conversion, and PWM actuator control. PDF strictly < 1 MB.",
+    description: "Document microcontroller interfacing (ESP32/Raspberry Pi/Arduino), GPIO pinouts, analog-to-digital conversion, and PWM actuator control. PDF strictly < 500 KB.",
     dueDate: "2026-11-22",
     maxMarks: 10,
     assignmentType: "Assignment 2",
@@ -282,7 +282,7 @@ const DEFAULT_ASSIGNMENTS: BatchAssignment[] = [
     id: "assign-iot-3",
     batchId: IOT_BATCH_ID,
     title: "IoT Assignment 3: Cloud Integration, MQTT & Edge Analytics",
-    description: "Submit your final IoT project report illustrating cloud telemetry pipelines, MQTT broker communication, edge data processing, and dashboard visualization. PDF strictly < 1 MB.",
+    description: "Submit your final IoT project report illustrating cloud telemetry pipelines, MQTT broker communication, edge data processing, and dashboard visualization. PDF strictly < 500 KB.",
     dueDate: "2026-11-30",
     maxMarks: 10,
     assignmentType: "Assignment 3",
@@ -968,13 +968,13 @@ export async function submitStudentAssignment({
     };
   }
 
-  // 2. File Size Check (Up to 10 MB)
-  const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+  // 2. Strict File Size Check: Maximum 500 KB (500 * 1024 = 512,000 bytes) to save Supabase bucket storage
+  const MAX_BYTES = 500 * 1024; // 500 KB
   if (file.size > MAX_BYTES) {
-    const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
+    const sizeInKb = (file.size / 1024).toFixed(1);
     return {
       success: false,
-      message: `File size exceeds the 10 MB limit (${sizeInMb} MB). Please compress your PDF below 10 MB before uploading.`,
+      message: `File size exceeds the 500 KB limit (${sizeInKb} KB). Please compress your PDF below 500 KB before uploading to conserve cloud storage.`,
     };
   }
 
