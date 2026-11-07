@@ -18,7 +18,7 @@ export function Footer() {
               Dr. G. Jaya Suma
             </h3>
             <p className="text-primary-foreground/80 leading-relaxed text-sm max-w-xl">
-              Professor of Information Technology, Director of Academic Audit & Planning (DAA&P), and Head of Women Empowerment Cell at JNTU-GV Gurajada University. Mentoring students, fostering innovation, and advancing academic excellence with over nearly three decades of distinguished leadership.
+              Professor of Information Technology, Director of Academic Audit (DAA), and BOS Member at JNTU-GV Gurajada University. Mentoring students, fostering innovation, and advancing academic excellence with over nearly three decades of distinguished leadership.
             </p>
           </div>
 

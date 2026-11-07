@@ -12,16 +12,16 @@ const ExperiencePage = () => {
     {
       year: "March 2026",
       endYear: "Present",
-      title: "DAA&P, Head of Women Empowerment Cell & Professor",
+      title: "DAA, BOS Member & Professor",
       institution:
         "Jawaharlal Nehru Technological University – Gurajada, Vizianagaram (JNTU-GV)",
       icon: "🏛️",
       description:
-        "Leading academic audit and planning initiatives, spearheading women empowerment programs, and continuing academic leadership as a Professor.",
+        "Leading academic audit initiatives, serving as Board of Studies (BOS) Member, and continuing academic leadership as a Professor.",
       responsibilities: [
-        "Overseeing academic audits and strategic planning for the university",
-        "Leading the Women Empowerment Cell to promote gender equality and support women in academia",
-        "Delivering lectures and guiding Ph.D. scholars in Data Mining and AI",
+        "Overseeing academic audits and institutional quality assurance for the university",
+        "Contributing as a Board of Studies (BOS) Member to shape modern curricula",
+        "Delivering lectures and guiding Ph.D. scholars in Computer Science and Data Mining",
         "Developing modern curricula and academic programs",
       ],
     },

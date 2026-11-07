@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -10,8 +11,11 @@ import {
   GraduationCap, 
   Award, 
   Sparkles,
-  ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  FolderGit2,
+  BookOpen,
+  ArrowRight,
+  Compass
 } from "lucide-react";
 import RegistrarImage from "../assets/Registrar.jpeg";
 
@@ -46,8 +50,8 @@ const AboutPage = () => {
   const highlights = [
     { label: "Experience", value: "24+ Years", sub: "Teaching & Research" },
     { label: "Former Registrar", value: "JNTU-GV", sub: "2023 – 2026" },
-    { label: "Current Leadership", value: "DAA&P", sub: "& Head, WEC" },
-    { label: "Specialization", value: "Data Mining", sub: "B.Tech, M.Tech, Ph.D." },
+    { label: "Current Leadership", value: "DAA", sub: "BOS Member" },
+    { label: "Specialization", value: "CSE", sub: "B.Tech, M.Tech, Ph.D." },
   ];
 
   return (
@@ -106,7 +110,7 @@ const AboutPage = () => {
                     <div className="aspect-[3/4] w-full max-h-[480px] overflow-hidden bg-muted/40">
                       <img
                         src={RegistrarImage}
-                        alt="Dr. G. Jayasuma - Professor of Information Technology & DAA&P"
+                        alt="Dr. G. Jayasuma - Professor of Information Technology & DAA"
                         className="w-full h-full object-cover object-top hover:scale-[1.03] transition-transform duration-500 ease-out"
                         loading="lazy"
                       />
@@ -118,10 +122,10 @@ const AboutPage = () => {
                         Dr. G. Jaya Suma
                       </h3>
                       <p className="text-sm font-medium text-accent mt-0.5">
-                        Director of Academic Audit & Planning (DAA&P)
+                        Director of Academic Audit (DAA)
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Head, Women Empowerment Cell · Professor of IT, JNTU-GV
+                        BOS Member · Professor of IT, JNTU-GV
                       </p>
 
                       <div className="mt-4 pt-3 border-t border-border/60 flex flex-wrap gap-1.5">
@@ -129,7 +133,7 @@ const AboutPage = () => {
                           Former University Registrar (2023–2026)
                         </span>
                         <span className="px-2.5 py-1 bg-accent/10 text-accent rounded text-[11px] font-medium border border-accent/20">
-                          Ph.D. in Data Mining
+                          Specialization: CSE
                         </span>
                       </div>
                     </div>
@@ -172,13 +176,13 @@ const AboutPage = () => {
               <div className="space-y-5 text-foreground/85 leading-relaxed text-base sm:text-[17px]">
                 <p className="hover:text-foreground transition-colors">
                   Dr. G. Jayasuma holds a B.Tech, M.Tech, and Ph.D. in Computer
-                  Science with specialization in Data Mining, and has over 24
+                  Science & Engineering with specialization in Data Mining, and has over 24
                   years of experience in teaching, research, and academic
                   administration. She has served as Professor and Head of the
                   Department of Information Technology at JNTU-GV, University
                   College of Engineering, Vizianagaram (2013–2022), and has
                   recently completed her tenure as the University Registrar of JNTU-GV 
-                  (2023–2026). She is currently serving as the Director of Academic Audit & Planning (DAA&P) and Head of Women Empowerment Cell, alongside her role as a Professor in the Department of Information Technology at JNTU-GV, Vizianagaram, Andhra Pradesh.
+                  (2023–2026). She is currently serving as the Director of Academic Audit (DAA) and BOS Member, alongside her role as a Professor in the Department of Information Technology at JNTU-GV, Vizianagaram, Andhra Pradesh.
                 </p>
 
                 <p className="hover:text-foreground transition-colors">
@@ -214,7 +218,7 @@ const AboutPage = () => {
                     — Dr. G. Jayasuma
                   </div>
                   <div className="text-xs sm:text-sm font-semibold text-accent tracking-wide">
-                    DAA&P, Head of Women Empowerment Cell & Professor, Dept. of IT, JNTU-GV
+                    DAA, BOS Member & Professor, Dept. of IT, JNTU-GV
                   </div>
                 </div>
               </blockquote>
@@ -240,7 +244,7 @@ const AboutPage = () => {
                   </div>
                   <div className="flex items-start gap-2.5">
                     <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
-                    <span>Mentored women in technology through proactive institutional WEC initiatives</span>
+                    <span>Active Board of Studies (BOS) Member shaping university curricula and standards</span>
                   </div>
                 </div>
               </div>
@@ -283,77 +287,100 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Administrative Philosophy (Wide 3-column Grid) */}
+      {/* Key Academic Portals & Contributions (Replaced 3 Cards with Navigation Arrows) */}
       <section className="section-padding">
         <div className="container-wide px-4 sm:px-6 lg:px-12 xl:px-16">
           <div className="text-center max-w-3xl mx-auto mb-14 animate-fade-in-up">
             <div className="inline-flex items-center justify-center gap-2 mb-3">
-              <Target className="h-6 w-6 text-accent" />
-              <span className="text-xs uppercase tracking-wider font-semibold text-accent">Leadership Ethos</span>
+              <Compass className="h-6 w-6 text-accent" />
+              <span className="text-xs uppercase tracking-wider font-semibold text-accent">Key Portals & Contributions</span>
             </div>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-primary font-serif mb-4">
-              Administrative Philosophy
+              Projects, Contributions & Portals
             </h2>
             <div className="mx-auto h-1 w-20 bg-accent rounded-full mb-4" />
             <p className="text-muted-foreground text-base sm:text-lg">
-              Guiding principles and core values shaping decades of effective institutional leadership and student empowerment.
+              Explore mentored innovations, scholarly research publications, and interactive computer science learning environments.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-            <div className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-accent hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up">
+            {/* Card 1: Projects */}
+            <Link
+              to="/projects"
+              className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-accent hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up"
+            >
               <div>
                 <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-5 group-hover:bg-accent transition-colors">
-                  <ShieldCheck className="h-6 w-6 text-accent group-hover:text-accent-foreground transition-colors" />
+                  <FolderGit2 className="h-6 w-6 text-accent group-hover:text-accent-foreground transition-colors" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-primary mb-3 group-hover:text-accent transition-colors">
-                  Transparency & Accountability
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-primary mb-3 group-hover:text-accent transition-colors flex items-center justify-between">
+                  <span>Projects</span>
+                  <ArrowRight className="h-5 w-5 text-accent opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </h3>
                 <p className="text-foreground/80 text-sm sm:text-base leading-relaxed group-hover:text-foreground transition-colors">
-                  Believing that transparency is the foundation of trust, Dr.
-                  Jayasuma has championed open governance practices, ensuring all
-                  stakeholders have access to information and that
-                  decision-making processes remain accountable, verifiable, and well
-                  documented.
+                  A showcase of state-of-the-art platforms, research prototypes, and student innovations mentored under Dr. G. Jaya Suma at JNTU-GV, featuring developer credits, live web applications, and source repositories.
                 </p>
               </div>
-            </div>
+              <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between text-sm font-semibold text-accent">
+                <span className="group-hover:underline">Explore Projects</span>
+                <span className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent group-hover:text-accent-foreground group-hover:translate-x-1 transition-all">
+                  <ArrowRight size={16} />
+                </span>
+              </div>
+            </Link>
 
-            <div className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-secondary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+            {/* Card 2: Contributions */}
+            <Link
+              to="/publications"
+              className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-secondary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up"
+              style={{ animationDelay: '100ms' }}
+            >
               <div>
                 <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-5 group-hover:bg-secondary transition-colors">
-                  <GraduationCap className="h-6 w-6 text-secondary group-hover:text-secondary-foreground transition-colors" />
+                  <BookOpen className="h-6 w-6 text-secondary group-hover:text-secondary-foreground transition-colors" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-primary mb-3 group-hover:text-secondary transition-colors">
-                  Student-Centric Approach
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-primary mb-3 group-hover:text-secondary transition-colors flex items-center justify-between">
+                  <span>Contributions</span>
+                  <ArrowRight className="h-5 w-5 text-secondary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </h3>
                 <p className="text-foreground/80 text-sm sm:text-base leading-relaxed group-hover:text-foreground transition-colors">
-                  At the heart of every policy and initiative is the student. Dr.
-                  Jayasuma's administration prioritizes student welfare,
-                  academic support systems, and career development opportunities,
-                  recognizing that students are the primary beneficiaries of
-                  educational institutions.
+                  Explore academic research papers, peer-reviewed international journals, conference proceedings, patents, research citations, and Ph.D. scholars guided across Computer Science and Data Mining.
                 </p>
               </div>
-            </div>
+              <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between text-sm font-semibold text-secondary">
+                <span className="group-hover:underline">View Contributions</span>
+                <span className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary group-hover:text-secondary-foreground group-hover:translate-x-1 transition-all">
+                  <ArrowRight size={16} />
+                </span>
+              </div>
+            </Link>
 
-            <div className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-primary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+            {/* Card 3: QLearn */}
+            <Link
+              to="/qlearn"
+              className="group card-institutional p-7 sm:p-8 rounded-xl border-t-4 border-t-primary hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 flex flex-col justify-between animate-fade-in-up"
+              style={{ animationDelay: '200ms' }}
+            >
               <div>
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-5 group-hover:bg-primary transition-colors">
-                  <Lightbulb className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
+                  <GraduationCap className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
                 </div>
-                <h3 className="font-serif text-xl font-semibold text-primary mb-3 group-hover:text-primary/80 transition-colors">
-                  Innovation & Adaptation
+                <h3 className="font-serif text-xl sm:text-2xl font-semibold text-primary mb-3 group-hover:text-primary/80 transition-colors flex items-center justify-between">
+                  <span>QLearn</span>
+                  <ArrowRight className="h-5 w-5 text-primary opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                 </h3>
                 <p className="text-foreground/80 text-sm sm:text-base leading-relaxed group-hover:text-foreground transition-colors">
-                  Embracing change as an opportunity for growth, Dr. Jayasuma has
-                  led digital transformation initiatives, modernized
-                  administrative processes, and introduced innovative programs
-                  that keep the institution aligned with contemporary academic
-                  standards.
+                  Interactive learning portal featuring 10-module comprehensive lecture roadmaps, syllabus tracking, interactive computer science word puzzles, and student self-assessment modules.
                 </p>
               </div>
-            </div>
+              <div className="mt-6 pt-4 border-t border-border/60 flex items-center justify-between text-sm font-semibold text-primary">
+                <span className="group-hover:underline">Launch QLearn Portal</span>
+                <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground group-hover:translate-x-1 transition-all">
+                  <ArrowRight size={16} />
+                </span>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
