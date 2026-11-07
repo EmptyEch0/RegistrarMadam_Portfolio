@@ -3253,42 +3253,41 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 
                 {/* Active Module Banner */}
                 {activeModule && (
-                  <div className={`p-8 rounded-xl bg-gradient-to-r ${activeDomain?.color} text-white shadow-xl relative overflow-hidden`}>
+                  <div className={`p-6 sm:p-8 rounded-2xl bg-gradient-to-r ${activeDomain?.color} text-white shadow-xl relative overflow-hidden`}>
                     <div 
-                      className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-2xl opacity-60"
+                      className="absolute -right-16 -top-16 w-56 h-56 rounded-full blur-3xl opacity-50 pointer-events-none"
                       style={{ backgroundColor: activeDomain?.glowColor }}
                     />
                     
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                      <div className="space-y-3 max-w-2xl">
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl bg-white/10 p-2 rounded-lg backdrop-blur-md">
-                            {activeDomain?.icon}
-                          </span>
-                          <div>
-                            <span className="text-xs tracking-widest uppercase font-semibold text-white/70">
-                              {activeDomain?.name}
-                            </span>
-                            <h2 className="text-2xl md:text-3xl font-serif font-bold">
-                              {activeModule.name}
-                            </h2>
-                          </div>
+                      <div className="flex items-start gap-4 sm:gap-5 max-w-2xl">
+                        <div className="text-3xl bg-white/15 p-3 rounded-xl backdrop-blur-md shrink-0 flex items-center justify-center shadow-inner border border-white/20 mt-0.5">
+                          {activeDomain?.icon}
                         </div>
-                        <p className="text-sm text-white/90 leading-relaxed pt-2">
-                          {activeModule.description}
-                        </p>
+                        <div className="space-y-1">
+                          <span className="text-xs tracking-widest uppercase font-bold text-white/80 block">
+                            {activeDomain?.name}
+                          </span>
+                          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight leading-tight">
+                            {activeModule.name}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-white/90 leading-relaxed pt-1">
+                            {activeModule.description}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 shrink-0">
+
+                      <div className="flex items-center shrink-0 md:self-center">
                         <button
                           type="button"
                           onClick={() => {
                             setActiveTab("puzzles");
                             window.scrollTo({ top: 460, behavior: "smooth" });
                           }}
-                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs sm:text-sm font-bold transition-all duration-200 border border-white/30 shadow-lg hover:scale-105"
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs sm:text-sm font-bold transition-all duration-200 border border-white/30 shadow-lg hover:scale-[1.02] whitespace-nowrap active:scale-95"
                         >
                           <Gamepad2 size={16} /> <span>Play {activeDomain?.name} Puzzle</span>
-                          <span className="bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded text-[10px] font-black uppercase">Top 10</span>
+                          <span className="bg-amber-400 text-slate-900 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider shrink-0 leading-none">Top 10</span>
                         </button>
                       </div>
                     </div>
@@ -3301,14 +3300,14 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                     {/* TABS CONTAINER */}
                     <div className="w-full space-y-3 border-b border-border/80 pb-4">
                       {/* The 6 module tabs */}
-                      <div className="w-full grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-1.5 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-xs">
+                      <div className="w-full flex items-center gap-1.5 sm:gap-2 p-1.5 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-xs overflow-x-auto scrollbar-none">
                         {[
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
-                          { id: "ppts", label: "PPT & Drive Slides", icon: Presentation },
+                          { id: "ppts", label: "PPT & Slides", icon: Presentation },
                           { id: "quiz", label: "Take Quiz", icon: Award },
                           { id: "worksheets", label: "Worksheets", icon: FileText, badge: "DOCX" },
-                          { id: "puzzles", label: "Puzzles & Games", icon: Puzzle, badge: "🎮 Top 10" }
+                          { id: "puzzles", label: "Puzzles & Games", icon: Puzzle, badge: "TOP 10" }
                         ].map((tab) => {
                           const TabIcon = tab.icon;
                           const isActive = activeTab === tab.id;
@@ -3316,17 +3315,22 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                             <button
                               key={tab.id}
                               onClick={() => handleTabSwitch(tab.id as any)}
-                              className={`flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2.5 sm:py-3 rounded-xl text-xs md:text-sm font-semibold transition-all duration-300 w-full ${
+                              className={`flex-1 min-w-fit h-11 sm:h-12 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap shrink-0 border ${
                                 isActive
-                                  ? "bg-card text-accent shadow-md shadow-accent/10 ring-1 ring-accent/30 font-bold transform scale-[1.01]"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-card/60"
+                                  ? "bg-card text-accent border-accent/40 shadow-xs font-bold ring-1 ring-accent/25"
+                                  : "text-muted-foreground border-transparent hover:text-foreground hover:bg-card/60"
                               }`}
                             >
-                              <TabIcon size={17} className={isActive ? "text-accent" : "text-muted-foreground"} />
-                              <span className="whitespace-nowrap truncate">{tab.label}</span>
-                              {tab.badge && !isActive && (
-                                <span className="hidden xl:inline-block text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400">
-                                  {tab.badge}
+                              <TabIcon size={16} className={`shrink-0 ${isActive ? "text-accent" : "text-muted-foreground"}`} />
+                              <span className="whitespace-nowrap shrink-0">{tab.label}</span>
+                              {tab.badge && (
+                                <span className={`whitespace-nowrap shrink-0 inline-flex items-center gap-0.5 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full leading-none transition-colors ${
+                                  isActive
+                                    ? "bg-accent/20 text-accent"
+                                    : "bg-amber-500/20 text-amber-600 dark:text-amber-400"
+                                }`}>
+                                  {tab.id === "puzzles" && <Gamepad2 size={10} className="shrink-0" />}
+                                  <span>{tab.badge}</span>
                                 </span>
                               )}
                             </button>
