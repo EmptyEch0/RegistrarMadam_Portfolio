@@ -1,9 +1,24 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Download, FileText, GraduationCap, Award, BookOpen, Gamepad2 } from "lucide-react";
+import { 
+  ArrowRight, 
+  Download, 
+  FileText, 
+  GraduationCap, 
+  Award, 
+  BookOpen, 
+  Gamepad2,
+  Code2,
+  Mail,
+  Github,
+  Globe,
+  ExternalLink,
+  Linkedin
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import RegistrarImage from "../assets/Registrar.jpeg";
+import DeveloperPhoto from "../assets/developer-photo.jpg";
 
 import CountUp from "react-countup";
 
@@ -42,9 +57,9 @@ const HomePage = () => {
       <Header />
 
       {/* Hero Section */}
-<section className="relative min-h-[90vh] flex items-center justify-center pt-24 overflow-hidden">
+      <section className="relative min-h-[90vh] flex items-center justify-center pt-24 overflow-hidden">
         {/* Background Pattern */}
-<div className="absolute inset-0 bg-gradient-to-br from-cream via-background to-cream-dark opacity-50 transform scale-105" />
+        <div className="absolute inset-0 bg-gradient-to-br from-cream via-background to-cream-dark opacity-50 transform scale-105" />
         <div
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -163,8 +178,8 @@ const HomePage = () => {
                   className="mx-auto mb-4 text-accent"
                 />
                 <p className="font-serif text-4xl md:text-5xl font-bold text-primary-foreground mb-2">
-  <CountUp end={parseInt(item.number)} suffix="+" duration={2} />
-</p>
+                  <CountUp end={parseInt(item.number)} suffix="+" duration={2} />
+                </p>
 
                 <p className="text-primary-foreground/70 text-sm uppercase tracking-wider">
                   {item.label}
@@ -277,6 +292,102 @@ const HomePage = () => {
       <section className="section-padding bg-background border-t border-border/60">
         <div className="container-wide">
           <GalleryCarousel />
+        </div>
+      </section>
+
+      {/* Developer Credit Box */}
+      <section className="py-12 bg-muted/20 border-t border-border/60">
+        <div className="container-wide px-4 sm:px-6 lg:px-12">
+          <div className="max-w-4xl mx-auto card-institutional bg-gradient-to-br from-card via-card to-accent/5 p-6 sm:p-8 rounded-2xl border border-border/80 shadow-md relative overflow-hidden group hover:border-accent/40 transition-all duration-300">
+            {/* Subtle background ambient blur */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-6 sm:gap-8">
+              {/* Developer Photo */}
+              <div className="relative shrink-0">
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-accent/40 shadow-lg bg-muted/40 relative">
+                  <img
+                    src={DeveloperPhoto}
+                    alt="M Likhith Kumar - Website Designer & Developer"
+                    className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-accent text-accent-foreground p-1.5 rounded-full shadow-md border-2 border-card" title="Platform Developer">
+                  <Code2 size={13} className="text-accent-foreground" />
+                </div>
+              </div>
+
+              {/* Developer Info */}
+              <div className="flex-1 text-center md:text-left space-y-3">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-accent/15 text-accent border border-accent/25">
+                    Platform Architect & Lead Developer
+                  </span>
+                  <span className="text-xs text-muted-foreground font-mono">
+                    JNTU-GV IT (2023–2027)
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary tracking-tight">
+                    Designed & Developed by M Likhith Kumar
+                  </h3>
+                  <p className="text-sm font-medium text-accent mt-0.5">
+                    AI/ML Engineer & Full-Stack Developer
+                  </p>
+                </div>
+
+                <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed max-w-2xl">
+                  Student developer and researcher specializing in Large Language Models (LLMs), Agentic AI systems, RAG pipelines, and production web engineering. Architected this comprehensive digital portfolio, QLearn interactive platform, course puzzles, and academic governance systems.
+                </p>
+
+                {/* Action Links & Contact */}
+                <div className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                  <a
+                    href="mailto:likhithmanakala@gmail.com?subject=Inquiry%20regarding%20Dr.%20G.%20Jaya%20Suma%20Portfolio"
+                    className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-accent text-accent-foreground hover:bg-accent/90 shadow-xs hover:shadow-md transition-all"
+                  >
+                    <Mail size={15} />
+                    <span>Contact Developer</span>
+                  </a>
+
+                  <a
+                    href="https://github.com/EmptyEch0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-card border border-border/80 text-foreground/80 hover:text-foreground hover:border-accent/40 shadow-xs transition-all"
+                  >
+                    <Github size={15} />
+                    <span>GitHub</span>
+                    <ExternalLink size={12} className="text-muted-foreground" />
+                  </a>
+
+                  <a
+                    href="https://likhith.online"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-card border border-border/80 text-foreground/80 hover:text-foreground hover:border-accent/40 shadow-xs transition-all"
+                  >
+                    <Globe size={15} />
+                    <span>Portfolio</span>
+                    <ExternalLink size={12} className="text-muted-foreground" />
+                  </a>
+
+                  <a
+                    href="https://www.linkedin.com/in/likhithmankala/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-card border border-border/80 text-foreground/80 hover:text-foreground hover:border-accent/40 shadow-xs transition-all"
+                  >
+                    <Linkedin size={15} />
+                    <span>LinkedIn</span>
+                    <ExternalLink size={12} className="text-muted-foreground" />
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

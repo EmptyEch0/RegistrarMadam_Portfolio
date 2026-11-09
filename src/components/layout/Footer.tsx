@@ -203,7 +203,7 @@ export function Footer() {
             </p>
 
             <a
-              href="https://github.com/Likhith32"
+              href="https://github.com/EmptyEch0"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 text-primary-foreground/70 text-xs md:text-sm transition-all duration-300 hover:text-accent"
@@ -213,9 +213,9 @@ export function Footer() {
                 className="transition-transform duration-300 group-hover:scale-110"
               />
               <span>
-                Engineered & Designed by{" "}
+                Designed & Developed by{" "}
                 <span className="font-semibold text-primary-foreground group-hover:text-accent transition-colors">
-                  Likhith Mankala
+                  M Likhith Kumar
                 </span>
               </span>
             </a>
