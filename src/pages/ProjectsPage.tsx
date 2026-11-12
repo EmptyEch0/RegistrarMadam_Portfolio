@@ -42,6 +42,7 @@ export interface Developer {
 export interface ProjectItem {
   id: string;
   title: string;
+  problem_statement?: string;
   description: string;
   category: string;
   live_url?: string;
@@ -53,6 +54,28 @@ export interface ProjectItem {
   year?: string | number;
   developers?: Developer[];
   created_at?: string;
+}
+
+function mergeProjectsWithDefaults(items: ProjectItem[]): ProjectItem[] {
+  const clean = items.filter(
+    (p) =>
+      p.id !== "2" &&
+      p.id !== "3" &&
+      !p.title?.includes("Smart Campus IoT") &&
+      !p.title?.includes("VANETs")
+  );
+  const normalize = (t?: string) => (t || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const defaults = defaultProjectsJSON as ProjectItem[];
+  const merged = [...clean];
+  for (const defProj of defaults) {
+    const exists = merged.some(
+      (p) => String(p.id) === String(defProj.id) || normalize(p.title) === normalize(defProj.title)
+    );
+    if (!exists) {
+      merged.push(defProj);
+    }
+  }
+  return merged;
 }
 
 export default function ProjectsPage() {
@@ -99,17 +122,11 @@ export default function ProjectsPage() {
           .order("featured", { ascending: false });
 
         if (!error && data && data.length > 0) {
-          const clean = data.filter(
-            (p: any) =>
-              p.id !== "2" &&
-              p.id !== "3" &&
-              !p.title?.includes("Smart Campus IoT") &&
-              !p.title?.includes("VANETs")
-          );
-          if (clean.length > 0) {
-            setProjects(clean);
+          const merged = mergeProjectsWithDefaults(data as ProjectItem[]);
+          if (merged.length > 0) {
+            setProjects(merged);
             try {
-              localStorage.setItem("admin_projects_data", JSON.stringify(clean));
+              localStorage.setItem("admin_projects_data", JSON.stringify(merged));
             } catch {}
             setIsLoading(false);
             return;
@@ -122,15 +139,9 @@ export default function ProjectsPage() {
       if (localCustom) {
         const parsed: ProjectItem[] = JSON.parse(localCustom);
         if (Array.isArray(parsed)) {
-          const clean = parsed.filter(
-            (p) =>
-              p.id !== "2" &&
-              p.id !== "3" &&
-              !p.title.includes("Smart Campus IoT") &&
-              !p.title.includes("VANETs")
-          );
-          if (clean.length > 0) {
-            setProjects(clean);
+          const merged = mergeProjectsWithDefaults(parsed);
+          if (merged.length > 0) {
+            setProjects(merged);
             setIsLoading(false);
             return;
           }
@@ -424,9 +435,9 @@ export default function ProjectsPage() {
 
           {/* Projects Grid */}
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-96 rounded-2xl bg-muted/40 animate-pulse border border-border/50" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-44 rounded-xl bg-muted/40 animate-pulse border border-border/50" />
               ))}
             </div>
           ) : filteredAndSortedProjects.length === 0 ? (
@@ -449,7 +460,7 @@ export default function ProjectsPage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 items-start">
               {filteredAndSortedProjects.map((project) => {
                 const isExpanded =
                   !!expandedProjects[project.id] ||
@@ -460,77 +471,77 @@ export default function ProjectsPage() {
                   <div
                     key={project.id}
                     id={`project-${project.id}`}
-                    className={`group bg-card rounded-2xl border transition-all duration-300 flex flex-col overflow-hidden relative ${
+                    className={`group bg-card rounded-xl border transition-all duration-300 flex flex-col overflow-hidden relative ${
                       sharedParam === String(project.id) || spotlightProject?.id === project.id
-                        ? "border-accent ring-4 ring-accent/40 shadow-xl"
-                        : "border-border shadow-sm hover:shadow-lg hover:border-accent/40"
+                        ? "border-accent ring-2 ring-accent/40 shadow-lg"
+                        : "border-border shadow-xs hover:shadow-md hover:border-accent/40"
                     }`}
                   >
                     {/* Card Top Header: Category & Status / Year Badges */}
-                    <div className="px-5 pt-4 pb-2.5 flex items-center justify-between gap-2 border-b border-border/40 bg-muted/20">
-                      <span className="px-2.5 py-0.5 bg-accent/15 text-accent text-[11px] font-semibold rounded-full border border-accent/25">
+                    <div className="px-3.5 pt-2.5 pb-2 flex items-center justify-between gap-1.5 border-b border-border/40 bg-muted/20">
+                      <span className="px-2 py-0.5 bg-accent/15 text-accent text-[10px] font-semibold rounded-full border border-accent/25 truncate max-w-[125px]">
                         {project.category || "Educational Platform"}
                       </span>
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-1 shrink-0">
                         {(project.year || (project.created_at && new Date(project.created_at).getFullYear())) && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-card text-muted-foreground border border-border/70">
-                            <Calendar size={10} />
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-card text-muted-foreground border border-border/70">
+                            <Calendar size={9} />
                             {project.year || new Date(project.created_at!).getFullYear()}
                           </span>
                         )}
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                             project.status === "Live"
                               ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30"
                               : "bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30"
                           }`}
                         >
-                          {project.status === "Live" ? <CheckCircle2 size={10} /> : <Clock size={10} />}
+                          {project.status === "Live" ? <CheckCircle2 size={9} /> : <Clock size={9} />}
                           {project.status || "Completed"}
                         </span>
                       </div>
                     </div>
 
-                    {/* Card Primary Content: Project Name & Link Directly Below It */}
-                    <div className="p-5 flex flex-col justify-between flex-1">
+                    {/* Card Primary Content: Compact Project Name & Link Directly Below It */}
+                    <div className="p-3.5 sm:p-4 flex flex-col justify-between flex-1">
                       <div>
                         {/* Project Name */}
                         <h3
                           onClick={() => toggleProjectExpand(project.id)}
-                          className="font-serif text-xl font-bold text-primary hover:text-accent transition-colors cursor-pointer mb-2"
-                          title="Click to view details"
+                          className="font-serif text-base font-bold text-primary hover:text-accent transition-colors cursor-pointer mb-1.5 line-clamp-2 leading-snug"
+                          title={project.title}
                         >
                           {project.title}
                         </h3>
 
                         {/* Project Link Directly Below Name */}
-                        <div className="mb-4">
+                        <div className="mb-3">
                           {project.live_url ? (
                             project.live_url.startsWith("/") ? (
                               <Link
                                 to={project.live_url}
-                                className="group/link inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 font-mono font-semibold transition-colors break-all"
+                                className="group/link inline-flex items-center gap-1 text-[11px] text-accent hover:text-accent/80 font-mono font-semibold transition-colors max-w-full"
                                 title="Open Live Platform"
                               >
-                                <Globe size={13} className="shrink-0 text-accent group-hover/link:rotate-12 transition-transform" />
-                                <span className="hover:underline">
+                                <Globe size={11} className="shrink-0 text-accent group-hover/link:rotate-12 transition-transform" />
+                                <span className="hover:underline truncate">
                                   {typeof window !== "undefined" ? window.location.host : "jayasuma.com"}{project.live_url}
                                 </span>
-                                <ArrowUpRight size={12} className="shrink-0" />
+                                <ArrowUpRight size={11} className="shrink-0" />
                               </Link>
                             ) : (
                               <a
                                 href={project.live_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="group/link inline-flex items-center gap-1.5 text-xs text-accent hover:text-accent/80 font-mono font-semibold transition-colors break-all"
-                                title="Open External Live Platform"
+                                className="group/link inline-flex items-center gap-1 text-[11px] text-accent hover:text-accent/80 font-mono font-semibold transition-colors max-w-full"
+                                title={project.live_url}
                               >
-                                <Globe size={13} className="shrink-0 text-accent group-hover/link:rotate-12 transition-transform" />
-                                <span className="hover:underline">
+                                <Globe size={11} className="shrink-0 text-accent group-hover/link:rotate-12 transition-transform" />
+                                <span className="hover:underline truncate">
                                   {project.live_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                                 </span>
-                                <ArrowUpRight size={12} className="shrink-0" />
+                                <ArrowUpRight size={11} className="shrink-0" />
                               </a>
                             )
                           ) : project.github_url ? (
@@ -538,18 +549,18 @@ export default function ProjectsPage() {
                               href={project.github_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="group/link inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-mono transition-colors break-all"
+                              className="group/link inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground font-mono transition-colors max-w-full"
                               title="Open GitHub Repository"
                             >
-                              <Github size={13} className="shrink-0" />
-                              <span className="hover:underline">
+                              <Github size={11} className="shrink-0" />
+                              <span className="hover:underline truncate">
                                 {project.github_url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                               </span>
-                              <ArrowUpRight size={12} className="shrink-0" />
+                              <ArrowUpRight size={11} className="shrink-0" />
                             </a>
                           ) : (
-                            <span className="text-xs text-muted-foreground italic flex items-center gap-1">
-                              <Sparkles size={11} className="text-accent" />
+                            <span className="text-[11px] text-muted-foreground italic flex items-center gap-1">
+                              <Sparkles size={10} className="text-accent" />
                               Guided Project &bull; Dr. G. Jaya Suma
                             </span>
                           )}
@@ -557,25 +568,25 @@ export default function ProjectsPage() {
                       </div>
 
                       {/* Dropdown Action Bar: Click to View Details + Share Button */}
-                      <div className="flex items-center gap-2 pt-3 border-t border-border/50 mt-auto">
+                      <div className="flex items-center gap-1.5 pt-2.5 border-t border-border/50 mt-auto">
                         <button
                           onClick={() => toggleProjectExpand(project.id)}
-                          className={`flex-1 inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all shadow-xs ${
+                          className={`flex-1 inline-flex items-center justify-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg border transition-all shadow-2xs ${
                             isExpanded
-                              ? "bg-accent text-accent-foreground border-accent shadow-sm"
+                              ? "bg-accent text-accent-foreground border-accent shadow-xs"
                               : "bg-accent/10 hover:bg-accent/20 text-accent border-accent/30"
                           }`}
                           aria-expanded={isExpanded}
                           title={isExpanded ? "Click to collapse details" : "Click to view description, team, and stack"}
                         >
-                          <span>{isExpanded ? "Hide Details" : "Click to View Details"}</span>
-                          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                          <span>{isExpanded ? "Hide Details" : "View Details"}</span>
+                          {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                         </button>
 
                         {/* Direct Project Share Button */}
                         <button
                           onClick={(e) => handleShareProject(project, e)}
-                          className={`px-3 py-2 rounded-xl border transition-all inline-flex items-center gap-1.5 text-xs font-semibold ${
+                          className={`px-2.5 py-1.5 rounded-lg border transition-all inline-flex items-center gap-1 text-[11px] font-semibold ${
                             copiedId === project.id
                               ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                               : "bg-muted/70 hover:bg-accent/10 text-muted-foreground hover:text-accent border-border"
@@ -584,13 +595,13 @@ export default function ProjectsPage() {
                         >
                           {copiedId === project.id ? (
                             <>
-                              <Check size={14} className="text-emerald-500" />
-                              <span className="text-[11px] font-bold">Copied!</span>
+                              <Check size={12} className="text-emerald-500" />
+                              <span className="text-[10px] font-bold">Copied</span>
                             </>
                           ) : (
                             <>
-                              <Share2 size={14} />
-                              <span className="text-[11px]">Share</span>
+                              <Share2 size={12} />
+                              <span className="text-[10px]">Share</span>
                             </>
                           )}
                         </button>
@@ -603,7 +614,7 @@ export default function ProjectsPage() {
                         {/* Banner Image Preview */}
                         <div
                           onClick={() => openSpotlight(project)}
-                          className="relative h-44 w-full bg-muted overflow-hidden cursor-pointer group/img"
+                          className="relative h-32 w-full bg-muted overflow-hidden cursor-pointer group/img"
                           title="Click to view full spotlight modal"
                         >
                           <img
@@ -616,19 +627,31 @@ export default function ProjectsPage() {
                             loading="lazy"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                          <div className="absolute bottom-2.5 right-3 text-[10px] font-semibold text-white/90 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-xs flex items-center gap-1">
-                            <Sparkles size={10} /> Spotlight View
+                          <div className="absolute bottom-2 right-2 text-[10px] font-semibold text-white/90 bg-black/60 px-2 py-0.5 rounded-md backdrop-blur-xs flex items-center gap-1">
+                            <Sparkles size={10} /> Spotlight
                           </div>
                         </div>
 
-                        <div className="p-5 space-y-4">
+                        <div className="p-3.5 space-y-3">
+                          {/* Problem Statement (when present) */}
+                          {project.problem_statement && (
+                            <div className="p-2.5 rounded-lg bg-accent/5 border border-accent/20">
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1">
+                                Problem Statement
+                              </div>
+                              <p className="text-muted-foreground text-xs leading-relaxed">
+                                {project.problem_statement}
+                              </p>
+                            </div>
+                          )}
+
                           {/* Project Description */}
                           <div>
-                            <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/80 mb-1.5 flex items-center gap-1">
-                              <Info size={12} className="text-accent" />
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 mb-1 flex items-center gap-1">
+                              <Info size={11} className="text-accent" />
                               <span>About Project</span>
                             </div>
-                            <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                            <p className="text-muted-foreground text-xs leading-relaxed">
                               {project.description}
                             </p>
                           </div>
@@ -901,6 +924,16 @@ export default function ProjectsPage() {
                   )}
                 </button>
               </div>
+
+              {/* Problem Statement (when present) */}
+              {spotlightProject.problem_statement && (
+                <div className="p-4 rounded-2xl bg-accent/5 border border-accent/25 text-sm leading-relaxed">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-accent mb-1.5">
+                    Problem Statement
+                  </div>
+                  <p className="text-muted-foreground">{spotlightProject.problem_statement}</p>
+                </div>
+              )}
 
               {/* Description Body */}
               <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">

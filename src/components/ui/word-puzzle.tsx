@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
-import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft, Gamepad2 } from "lucide-react";
+import { Lightbulb, RotateCcw, Timer, CheckCircle2, Puzzle, User, Home, ArrowLeft, Gamepad2, Play } from "lucide-react";
 import { PuzzleLeaderboard, submitPuzzleScore, formatTime, HINT_PENALTY_SECONDS } from "@/components/ui/puzzle-leaderboard";
 import { PuzzleCelebration } from "@/components/ui/puzzle-celebration";
 import { logVisitorAccess } from "@/lib/visitorTracking";
@@ -149,7 +149,7 @@ export function WordPuzzle({
   // Player name (asked in a pop-up before each game) and leaderboard submission
   const [playerName, setPlayerName] = useState("");
   const [nameInput, setNameInput] = useState(readSavedName);
-  const [namePromptOpen, setNamePromptOpen] = useState(true);
+  const [namePromptOpen, setNamePromptOpen] = useState(false);
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [savedScoreId, setSavedScoreId] = useState<string | null>(null);
   const [leaderboardRefresh, setLeaderboardRefresh] = useState(0);
@@ -395,7 +395,7 @@ export function WordPuzzle({
 
         {/* Status bar */}
         <div className="flex flex-wrap items-center justify-center gap-3 text-xs md:text-sm font-semibold">
-          {playerName && (
+          {playerName ? (
             <button
               type="button"
               onClick={() => setNamePromptOpen(true)}
@@ -405,6 +405,15 @@ export function WordPuzzle({
             >
               <User size={15} className="text-accent" /> Playing as <span className="max-w-[10rem] truncate">{playerName}</span>
             </button>
+          ) : (
+            <Button
+              variant="hero"
+              size="sm"
+              onClick={() => setNamePromptOpen(true)}
+              className="flex items-center gap-1.5 shadow-sm"
+            >
+              <Play size={14} /> Start Playing
+            </Button>
           )}
           <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted border border-border">
             <CheckCircle2 size={15} className="text-accent" /> {found.length} / {placed.length} found
@@ -458,10 +467,18 @@ export function WordPuzzle({
               aria-label={`${puzzle.title} letter grid`}
             >
               {!playerName && !namePromptOpen && (
-                <div className="absolute inset-0 z-10 rounded-2xl bg-background/70 backdrop-blur-[2px] flex items-center justify-center">
-                  <Button variant="hero" size="sm" onClick={() => setNamePromptOpen(true)} className="flex items-center gap-1.5">
-                    <User size={15} /> Enter your name to start
+                <div className="absolute inset-0 z-10 rounded-2xl bg-background/75 backdrop-blur-[2px] flex flex-col items-center justify-center gap-2.5 p-4 text-center">
+                  <Button
+                    variant="hero"
+                    size="lg"
+                    onClick={() => setNamePromptOpen(true)}
+                    className="flex items-center gap-2 shadow-xl px-6 py-3 text-sm sm:text-base font-bold"
+                  >
+                    <Play size={17} /> Start Playing
                   </Button>
+                  <p className="text-xs text-muted-foreground font-medium">
+                    Click Start Playing to enter your details &amp; begin
+                  </p>
                 </div>
               )}
               {/* Lines joining the letters of found words and the current drag */}

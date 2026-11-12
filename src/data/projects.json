@@ -21,5 +21,83 @@
         "github_url": "https://github.com/Likhith32"
       }
     ]
+  },
+  {
+    "id": "convocation-management-system",
+    "title": "Convocation Management System",
+    "description": "The JNTUGV Convocation Management System is an end-to-end digital platform developed for Jawaharlal Nehru Technological University Gurajada Vizianagaram (JNTUGV) to automate and manage academic convocation ceremonies. Featuring a full-stack architecture with a Node.js/Express backend and a React/Vite frontend (along with custom dashboards like convocation_poster.html), the system handles student registration, degree verification, gold medalist and Ph.D. honors, QR-code entry pass generation, security gate scanning, and real-time ceremony administration.",
+    "category": "University Platform",
+    "live_url": "https://jntugv.edu.in/1st-convocation",
+    "image_url": "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&auto=format&fit=crop&q=80",
+    "tags": ["React", "Vite", "Node.js", "Express", "QR Entry Pass", "Ceremony Automation"],
+    "status": "Live",
+    "featured": true,
+    "year": "2026",
+    "created_at": "2026-03-10T00:00:00.000Z",
+    "developers": [
+      {
+        "name": "Datti Mounika",
+        "role": "Team Member"
+      },
+      {
+        "name": "Teki Chaitanya Lakshmi",
+        "role": "Team Member"
+      }
+    ]
+  },
+  {
+    "id": "academic-ledger-portal",
+    "title": "Academic Ledger Portal",
+    "problem_statement": "Managing institutional fees, affiliation dues, course intake capacities, and regulatory compliance documents manually across dozens of affiliated autonomous and non-autonomous colleges leads to frequent calculation errors, delayed fee processing, lack of centralized audit history, and cumbersome verification of annual Extension of Approval (EoA) documents.",
+    "description": "The Academic Ledger Portal is a centralized financial and academic compliance management web application designed for Jawaharlal Nehru Technological University Gurajada Vizianagaram (JNTU-GV) to streamline institutional fee ledgers, student intake progression, and approval document management. The portal automates complex fee calculations—such as University Common Services (UCS) fees, affiliation dues, and student registration charges across multiple academic years and college autonomy tiers—while featuring bulk Excel data ingestion, instant PDF ledger generation, and super-admin audit logs to ensure institutional transparency and error-free financial governance.",
+    "category": "University Platform",
+    "live_url": "https://alp.jntugv.edu.in",
+    "image_url": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&auto=format&fit=crop&q=80",
+    "tags": ["UCS & Affiliation Dues", "Excel Ingestion", "PDF Ledger", "Audit Logs", "Compliance"],
+    "status": "Live",
+    "featured": true,
+    "year": "2026",
+    "created_at": "2026-03-15T00:00:00.000Z",
+    "developers": [
+      {
+        "name": "Asma",
+        "role": "Team Member"
+      },
+      {
+        "name": "Likhith",
+        "role": "Team Member"
+      },
+      {
+        "name": "Pravallika",
+        "role": "Team Member"
+      }
+    ]
+  },
+  {
+    "id": "sdlbms-smart-digital-library",
+    "title": "Smart Digital Library and Barcode Management System (SDLBMS)",
+    "description": "The Smart Digital Library & Barcode Management System (SDLBMS) is a web-based library management project designed to make it easier for students and librarians to manage, search, locate, and track physical books. Unlike traditional library systems that mainly handle book issue, return, and fine transactions, this system also provides the exact physical location of each book, including the room, section, rack, shelf, and position. It uses React.js, Node.js, Express.js, and PostgreSQL, along with barcode and QR-code technologies for quick book identification and checkout/return operations. Students can search for books, view their availability, and find their exact shelf location, while librarians can manage books, authors, categories, inventory, and audits through an administrative dashboard. The system also includes JWT-based security, inventory analytics using Chart.js, real-time book status tracking, barcode/QR scanning, and inventory auditing, helping reduce the time spent searching for books and improving overall library organization and resource management.",
+    "category": "University Platform",
+    "live_url": "https://ysrcl.jntugvcev.edu.in",
+    "image_url": "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=800&auto=format&fit=crop&q=80",
+    "tags": ["React.js", "Node.js", "Express.js", "PostgreSQL", "Barcode & QR", "Chart.js", "JWT"],
+    "status": "Live",
+    "featured": true,
+    "year": "2026",
+    "created_at": "2026-03-20T00:00:00.000Z",
+    "developers": [
+      {
+        "name": "Y. Ghana Sathya Karthik",
+        "role": "Team Member"
+      },
+      {
+        "name": "V. Charu",
+        "role": "Team Member"
+      },
+      {
+        "name": "Brunda Hasini",
+        "role": "Team Member"
+      }
+    ]
   }
 ]
