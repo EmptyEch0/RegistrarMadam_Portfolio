@@ -18,7 +18,7 @@
         "role": "Lead Fullstack Architect",
         "photo_url": "https://github.com/EmptyEch0.png",
         "linkedin_url": "https://www.linkedin.com/in/likhithmankala/",
-        "github_url": "https://github.com/Likhith32"
+        "github_url": "https://github.com/EmptyEch0"
       }
     ]
   },
@@ -48,7 +48,6 @@
   {
     "id": "academic-ledger-portal",
     "title": "Academic Ledger Portal",
-    "problem_statement": "Managing institutional fees, affiliation dues, course intake capacities, and regulatory compliance documents manually across dozens of affiliated autonomous and non-autonomous colleges leads to frequent calculation errors, delayed fee processing, lack of centralized audit history, and cumbersome verification of annual Extension of Approval (EoA) documents.",
     "description": "The Academic Ledger Portal is a centralized financial and academic compliance management web application designed for Jawaharlal Nehru Technological University Gurajada Vizianagaram (JNTU-GV) to streamline institutional fee ledgers, student intake progression, and approval document management. The portal automates complex fee calculations—such as University Common Services (UCS) fees, affiliation dues, and student registration charges across multiple academic years and college autonomy tiers—while featuring bulk Excel data ingestion, instant PDF ledger generation, and super-admin audit logs to ensure institutional transparency and error-free financial governance.",
     "category": "University Platform",
     "live_url": "https://alp.jntugv.edu.in",
@@ -64,8 +63,11 @@
         "role": "Team Member"
       },
       {
-        "name": "Likhith",
-        "role": "Team Member"
+        "name": "Likhith Mankala",
+        "role": "Team Member",
+        "photo_url": "https://github.com/EmptyEch0.png",
+        "linkedin_url": "https://www.linkedin.com/in/likhithmankala/",
+        "github_url": "https://github.com/EmptyEch0"
       },
       {
         "name": "Pravallika",
@@ -91,11 +93,7 @@
         "role": "Team Member"
       },
       {
-        "name": "V. Charu",
-        "role": "Team Member"
-      },
-      {
-        "name": "Brunda Hasini",
+        "name": "V. Charu Brunda Hasini",
         "role": "Team Member"
       }
     ]

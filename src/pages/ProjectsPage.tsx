@@ -42,7 +42,6 @@ export interface Developer {
 export interface ProjectItem {
   id: string;
   title: string;
-  problem_statement?: string;
   description: string;
   category: string;
   live_url?: string;
@@ -68,11 +67,17 @@ function mergeProjectsWithDefaults(items: ProjectItem[]): ProjectItem[] {
   const defaults = defaultProjectsJSON as ProjectItem[];
   const merged = [...clean];
   for (const defProj of defaults) {
-    const exists = merged.some(
+    const existingIdx = merged.findIndex(
       (p) => String(p.id) === String(defProj.id) || normalize(p.title) === normalize(defProj.title)
     );
-    if (!exists) {
+    if (existingIdx === -1) {
       merged.push(defProj);
+    } else if (
+      defProj.id === "convocation-management-system" ||
+      defProj.id === "academic-ledger-portal" ||
+      defProj.id === "sdlbms-smart-digital-library"
+    ) {
+      merged[existingIdx] = defProj;
     }
   }
   return merged;
@@ -633,18 +638,6 @@ export default function ProjectsPage() {
                         </div>
 
                         <div className="p-3.5 space-y-3">
-                          {/* Problem Statement (when present) */}
-                          {project.problem_statement && (
-                            <div className="p-2.5 rounded-lg bg-accent/5 border border-accent/20">
-                              <div className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1">
-                                Problem Statement
-                              </div>
-                              <p className="text-muted-foreground text-xs leading-relaxed">
-                                {project.problem_statement}
-                              </p>
-                            </div>
-                          )}
-
                           {/* Project Description */}
                           <div>
                             <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/80 mb-1 flex items-center gap-1">
@@ -924,16 +917,6 @@ export default function ProjectsPage() {
                   )}
                 </button>
               </div>
-
-              {/* Problem Statement (when present) */}
-              {spotlightProject.problem_statement && (
-                <div className="p-4 rounded-2xl bg-accent/5 border border-accent/25 text-sm leading-relaxed">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-accent mb-1.5">
-                    Problem Statement
-                  </div>
-                  <p className="text-muted-foreground">{spotlightProject.problem_statement}</p>
-                </div>
-              )}
 
               {/* Description Body */}
               <div className="p-4 rounded-2xl bg-muted/40 border border-border/60 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
