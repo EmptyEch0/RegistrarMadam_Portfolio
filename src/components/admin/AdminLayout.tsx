@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { Newspaper } from "lucide-react";
 import { GraduationCap } from "lucide-react";
-import { ClipboardList, Mail } from "lucide-react";
+import { ClipboardList, Mail, MessagesSquare } from "lucide-react";
 import {
   Home,
   Award,
@@ -27,6 +27,7 @@ const navItems = [
   { label: "Dashboard", to: "/admin/dashboard", icon: Home },
   { label: "Visitor Logs", to: "/admin/visitors", icon: Users },
   { label: "Requests Inbox", to: "/admin/inquiries", icon: Mail },
+  { label: "Discussions", to: "/admin/discussions", icon: MessagesSquare },
   { label: "Projects & Labs", to: "/admin/projects", icon: FolderGit2 },
   { label: "QLearn Hub", to: "/admin/qlearn", icon: Sparkles },
   { label: "Academics Portal", to: "/admin/academics", icon: GraduationCap },

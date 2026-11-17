@@ -50,10 +50,10 @@ const audienceCards: { id: SectionId; title: string; description: string; cta: s
   },
   {
     id: "connect",
-    title: "Connect & Request",
-    description: "Request a research paper, ask about thesis or Ph.D. guidance, or propose a collaboration.",
-    cta: "Get in touch",
-    link: "/contact",
+    title: "Discuss & Connect",
+    description: "Join moderated discussions, request a research paper, or ask about thesis and Ph.D. guidance.",
+    cta: "Join the conversation",
+    link: "/discuss",
     icon: MessagesSquare,
   },
 ];

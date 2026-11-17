@@ -60,9 +60,10 @@ export const SECTIONS: Record<SectionId, {
   },
   connect: {
     label: "Connect",
-    home: "/contact",
+    home: "/discuss",
     icon: MessagesSquare,
     links: [
+      { label: "Discussions", href: "/discuss" },
       { label: "Contact & Requests", href: "/contact" },
       { label: "Request a Paper", href: "/contact?type=paper" },
       { label: "Thesis Guidance", href: "/contact?type=thesis" },
@@ -76,6 +77,20 @@ export const LAST_SECTION_KEY = "last_section";
 export function sectionFor(pathname: string): SectionId | null {
   if (pathname === "/") return null;
   if (pathname.startsWith("/qlearn")) return "students";
-  if (pathname.startsWith("/contact")) return "connect";
+  if (pathname.startsWith("/contact") || pathname.startsWith("/discuss")) return "connect";
   return "profile";
 }
+
+/** Forum categories; ids must match the check constraint in supabase/discussions.sql. */
+export const DISCUSSION_CATEGORIES = [
+  { id: "general", label: "General" },
+  { id: "ask-professor", label: "Ask the Professor" },
+  { id: "quantum-computing", label: "Quantum Computing" },
+  { id: "data-science", label: "Data Science" },
+  { id: "machine-learning", label: "Machine Learning" },
+  { id: "deep-learning", label: "Deep Learning" },
+  { id: "iot-internet-of-things", label: "IoT" },
+  { id: "agentic-ai", label: "Agentic AI" },
+];
+
+export const categoryLabel = (id: string) => DISCUSSION_CATEGORIES.find((c) => c.id === id)?.label ?? id;

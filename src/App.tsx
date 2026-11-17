@@ -20,6 +20,7 @@ import ScholarsPage from "@/pages/ScholarsPage";
 import QLearnPage from "./pages/QLearnPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import ProfilePage from "./pages/ProfilePage";
+import DiscussPage from "./pages/DiscussPage";
 
 // ================= ADMIN COMPONENTS =================
 import ProtectedRoute from "@/components/admin/ProtectedRoute";
@@ -35,6 +36,7 @@ import JournalsAdmin from "./pages/admin/journals";
 import InvitedTalksAdmin from "./pages/admin/invited-talks";
 import TextbooksAdmin from "./pages/admin/textbooks";
 import InquiriesAdmin from "./pages/admin/inquiries";
+import DiscussionsAdmin from "./pages/admin/discussions";
 import WorkshopsAttendedAdmin from "./pages/admin/workshops-attended";
 import WorkshopsOrganizedAdmin from "./pages/admin/workshops-organized";
 import AdminMedia from "./pages/admin/media";
@@ -60,6 +62,8 @@ export default function App() {
             {/* ================= PUBLIC ROUTES ================= */}
             <Route path="/" element={<HomePage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/discuss" element={<DiscussPage />} />
+            <Route path="/discuss/:id" element={<DiscussPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/experience" element={<ExperiencePage />} />
             <Route path="/achievements" element={<AchievementsPage />} />
@@ -88,6 +92,7 @@ export default function App() {
               <Route path="invited-talks" element={<InvitedTalksAdmin />} />
               <Route path="textbooks" element={<TextbooksAdmin />} />
               <Route path="inquiries" element={<InquiriesAdmin />} />
+              <Route path="discussions" element={<DiscussionsAdmin />} />
               <Route path="workshops-attended" element={<WorkshopsAttendedAdmin />} />
               <Route path="workshops-organized" element={<WorkshopsOrganizedAdmin />} />
               <Route path="media" element={<AdminMedia />} />
