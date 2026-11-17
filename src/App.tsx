@@ -32,6 +32,7 @@ import AcademicGovernanceAdmin from "./pages/admin/academic-governance";
 import CommitteeRolesAdmin from "./pages/admin/committee-roles";
 import JournalsAdmin from "./pages/admin/journals";
 import InvitedTalksAdmin from "./pages/admin/invited-talks";
+import TextbooksAdmin from "./pages/admin/textbooks";
 import WorkshopsAttendedAdmin from "./pages/admin/workshops-attended";
 import WorkshopsOrganizedAdmin from "./pages/admin/workshops-organized";
 import AdminMedia from "./pages/admin/media";
@@ -82,6 +83,7 @@ export default function App() {
               <Route path="committee-roles" element={<CommitteeRolesAdmin />} />
               <Route path="journals" element={<JournalsAdmin />} />
               <Route path="invited-talks" element={<InvitedTalksAdmin />} />
+              <Route path="textbooks" element={<TextbooksAdmin />} />
               <Route path="workshops-attended" element={<WorkshopsAttendedAdmin />} />
               <Route path="workshops-organized" element={<WorkshopsOrganizedAdmin />} />
               <Route path="media" element={<AdminMedia />} />

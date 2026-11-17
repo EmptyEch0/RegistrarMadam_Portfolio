@@ -33,6 +33,7 @@ const navItems = [
   { label: "Academic Governance", to: "/admin/academic-governance", icon: BookOpen },
   { label: "Committee Roles", to: "/admin/committee-roles", icon: Users },
   { label: "Invited Talks", to: "/admin/invited-talks", icon: Mic },
+  { label: "Textbooks", to: "/admin/textbooks", icon: BookOpen },
   { label: "Workshops-Attended", to: "/admin/workshops-attended", icon: Calendar },
   { label: "Workshops-organized", to: "/admin/workshops-organized", icon: Calendar },
   { label: "Media", to: "/admin/media", icon: Newspaper },

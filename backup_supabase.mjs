@@ -10,6 +10,7 @@ const knownTables = [
   'daily_activities',
   'invited_talks',
   'journals',
+  'textbooks',
   'major_awards',
   'media',
   'publications_recognition',

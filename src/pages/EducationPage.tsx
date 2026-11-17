@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -18,13 +18,15 @@ import {
   Clock,
   Search,
   Filter,
-  Calendar
+  Calendar,
+  Mic
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 // 1️⃣ ADD JSON IMPORTS (TOP OF FILE)
 import facultyDevelopmentProgramsJSON from "@/data/faculty_development_programs.json";
 import publicationsRecognitionJSON from "@/data/publications_recognition.json";
+import invitedTalksJSON from "@/data/invited_talks.json";
 
 const EducationPage = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -45,7 +47,11 @@ const EducationPage = () => {
       issued_by?: string;
     }[]
   >([]);
+  const [invitedTalks, setInvitedTalks] = useState<
+    { title: string; event?: string; date?: string; speaker?: string }[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
   const [sortBy, setSortBy] = useState<string>("latest");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -83,8 +89,16 @@ const EducationPage = () => {
 
         if (pubsRecError) throw pubsRecError;
 
+        const { data: talks, error: talksError } = await supabase
+          .from("invited_talks")
+          .select("title, event, date, speaker")
+          .order("created_at", { ascending: false });
+
+        if (talksError) throw talksError;
+
         setFacultyDevelopmentPrograms(fdps || []);
         setPublicationsRecognition(pubsRec || []);
+        setInvitedTalks(talks || []);
 
       } catch (error) {
         console.warn("Supabase connection issue → loading Education data from JSON fallback", error);
@@ -92,6 +106,7 @@ const EducationPage = () => {
         // ✅ JSON fallback
         setFacultyDevelopmentPrograms(facultyDevelopmentProgramsJSON || []);
         setPublicationsRecognition(publicationsRecognitionJSON || []);
+        setInvitedTalks(invitedTalksJSON || []);
       } finally {
         setIsLoading(false);
       }
@@ -99,6 +114,12 @@ const EducationPage = () => {
 
     fetchEducationData();
   }, [isSupabaseEnabled]);
+
+  // Deep link (/education#invited-talks): scroll once content has rendered
+  useEffect(() => {
+    if (isLoading || !location.hash) return;
+    document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: "smooth" });
+  }, [isLoading, location.hash]);
 
   // Hardcoded Session Chairs
   const sessionChairs = [
@@ -259,7 +280,7 @@ const EducationPage = () => {
         const p = parseInt(String(item.year), 10);
         if (!isNaN(p)) return p;
       }
-      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""}`;
+      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""} ${item.date || ""}`;
       const years = extractYearsFromString(combined);
       return years.length > 0 ? Math.max(...years) : 0;
     }
@@ -279,7 +300,7 @@ const EducationPage = () => {
         const p = parseInt(String(item.year), 10);
         if (!isNaN(p)) return p;
       }
-      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""}`;
+      const combined = `${item.title || ""} ${item.description || ""} ${item.duration || ""} ${item.date || ""}`;
       const years = extractYearsFromString(combined);
       return years.length > 0 ? Math.min(...years) : 9999;
     }
@@ -337,6 +358,8 @@ const EducationPage = () => {
         (item.organizer && item.organizer.toLowerCase().includes(q)) ||
         (item.description && item.description.toLowerCase().includes(q)) ||
         (item.issued_by && item.issued_by.toLowerCase().includes(q)) ||
+        (item.event && item.event.toLowerCase().includes(q)) ||
+        (item.date && item.date.toLowerCase().includes(q)) ||
         (item.year && String(item.year).includes(q))
       );
     }
@@ -358,6 +381,11 @@ const EducationPage = () => {
     const filtered = publicationsRecognition.filter(matchesSearch);
     return sortContributionItems(filtered, sortBy);
   }, [publicationsRecognition, sortBy, searchQuery]);
+
+  const sortedInvitedTalks = useMemo(() => {
+    const filtered = invitedTalks.filter(matchesSearch);
+    return sortContributionItems(filtered, sortBy);
+  }, [invitedTalks, sortBy, searchQuery]);
 
   const sortedAcademicContributions = useMemo(() => {
     return academicContributions.map((section) => ({
@@ -665,6 +693,47 @@ const EducationPage = () => {
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Invited Talks (moved here from Publications) */}
+      <section id="invited-talks" className="section-padding scroll-mt-40">
+        <div className="container-wide px-6 lg:px-12">
+          <SectionHeading
+            title="Invited Talks"
+            subtitle="Keynote addresses, guest lectures, and resource-person sessions"
+          />
+
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          ) : sortedInvitedTalks.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No invited talks match your search.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-4">
+              {sortedInvitedTalks.map((talk, index) => (
+                <div
+                  key={index}
+                  className="group flex items-start justify-between gap-3 p-5 bg-card rounded-lg border border-border hover:border-accent hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 animate-fade-in"
+                  style={{ animationDelay: `${Math.min(index, 12) * 40}ms` }}
+                >
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <Mic className="w-5 h-5 text-accent flex-shrink-0 mt-1" />
+                    <div className="text-sm leading-relaxed">
+                      <p className="font-semibold text-foreground">{talk.title}</p>
+                      {talk.event && <p className="mt-1 text-muted-foreground">{talk.event}</p>}
+                    </div>
+                  </div>
+                  {talk.date && (
+                    <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-accent/15 text-accent border border-accent/25 whitespace-nowrap">
+                      {talk.date}
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

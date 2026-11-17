@@ -14,8 +14,8 @@ const mainNavItems = [
 
 const dropdownItems = [
   { label: "Projects & Innovations", href: "/projects", desc: "Student & research prototypes", icon: FolderGit2 },
-  { label: "Publications", href: "/publications", desc: "Journals and papers", icon: BookOpen },
-  { label: "Invited Talks", href: "/publications?filter=talk", desc: "Keynote addresses & guest lectures", icon: Mic },
+  { label: "Publications", href: "/publications", desc: "Research papers & textbooks", icon: BookOpen },
+  { label: "Invited Talks", href: "/education#invited-talks", desc: "Keynote addresses & guest lectures", icon: Mic },
   { label: "Achievements", href: "/achievements", desc: "National awards & honors", icon: Award },
   { label: "Scholars", href: "/scholars", desc: "Ph.D. guidance and research", icon: Users },
   { label: "Learning Symposium", href: "/learning-symposium", desc: "FDPs & workshops", icon: Sparkles },

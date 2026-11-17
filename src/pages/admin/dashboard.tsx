@@ -92,6 +92,14 @@ const sections = [
     count: null
   },
   { 
+    title: "Textbooks", 
+    path: "/admin/textbooks", 
+    icon: BookOpen, 
+    color: "text-amber-600",
+    bgGradient: "from-amber-400/20 to-yellow-400/20",
+    count: null
+  },
+  { 
     title: "Invited Talks", 
     path: "/admin/invited-talks", 
     icon: Mic, 

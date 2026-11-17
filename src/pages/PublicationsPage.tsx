@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import {
   BookOpen,
   Users,
-  Award,
+  Library,
   Search,
   ArrowUpDown,
   ChevronDown,
@@ -22,10 +22,11 @@ import { supabase } from "@/lib/supabase";
 // JSON fallback imports
 import journalsJSON from "@/data/journals.json";
 import internationalConferencesJSON from "@/data/international_conferences.json";
-import invitedTalksJSON from "@/data/invited_talks.json";
+import textbooksJSON from "@/data/textbooks.json";
 
 const PublicationsPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialFilter = searchParams.get("filter") || "all";
   const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -34,18 +35,23 @@ const PublicationsPage = () => {
 
   useEffect(() => {
     const f = searchParams.get("filter");
+    // Old shared links: invited talks now live on the Contributions page
+    if (f === "talk") {
+      navigate("/education#invited-talks", { replace: true });
+      return;
+    }
     if (f) {
       setActiveFilter(f);
       setTimeout(() => {
         window.scrollTo({ top: 380, behavior: "smooth" });
       }, 150);
     }
-  }, [searchParams]);
+  }, [searchParams, navigate]);
   
   // State for Supabase data
   const [journals, setJournals] = useState<any[]>([]);
   const [internationalConferences, setInternationalConferences] = useState<any[]>([]);
-  const [invitedTalks, setInvitedTalks] = useState<any[]>([]);
+  const [textbooks, setTextbooks] = useState<any[]>([]);
 
   // Check if Supabase is available (production-safe)
   const isSupabaseEnabled =
@@ -77,22 +83,20 @@ const PublicationsPage = () => {
           .order("year", { ascending: false });
         if (conferencesError) throw conferencesError;
 
-        // Fetch invited talks
-        const { data: talksData, error: talksError } = await supabase
-          .from("invited_talks")
-          .select("title, event, date, speaker, created_at")
-          .order("created_at", { ascending: false });
-
-        if (talksError) throw talksError;
-
         setJournals(journalsData || []);
         setInternationalConferences(conferencesData || []);
-        setInvitedTalks(talksData || []);
+
+        // Textbooks fetched separately so a missing table never knocks out papers
+        const { data: booksData, error: booksError } = await supabase
+          .from("textbooks")
+          .select("title, authors, publisher, isbn, edition, kind, year, link")
+          .order("year", { ascending: false });
+        setTextbooks(booksError ? textbooksJSON : booksData || []);
       } catch (error) {
         console.warn("Supabase failed → loading publications from JSON");
         setJournals(journalsJSON || []);
         setInternationalConferences(internationalConferencesJSON || []);
-        setInvitedTalks(invitedTalksJSON || []);
+        setTextbooks(textbooksJSON || []);
       } finally {
         setIsLoading(false);
       }
@@ -126,20 +130,25 @@ const PublicationsPage = () => {
       authors: c.authors || "",
       link: c.link || "",
     })),
-    ...invitedTalks.map(t => ({
-      title: t.title || "",
-      journal: t.event || "",
-      year: t.sort_year?.toString() || t.year?.toString() || t.date || "",
-      type: "talk" as const,
-      authors: t.speaker || "Jaya G. Suma",
+    ...textbooks.map(b => ({
+      title: b.title || "",
+      journal: [b.publisher, b.edition, b.isbn && `ISBN ${b.isbn}`].filter(Boolean).join(" · "),
+      year: b.year?.toString() || "",
+      type: (b.kind === "chapter" ? "chapter" : "book") as "book" | "chapter",
+      authors: b.authors || "",
+      link: b.link || "",
     })),
-  ], [journals, internationalConferences, invitedTalks]);
+  ], [journals, internationalConferences, textbooks]);
 
   // Filter and sort publications
   const filteredAndSortedPublications = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     const filtered = rawPublications.filter((pub) => {
-      const matchesType = activeFilter === "all" || pub.type === activeFilter;
+      const matchesType =
+        activeFilter === "all" ||
+        pub.type === activeFilter ||
+        (activeFilter === "paper" && (pub.type === "journal" || pub.type === "conference")) ||
+        (activeFilter === "textbook" && (pub.type === "book" || pub.type === "chapter"));
       const matchesSearch =
         !q ||
         pub.title.toLowerCase().includes(q) ||
@@ -176,14 +185,15 @@ const PublicationsPage = () => {
     all: rawPublications.length,
     journal: rawPublications.filter(p => p.type === "journal").length,
     conference: rawPublications.filter(p => p.type === "conference").length,
-    talk: rawPublications.filter(p => p.type === "talk").length,
-  }), [rawPublications]);
+    textbook: textbooks.length,
+  }), [rawPublications, textbooks]);
 
   const filters = [
     { id: "all", label: "All Publications", count: counts.all },
+    { id: "paper", label: "Research Papers", count: counts.journal + counts.conference },
     { id: "journal", label: "Journals", count: counts.journal },
     { id: "conference", label: "Conferences", count: counts.conference },
-    { id: "talk", label: "Invited Talks", count: counts.talk },
+    { id: "textbook", label: "Textbooks", count: counts.textbook },
   ];
 
   return (
@@ -228,7 +238,7 @@ const PublicationsPage = () => {
             {[
               { number: journals.length.toString(), label: "Journal Articles", icon: BookOpen },
               { number: internationalConferences.length.toString(), label: "Conference Papers", icon: Users },
-              { number: invitedTalks.length.toString(), label: "Invited Talks", icon: Award },
+              { number: textbooks.length.toString(), label: "Textbooks & Chapters", icon: Library },
             ].map((item, index) => {
               const Icon = item.icon;
               return (
@@ -256,7 +266,7 @@ const PublicationsPage = () => {
         <div className="container-wide px-6 lg:px-12">
           <SectionHeading
             title="Publications"
-            subtitle="Research papers in SCOPUS-indexed journals and international conferences"
+            subtitle="Research papers in SCOPUS-indexed journals and international conferences, plus authored textbooks"
           />
 
           {/* Filter & Sort Controls Bar */}
