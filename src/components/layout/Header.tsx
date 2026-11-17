@@ -76,7 +76,7 @@ export function Header() {
     if (path !== location.pathname) return false;
     if (rest.startsWith("?")) return location.search.startsWith(rest);
     if (rest.startsWith("#")) return location.hash === rest;
-    return !location.search.includes("tab=") && !location.search.includes("type=") && !location.hash;
+    return !location.search.includes("tab=") && !location.hash;
   };
   const isMoreActive = !!nav.more?.some((item) => isActive(item.href));
 

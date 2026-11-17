@@ -9,72 +9,156 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, MapPin, Phone, Clock, Send } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Mail, MapPin, Phone, Clock, Send, Info } from "lucide-react";
 
-const REQUEST_TYPES = [
-  { id: "paper", label: "Request a research paper / full text" },
-  { id: "thesis", label: "Thesis or Ph.D. guidance" },
-  { id: "collaboration", label: "Research collaboration" },
-  { id: "talk", label: "Invite for a talk or event" },
-  { id: "general", label: "General enquiry" },
+type Extra = { name: string; label: string; type: "select" | "date"; options?: string[]; required?: boolean };
+
+/* Each request type reshapes the form. ids match the inquiries.request_type check in supabase/inquiries.sql.
+ * Extra fields have no DB column; they are written as "Label: value" lines at the top of the message. */
+const REQUEST_TYPES: {
+  id: string;
+  emoji: string;
+  card: string;
+  cardDesc: string;
+  heading: string;
+  hint: string;
+  ref?: { label: string; placeholder: string };
+  extras?: Extra[];
+  subject?: string; // fixed subject prefix; general enquiries type their own
+  messageLabel: string;
+  messagePlaceholder: string;
+}[] = [
+  {
+    id: "paper",
+    emoji: "📄",
+    card: "Request a Paper",
+    cardDesc: "Full text of a publication",
+    heading: "Request a research paper",
+    hint: "Give the paper title (or DOI) and say how you'll use it: reading, citing, or teaching. Full texts are shared for personal academic use.",
+    ref: { label: "Paper title or DOI *", placeholder: "Exact title as listed on the Publications page" },
+    subject: "Paper request",
+    messageLabel: "How will you use it? *",
+    messagePlaceholder: "e.g. I'm citing this in my M.Tech thesis on diabetes prediction...",
+  },
+  {
+    id: "thesis",
+    emoji: "🎓",
+    card: "Thesis / Ph.D. Guidance",
+    cardDesc: "Supervision & research direction",
+    heading: "Thesis or Ph.D. guidance",
+    hint: "Share your degree, research area, and background. Mention prior publications or projects if you have them.",
+    ref: { label: "Research area or proposed topic *", placeholder: "e.g. Deep learning for medical imaging" },
+    extras: [{ name: "Degree", label: "Degree *", type: "select", options: ["Ph.D.", "M.Tech", "MCA", "B.Tech", "Other"], required: true }],
+    subject: "Thesis guidance",
+    messageLabel: "Your background *",
+    messagePlaceholder: "Current programme and institution, prior work, why this area interests you...",
+  },
+  {
+    id: "collaboration",
+    emoji: "🤝",
+    card: "Collaboration",
+    cardDesc: "Joint research or projects",
+    heading: "Propose a research collaboration",
+    hint: "Describe the problem, what each side brings, and the expected outcome (paper, project, grant, MoU).",
+    ref: { label: "Collaboration area *", placeholder: "e.g. IoT-based disaster management" },
+    subject: "Collaboration proposal",
+    messageLabel: "Your proposal *",
+    messagePlaceholder: "The idea, your team, timeline, and how you see us working together...",
+  },
+  {
+    id: "talk",
+    emoji: "🎤",
+    card: "Invite for a Talk",
+    cardDesc: "Keynote, guest lecture, FDP",
+    heading: "Invite for a talk or event",
+    hint: "Include the event, proposed date, audience, and topic. Invitations at least 3 weeks ahead are easier to accommodate.",
+    ref: { label: "Event / programme name *", placeholder: "e.g. National FDP on Agentic AI" },
+    extras: [
+      { name: "Proposed date", label: "Proposed date", type: "date" },
+      { name: "Mode", label: "Mode", type: "select", options: ["In person", "Online", "Hybrid"] },
+    ],
+    subject: "Talk invitation",
+    messageLabel: "Event details *",
+    messagePlaceholder: "Topic, audience, expected duration, venue...",
+  },
+  {
+    id: "general",
+    emoji: "✉️",
+    card: "General enquiry",
+    cardDesc: "Anything else",
+    heading: "Send a message",
+    hint: "For anything else: department matters, student queries, or feedback about this site.",
+    messageLabel: "Message *",
+    messagePlaceholder: "Your message...",
+  },
 ];
 
 const emptyForm = {
   name: "",
   email: "",
   affiliation: "",
-  request_type: "general",
   reference_title: "",
   subject: "",
   message: "",
+  extras: {} as Record<string, string>,
   website: "", // honeypot: hidden from people, bots fill it
 };
 
+const selectClass =
+  "flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
+
 const ContactPage = () => {
   const { toast } = useToast();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(emptyForm);
 
-  // Prefill from links like /contact?type=paper&title=Paper%20Title
+  // The URL is the single source of truth for the chosen type (?type=paper&title=...)
+  const type = REQUEST_TYPES.find((t) => t.id === searchParams.get("type")) ?? REQUEST_TYPES[REQUEST_TYPES.length - 1];
+
+  // Switching type (or arriving from "Request full text") resets the type-specific fields
   useEffect(() => {
-    const type = searchParams.get("type");
-    const title = searchParams.get("title") || "";
-    if (!type && !title) return;
-    setFormData((prev) => ({
-      ...prev,
-      request_type: REQUEST_TYPES.some((t) => t.id === type) ? (type as string) : prev.request_type,
-      reference_title: title || prev.reference_title,
-      subject: title ? `Request for full text: ${title}`.slice(0, 200) : prev.subject,
-    }));
+    setFormData((prev) => ({ ...prev, reference_title: searchParams.get("title") || "", subject: "", extras: {} }));
   }, [searchParams]);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const chooseType = (id: string) => setSearchParams({ type: id }, { replace: true });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const setExtra = (name: string, value: string) =>
+    setFormData((prev) => ({ ...prev, extras: { ...prev.extras, [name]: value } }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { website, ...fields } = formData;
+    const reference = formData.reference_title.trim();
+    const extraLines = (type.extras ?? [])
+      .filter((x) => formData.extras[x.name])
+      .map((x) => `${x.name}: ${formData.extras[x.name]}`);
+    const message = [...extraLines, ...(extraLines.length ? [""] : []), formData.message.trim()].join("\n");
+    const subject = (type.subject ? `${type.subject}: ${reference || formData.name.trim()}` : formData.subject.trim()).slice(0, 200);
+
     // Bots that fill the hidden field get a fake success and nothing is stored
-    const { error } = website
+    const { error } = formData.website
       ? { error: null }
       : await supabase.from("inquiries").insert({
-          ...fields,
-          name: fields.name.trim(),
-          email: fields.email.trim(),
-          affiliation: fields.affiliation.trim() || null,
-          reference_title: fields.reference_title.trim() || null,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          affiliation: formData.affiliation.trim() || null,
+          request_type: type.id,
+          reference_title: reference || null,
+          subject,
+          message: message.slice(0, 5000),
         });
 
     if (error) {
@@ -89,7 +173,7 @@ const ContactPage = () => {
         title: "Request Sent",
         description: "Thank you. We will respond to your email within 2-3 business days.",
       });
-      setFormData(emptyForm);
+      setFormData({ ...emptyForm, extras: {} });
     }
     setIsSubmitting(false);
   };
@@ -126,12 +210,14 @@ const ContactPage = () => {
     },
   ];
 
+  const mainTypes = REQUEST_TYPES.filter((t) => t.id !== "general");
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-gradient-to-b from-cream-dark to-background">
+      <section className="pt-32 pb-10 bg-gradient-to-b from-cream-dark to-background">
         <div className="container-wide px-6 lg:px-12">
           <div className={`max-w-4xl mx-auto text-center transition-all duration-1000 transform ${
             isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -140,99 +226,116 @@ const ContactPage = () => {
               Collaborate
             </h1>
             <p className="text-xl text-muted-foreground">
-              Request research papers, ask about thesis guidance, or propose a collaboration
+              What can we help you with?
             </p>
           </div>
         </div>
       </section>
 
+      {/* Request type chooser */}
+      <section className="pb-4">
+        <div className="container-wide px-6 lg:px-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" role="group" aria-label="Choose request type">
+            {mainTypes.map((t) => {
+              const active = t.id === type.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => chooseType(t.id)}
+                  aria-pressed={active}
+                  className={cn(
+                    "card-institutional p-4 sm:p-5 text-left transition-all duration-200 border-2",
+                    active ? "border-accent bg-accent/5 shadow-md" : "border-transparent hover:border-accent/40"
+                  )}
+                >
+                  <span className="text-2xl sm:text-3xl block mb-2" aria-hidden="true">{t.emoji}</span>
+                  <span className={cn("block font-serif font-semibold text-sm sm:text-base", active ? "text-accent" : "text-primary")}>
+                    {t.card}
+                  </span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">{t.cardDesc}</span>
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Something else?{" "}
+            <button
+              type="button"
+              onClick={() => chooseType("general")}
+              aria-pressed={type.id === "general"}
+              className={cn("font-medium underline-offset-4 hover:underline", type.id === "general" ? "text-accent underline" : "text-primary")}
+            >
+              Send a general enquiry
+            </button>
+          </p>
+        </div>
+      </section>
+
       {/* Contact Section */}
-      <section className="section-padding">
+      <section className="section-padding pt-10">
         <div className="container-wide px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* Contact Form */}
-            <div className="animate-fade-in-left">
+            {/* Contact Form (fields change with the chosen type) */}
+            <div key={type.id} className="animate-fade-in">
               <SectionHeading
-                title="Send a Request"
-                subtitle="Choose what you need and we will respond by email"
+                title={`${type.emoji} ${type.heading}`}
+                subtitle="We will respond to your email within 2-3 business days"
                 alignment="left"
               />
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="flex gap-3 p-4 mb-6 rounded-lg bg-accent/5 border border-accent/20 text-sm text-foreground/80">
+                <Info size={18} className="text-accent shrink-0 mt-0.5" />
+                <p><strong className="text-primary">What to include:</strong> {type.hint}</p>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-6 relative">
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Full Name *</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      placeholder="Your name"
-                      maxLength={120}
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="bg-card transition-all duration-300 focus:scale-[1.02]"
-                    />
+                    <Input id="name" name="name" placeholder="Your name" maxLength={120} value={formData.name} onChange={handleChange} required className="bg-card" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address *</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your.email@example.com"
-                      maxLength={200}
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      className="bg-card transition-all duration-300 focus:scale-[1.02]"
-                    />
+                    <Input id="email" name="email" type="email" placeholder="your.email@example.com" maxLength={200} value={formData.email} onChange={handleChange} required className="bg-card" />
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="request_type">I'd like to *</Label>
-                    <select
-                      id="request_type"
-                      name="request_type"
-                      value={formData.request_type}
-                      onChange={handleChange}
-                      required
-                      className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      {REQUEST_TYPES.map((t) => (
-                        <option key={t.id} value={t.id}>{t.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="affiliation">Institution / Affiliation</Label>
-                    <Input
-                      id="affiliation"
-                      name="affiliation"
-                      placeholder="University, college, or company"
-                      maxLength={200}
-                      value={formData.affiliation}
-                      onChange={handleChange}
-                      className="bg-card"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="affiliation">Institution / Affiliation</Label>
+                  <Input id="affiliation" name="affiliation" placeholder="University, college, or company" maxLength={200} value={formData.affiliation} onChange={handleChange} className="bg-card" />
                 </div>
 
-                {(formData.request_type === "paper" || formData.request_type === "thesis") && (
+                {type.ref ? (
                   <div className="space-y-2">
-                    <Label htmlFor="reference_title">
-                      {formData.request_type === "paper" ? "Paper title" : "Thesis topic / research area"}
-                    </Label>
-                    <Input
-                      id="reference_title"
-                      name="reference_title"
-                      placeholder={formData.request_type === "paper" ? "Title of the paper you need" : "Proposed topic or area"}
-                      maxLength={300}
-                      value={formData.reference_title}
-                      onChange={handleChange}
-                      className="bg-card"
-                    />
+                    <Label htmlFor="reference_title">{type.ref.label}</Label>
+                    <Input id="reference_title" name="reference_title" placeholder={type.ref.placeholder} maxLength={300} value={formData.reference_title} onChange={handleChange} required className="bg-card" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="subject">Subject *</Label>
+                    <Input id="subject" name="subject" placeholder="Subject of your message" maxLength={200} value={formData.subject} onChange={handleChange} required className="bg-card" />
+                  </div>
+                )}
+
+                {type.extras && (
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {type.extras.map((x) => {
+                      const id = `extra-${x.name.replace(/\W+/g, "-").toLowerCase()}`;
+                      return (
+                        <div key={x.name} className="space-y-2">
+                          <Label htmlFor={id}>{x.label}</Label>
+                          {x.type === "select" ? (
+                            <select id={id} value={formData.extras[x.name] ?? ""} onChange={(e) => setExtra(x.name, e.target.value)} required={x.required} className={selectClass}>
+                              <option value="">Select...</option>
+                              {x.options?.map((o) => <option key={o} value={o}>{o}</option>)}
+                            </select>
+                          ) : (
+                            <Input id={id} type="date" value={formData.extras[x.name] ?? ""} onChange={(e) => setExtra(x.name, e.target.value)} required={x.required} className="bg-card" />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -243,48 +346,16 @@ const ContactPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Input
-                    id="subject"
-                    name="subject"
-                    placeholder="Subject of your message"
-                    maxLength={200}
-                    value={formData.subject}
-                    onChange={handleChange}
-                    required
-                    className="bg-card transition-all duration-300 focus:scale-[1.02]"
-                  />
+                  <Label htmlFor="message">{type.messageLabel}</Label>
+                  <Textarea id="message" name="message" placeholder={type.messagePlaceholder} maxLength={4800} rows={6} value={formData.message} onChange={handleChange} required className="bg-card resize-y" />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message *</Label>
-                  <Textarea
-                    id="message"
-                    name="message"
-                    placeholder="Your message..."
-                    maxLength={5000}
-                    rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
-                    required
-                    className="bg-card resize-none transition-all duration-300 focus:scale-[1.01]"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="hero"
-                  size="lg"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto transform hover:scale-105 transition-all duration-300"
-                >
+                <Button type="submit" variant="hero" size="lg" disabled={isSubmitting} className="w-full sm:w-auto">
                   {isSubmitting ? (
-                    <>
-                      <span className="animate-pulse">Sending...</span>
-                    </>
+                    <span className="animate-pulse">Sending...</span>
                   ) : (
                     <>
-                      Send Request
+                      Send {type.id === "general" ? "Message" : "Request"}
                       <Send size={18} />
                     </>
                   )}

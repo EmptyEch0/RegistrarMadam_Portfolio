@@ -65,8 +65,6 @@ export const SECTIONS: Record<SectionId, {
     links: [
       { label: "Discussions", href: "/discuss" },
       { label: "Contact & Requests", href: "/contact" },
-      { label: "Request a Paper", href: "/contact?type=paper" },
-      { label: "Thesis Guidance", href: "/contact?type=thesis" },
     ],
   },
 };
