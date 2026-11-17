@@ -32,6 +32,10 @@ import {
   GraduationCap,
   FileText,
   FileDown,
+  Edit3,
+  ListChecks,
+  BookmarkCheck,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
@@ -80,11 +84,44 @@ interface ModuleData {
   id: string;
   name: string;
   description: string;
+  syllabus?: string;
+  learningOutcomes?: string;
+  referenceMaterials?: string;
+  duration?: string;
   videos: VideoItem[];
   notes: NoteSnippet[];
   ppts?: PptItem[];
   quiz: QuizQuestion[];
 }
+
+const getModuleTopics = (mod: ModuleData): string[] => {
+  if (mod.syllabus) {
+    const lines = mod.syllabus
+      .split("\n")
+      .map((s) => s.trim().replace(/^[-*•\d.]+\s*/, ""))
+      .filter(Boolean);
+    if (lines.length > 0) return lines;
+  }
+  const desc = mod.description || "";
+  const cleaned = desc.replace(/^Topics:\s*/i, "");
+  return cleaned.split(",").map((s) => s.trim()).filter(Boolean);
+};
+
+const getModuleOutcomes = (mod: ModuleData): string[] => {
+  if (mod.learningOutcomes) {
+    const lines = mod.learningOutcomes
+      .split("\n")
+      .map((s) => s.trim().replace(/^[-*•\d.]+\s*/, ""))
+      .filter(Boolean);
+    if (lines.length > 0) return lines;
+  }
+  const cleanName = mod.name.replace(/^Module \d+:\s*/i, "");
+  return [
+    `Master foundational principles, architectures, and theoretical models of ${cleanName}.`,
+    `Analyze real-world problem scenarios and formulate structured, reproducible solutions.`,
+    `Demonstrate competency through interactive quiz evaluations, coding worksheets, and domain word puzzles.`
+  ];
+};
 
 interface DomainData {
   id: string;
@@ -2433,7 +2470,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [domains, setDomains] = useState<DomainData[]>([]);
   const [activeDomainIndex, setActiveDomainIndex] = useState<number | null>(null);
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState<"videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles">("videos");
+  const [activeTab, setActiveTab] = useState<"syllabus" | "videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles">("syllabus");
   const [selectedPuzzleIndex, setSelectedPuzzleIndex] = useState(0);
 
   // Visitor Access & Tracking states
@@ -2451,6 +2488,24 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [activePptIndex, setActivePptIndex] = useState(0);
   const [pptModalOpen, setPptModalOpen] = useState(false);
   const [fullscreenPpt, setFullscreenPpt] = useState<PptItem | null>(null);
+
+  // Module and Syllabus edit & add modals states (Admin)
+  const [editModuleModalOpen, setEditModuleModalOpen] = useState(false);
+  const [editingModuleIndex, setEditingModuleIndex] = useState<number | null>(null);
+  const [editModuleName, setEditModuleName] = useState("");
+  const [editModuleDesc, setEditModuleDesc] = useState("");
+  const [editModuleSyllabus, setEditModuleSyllabus] = useState("");
+  const [editModuleOutcomes, setEditModuleOutcomes] = useState("");
+  const [editModuleReferences, setEditModuleReferences] = useState("");
+  const [editModuleDuration, setEditModuleDuration] = useState("");
+
+  const [addModuleModalOpen, setAddModuleModalOpen] = useState(false);
+  const [newModuleName, setNewModuleName] = useState("");
+  const [newModuleDesc, setNewModuleDesc] = useState("");
+  const [newModuleSyllabus, setNewModuleSyllabus] = useState("");
+  const [newModuleOutcomes, setNewModuleOutcomes] = useState("");
+  const [newModuleReferences, setNewModuleReferences] = useState("");
+  const [newModuleDuration, setNewModuleDuration] = useState("");
 
   // Quiz states
   const [quizStarted, setQuizStarted] = useState(false);
@@ -2520,20 +2575,18 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           const defaultDomain = DEFAULT_DOMAINS.find((d) => d.id === domain.id);
           if (!defaultDomain) return domain;
           return {
+            ...defaultDomain,
             ...domain,
             modules: domain.modules.map((mod) => {
               const defaultMod = defaultDomain.modules.find((m) => m.id === mod.id);
-              if (defaultMod && defaultMod.ppts && defaultMod.ppts.length > 0) {
+              if (defaultMod) {
                 const userCustomPpts = (mod.ppts || []).filter(
-                  (p) => !defaultMod.ppts!.some((defP) => defP.id === p.id)
+                  (p) => !defaultMod.ppts?.some((defP) => defP.id === p.id)
                 );
                 return {
+                  ...defaultMod,
                   ...mod,
-                  name: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.name : mod.name,
-                  description: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.description : mod.description,
-                  notes: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.notes : mod.notes,
-                  quiz: defaultMod.id === "mod-1" && domain.id === "iot-internet-of-things" ? defaultMod.quiz : mod.quiz,
-                  ppts: [...defaultMod.ppts, ...userCustomPpts]
+                  ppts: [...(defaultMod.ppts || []), ...userCustomPpts]
                 };
               }
               return mod;
@@ -2575,9 +2628,11 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
         // Tab is puzzles with no specific subject: display subject selection screen
         setActiveDomainIndex(null);
       }
+    } else if (tab === "syllabus") {
+      setActiveTab("syllabus");
     } else if (tab === "courses") {
       setActiveDomainIndex(null);
-      setActiveTab("videos");
+      setActiveTab("syllabus");
     }
 
     // Silent access logging if visitor exists; courses open freely without blocking
@@ -2693,6 +2748,151 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
       localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
       setActiveDomainIndex(null);
       alert("QLearn content reset to default successfully.");
+    }
+  };
+
+  // Open Edit Module Modal
+  const openEditModuleModal = (index: number) => {
+    if (activeDomainIndex === null) return;
+    const targetDomain = domains[activeDomainIndex];
+    if (!targetDomain) return;
+    const mod = targetDomain.modules[index];
+    if (!mod) return;
+
+    setEditingModuleIndex(index);
+    setEditModuleName(mod.name);
+    setEditModuleDesc(mod.description || "");
+    setEditModuleSyllabus(mod.syllabus || "");
+    setEditModuleOutcomes(mod.learningOutcomes || "");
+    setEditModuleReferences(mod.referenceMaterials || "");
+    setEditModuleDuration(mod.duration || "");
+    setEditModuleModalOpen(true);
+  };
+
+  // Submit Edit Module & Syllabus
+  const handleEditModuleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editModuleName.trim() || activeDomainIndex === null || editingModuleIndex === null) {
+      alert("Please enter a valid module title.");
+      return;
+    }
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.map((m, mIdx) => {
+            if (mIdx === editingModuleIndex) {
+              return {
+                ...m,
+                name: editModuleName.trim(),
+                description: editModuleDesc.trim() || `Topics: ${editModuleName.trim()}`,
+                syllabus: editModuleSyllabus.trim(),
+                learningOutcomes: editModuleOutcomes.trim(),
+                referenceMaterials: editModuleReferences.trim(),
+                duration: editModuleDuration.trim(),
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return d;
+    });
+
+    saveDomains(updatedDomains);
+    setEditModuleModalOpen(false);
+    setEditingModuleIndex(null);
+  };
+
+  // Open Add Module Modal
+  const openAddModuleModal = () => {
+    if (activeDomainIndex === null) return;
+    const modNum = (domains[activeDomainIndex]?.modules.length || 0) + 1;
+    setNewModuleName(`Module ${modNum}: `);
+    setNewModuleDesc("Topics: ");
+    setNewModuleSyllabus("");
+    setNewModuleOutcomes("");
+    setNewModuleReferences("");
+    setNewModuleDuration("6-8 Hours");
+    setAddModuleModalOpen(true);
+  };
+
+  // Submit Add Module & Syllabus Option
+  const handleAddModuleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newModuleName.trim() || activeDomainIndex === null) {
+      alert("Please provide a module title.");
+      return;
+    }
+
+    const newModuleId = `mod-${Date.now()}`;
+    const newModule: ModuleData = {
+      id: newModuleId,
+      name: newModuleName.trim(),
+      description: newModuleDesc.trim() || `Topics: ${newModuleName.trim()}`,
+      syllabus: newModuleSyllabus.trim(),
+      learningOutcomes: newModuleOutcomes.trim(),
+      referenceMaterials: newModuleReferences.trim(),
+      duration: newModuleDuration.trim() || "8 Hours",
+      videos: [],
+      notes: [],
+      ppts: [],
+      quiz: []
+    };
+
+    const currentLen = domains[activeDomainIndex]?.modules.length || 0;
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: [...d.modules, newModule]
+        };
+      }
+      return d;
+    });
+
+    saveDomains(updatedDomains);
+    setActiveModuleIndex(currentLen);
+    setAddModuleModalOpen(false);
+    setNewModuleName("");
+    setNewModuleDesc("");
+    setNewModuleSyllabus("");
+    setNewModuleOutcomes("");
+    setNewModuleReferences("");
+    setNewModuleDuration("");
+  };
+
+  // Delete Module handler (admin)
+  const handleDeleteModule = (moduleIdx: number) => {
+    if (activeDomainIndex === null) return;
+    const targetDomain = domains[activeDomainIndex];
+    if (!targetDomain) return;
+    const targetMod = targetDomain.modules[moduleIdx];
+    if (!targetMod) return;
+
+    if (targetDomain.modules.length <= 1) {
+      alert("A course must retain at least one module in its syllabus.");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete "${targetMod.name}" and its syllabus? This action cannot be undone.`)) {
+      return;
+    }
+
+    const updatedDomains = domains.map((d, dIdx) => {
+      if (dIdx === activeDomainIndex) {
+        return {
+          ...d,
+          modules: d.modules.filter((_, idx) => idx !== moduleIdx)
+        };
+      }
+      return d;
+    });
+
+    saveDomains(updatedDomains);
+    if (activeModuleIndex >= updatedDomains[activeDomainIndex].modules.length) {
+      setActiveModuleIndex(Math.max(0, updatedDomains[activeDomainIndex].modules.length - 1));
     }
   };
 
@@ -2927,7 +3127,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
     setActivePptIndex(0);
-    setActiveTab("videos");
+    setActiveTab("syllabus");
     setQuizStarted(false);
     setQuizFinished(false);
   };
@@ -2960,7 +3160,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   };
 
   // Tab switch handler with access logging
-  const handleTabSwitch = (tabId: "videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles") => {
+  const handleTabSwitch = (tabId: "syllabus" | "videos" | "notes" | "ppts" | "quiz" | "worksheets" | "puzzles") => {
     setActiveTab(tabId);
     if (!isAdminPortal) {
       const visitor = getSavedVisitor();
@@ -2978,7 +3178,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setActiveModuleIndex(0);
     setActiveNoteIndex(0);
     setActivePptIndex(0);
-    setActiveTab("videos");
+    setActiveTab("syllabus");
     setSearchParams({});
   };
 
@@ -3220,29 +3420,75 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 >
                   <ArrowLeft size={16} /> Back to Domains
                 </button>
-                <h3 className="font-serif text-lg font-semibold text-primary px-1 mb-2">
-                  {activeDomain?.name} Modules
-                </h3>
+                <div className="flex items-center justify-between px-1 mb-2">
+                  <h3 className="font-serif text-lg font-semibold text-primary">
+                    {activeDomain?.name} Modules
+                  </h3>
+                  {isAdminPortal && (
+                    <Button
+                      variant="hero"
+                      size="sm"
+                      onClick={openAddModuleModal}
+                      className="h-7 px-2 text-[11px] font-bold flex items-center gap-1 shadow-xs"
+                      title="Add a new module to this syllabus"
+                    >
+                      <Plus size={12} /> Add
+                    </Button>
+                  )}
+                </div>
                 <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                   {activeDomain?.modules.map((module, index) => {
                     const isActive = index === activeModuleIndex;
                     return (
-                      <button
+                      <div
                         key={module.id}
-                        onClick={() => handleModuleSwitch(index)}
-                        className={`w-full text-left p-4 rounded-lg border transition-all duration-300 ${
+                        className={`group/mod relative rounded-lg border transition-all duration-300 ${
                           isActive
                             ? "bg-card border-accent shadow-md shadow-accent/5 ring-1 ring-accent/30 scale-100"
                             : "bg-card/40 border-border hover:border-accent/40 hover:bg-card"
                         }`}
                       >
-                        <h4 className={`font-serif font-semibold leading-tight ${isActive ? "text-accent" : "text-primary"}`}>
-                          {module.name}
-                        </h4>
-                        <p className="text-xs text-muted-foreground leading-relaxed mt-1 line-clamp-2">
-                          {module.description}
-                        </p>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => handleModuleSwitch(index)}
+                          className={`w-full text-left p-4 ${isAdminPortal ? "pr-16" : ""}`}
+                        >
+                          <h4 className={`font-serif font-semibold leading-tight ${isActive ? "text-accent" : "text-primary"}`}>
+                            {module.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground leading-relaxed mt-1 line-clamp-2">
+                            {module.description}
+                          </p>
+                        </button>
+                        {isAdminPortal && (
+                          <div className="absolute top-3 right-2 flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openEditModuleModal(index);
+                              }}
+                              className="p-1.5 rounded-md hover:bg-accent/15 text-muted-foreground hover:text-accent transition-colors"
+                              title="Edit Module & Syllabus"
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            {activeDomain && activeDomain.modules.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteModule(index);
+                                }}
+                                className="p-1.5 rounded-md hover:bg-red-500/15 text-muted-foreground hover:text-red-500 transition-colors"
+                                title="Delete Module"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -3277,7 +3523,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                         </div>
                       </div>
 
-                      <div className="flex items-center shrink-0 md:self-center">
+                      <div className="flex items-center gap-2 shrink-0 md:self-center flex-wrap">
+                        {isAdminPortal && (
+                          <button
+                            type="button"
+                            onClick={() => openEditModuleModal(activeModuleIndex)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs sm:text-sm font-bold transition-all duration-200 border border-white/30 shadow-md hover:scale-[1.02] active:scale-95"
+                            title="Edit Module Name &amp; Syllabus"
+                          >
+                            <Edit3 size={15} /> <span>Edit Syllabus</span>
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => {
@@ -3299,9 +3555,10 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   <>
                     {/* TABS CONTAINER */}
                     <div className="w-full space-y-3 border-b border-border/80 pb-4">
-                      {/* The 6 module tabs */}
+                      {/* The 7 module tabs */}
                       <div className="w-full flex items-center gap-1.5 sm:gap-2 p-1.5 bg-muted/60 backdrop-blur-md rounded-2xl border border-border/80 shadow-xs overflow-x-auto scrollbar-none">
                         {[
+                          { id: "syllabus", label: "Syllabus & Topics", icon: ListChecks },
                           { id: "videos", label: "Video Seminars", icon: Video },
                           { id: "notes", label: "Lecture Notes", icon: BookOpen },
                           { id: "ppts", label: "PPT & Slides", icon: Presentation },
@@ -3317,7 +3574,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                               onClick={() => handleTabSwitch(tab.id as any)}
                               className={`flex-1 min-w-fit h-11 sm:h-12 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 whitespace-nowrap shrink-0 border ${
                                 isActive
-                                  ? "bg-card text-accent border-accent/40 shadow-xs font-bold ring-1 ring-accent/25"
+                                   ? "bg-card text-accent border-accent/40 shadow-xs font-bold ring-1 ring-accent/25"
                                   : "text-muted-foreground border-transparent hover:text-foreground hover:bg-card/60"
                               }`}
                             >
@@ -3347,6 +3604,27 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                           </div>
 
                           <div className="flex flex-wrap items-center gap-2">
+                            {/* Direct Module & Syllabus edit options always accessible in Admin Portal */}
+                            <Button 
+                              variant="hero" 
+                              size="sm"
+                              onClick={() => openEditModuleModal(activeModuleIndex)}
+                              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:shadow-md transition-all"
+                              title="Edit current module title, topics, and syllabus outline"
+                            >
+                              <Edit3 size={14} /> Edit Module Syllabus
+                            </Button>
+
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={openAddModuleModal}
+                              className="flex items-center gap-1.5 text-xs font-semibold shadow-xs hover:shadow-md transition-all"
+                              title="Add a new module and syllabus unit to this course"
+                            >
+                              <Plus size={14} /> Add Syllabus Option
+                            </Button>
+
                             {activeTab === "videos" && (
                               <Button 
                                 variant="hero" 
@@ -3394,6 +3672,279 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                     {/* CONTENT PANEL */}
                     <div className="min-h-[400px]">
                       
+                      {/* SYLLABUS & TOPICS TAB */}
+                      {activeTab === "syllabus" && (
+                        <div className="space-y-8 animate-fade-in">
+                          {/* Module Header Card */}
+                          <div className="card-institutional p-6 sm:p-8 space-y-6">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border/80 pb-6">
+                              <div className="space-y-2">
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/25 text-accent text-xs font-bold">
+                                  <ListChecks size={14} /> Curriculum &amp; Syllabus Breakdown
+                                </div>
+                                <h3 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
+                                  {activeModule.name}
+                                </h3>
+                                <p className="text-muted-foreground text-sm max-w-2xl leading-relaxed">
+                                  {activeModule.description}
+                                </p>
+                              </div>
+
+                              {isAdminPortal && (
+                                <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                                  <Button
+                                    variant="hero"
+                                    size="sm"
+                                    onClick={() => openEditModuleModal(activeModuleIndex)}
+                                    className="flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+                                  >
+                                    <Edit3 size={14} /> Edit Syllabus
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={openAddModuleModal}
+                                    className="flex items-center gap-1.5 text-xs font-semibold"
+                                  >
+                                    <Plus size={14} /> Add Syllabus Option
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Grid: Topics / Key Terminology & Outcomes */}
+                            <div className="grid md:grid-cols-2 gap-6">
+                              {/* Core Topics Covered */}
+                              <div className="p-5 rounded-xl bg-muted/30 border border-border/70 space-y-3">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
+                                  <BookmarkCheck size={14} /> Core Topics &amp; Terminology
+                                </h4>
+                                <div className="flex flex-wrap gap-2 pt-1">
+                                  {getModuleTopics(activeModule).map((topic, tIdx) => (
+                                    <span
+                                      key={tIdx}
+                                      className="px-3 py-1.5 rounded-lg bg-card border border-border/80 text-foreground text-xs font-medium shadow-2xs flex items-center gap-1.5"
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
+                                      {topic}
+                                    </span>
+                                  ))}
+                                </div>
+                                {activeModule.duration && (
+                                  <div className="pt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                                    <Clock size={13} className="text-accent" />
+                                    <span>Recommended Study Pace: <strong className="text-foreground">{activeModule.duration}</strong></span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Expected Learning Outcomes */}
+                              <div className="p-5 rounded-xl bg-muted/30 border border-border/70 space-y-3">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                                  <Award size={14} /> Expected Learning Outcomes
+                                </h4>
+                                <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
+                                  {getModuleOutcomes(activeModule).map((outcome, oIdx) => (
+                                    <li key={oIdx} className="flex items-start gap-2">
+                                      <CheckCircle2 size={15} className="text-emerald-500 shrink-0 mt-0.5" />
+                                      <span>{outcome}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+
+                            {/* Detailed Syllabus / Unit Content */}
+                            <div className="p-6 rounded-xl bg-card border border-border/80 space-y-4">
+                              <h4 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                                <FileText size={18} className="text-accent" /> Detailed Unit Outline &amp; Curriculum
+                              </h4>
+                              <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line space-y-3">
+                                {activeModule.syllabus ? (
+                                  <div className="space-y-3">
+                                    {activeModule.syllabus.split("\n").filter(Boolean).map((line, lIdx) => (
+                                      <div key={lIdx} className="flex items-start gap-2.5 p-3 rounded-lg bg-muted/20 border border-border/50">
+                                        <span className="w-5 h-5 rounded-full bg-accent/15 text-accent text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                                          {lIdx + 1}
+                                        </span>
+                                        <span className="text-foreground/90 font-medium">{line}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="grid sm:grid-cols-2 gap-3">
+                                    {getModuleTopics(activeModule).map((topic, uIdx) => (
+                                      <div key={uIdx} className="p-3.5 rounded-lg bg-muted/20 border border-border/50 space-y-1">
+                                        <div className="text-[11px] font-bold text-accent uppercase tracking-wider">
+                                          Unit {uIdx + 1}
+                                        </div>
+                                        <div className="text-sm font-semibold text-foreground">
+                                          {topic}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                          Core theoretical principles, mathematical formulations, and engineering implementations.
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Recommended Textbooks & Reference Materials */}
+                            <div className="p-5 rounded-xl bg-muted/30 border border-border/70 space-y-2">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                                <BookOpen size={14} className="text-accent" /> Recommended Textbooks &amp; Reference Material
+                              </h4>
+                              <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
+                                {activeModule.referenceMaterials || `Authoritative university textbooks, research papers, and laboratory coursework supervised by Dr. G. Jaya Suma at JNTU-GV.`}
+                              </p>
+                            </div>
+
+                            {/* Quick Jump Buttons to Module Resources */}
+                            <div className="pt-2 border-t border-border/60">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                                Explore Learning Materials for this Module
+                              </h4>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabSwitch("videos")}
+                                  className="p-3 rounded-xl bg-card border border-border hover:border-accent/50 text-left transition-all hover:-translate-y-0.5 group shadow-2xs"
+                                >
+                                  <Video size={16} className="text-accent mb-2 group-hover:scale-110 transition-transform" />
+                                  <div className="text-xs font-bold text-foreground">Video Seminars</div>
+                                  <div className="text-[10px] text-muted-foreground">{activeModule.videos.length} Lectures</div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabSwitch("notes")}
+                                  className="p-3 rounded-xl bg-card border border-border hover:border-accent/50 text-left transition-all hover:-translate-y-0.5 group shadow-2xs"
+                                >
+                                  <BookOpen size={16} className="text-accent mb-2 group-hover:scale-110 transition-transform" />
+                                  <div className="text-xs font-bold text-foreground">Lecture Notes</div>
+                                  <div className="text-[10px] text-muted-foreground">{activeModule.notes.length} Slides</div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabSwitch("ppts")}
+                                  className="p-3 rounded-xl bg-card border border-border hover:border-accent/50 text-left transition-all hover:-translate-y-0.5 group shadow-2xs"
+                                >
+                                  <Presentation size={16} className="text-accent mb-2 group-hover:scale-110 transition-transform" />
+                                  <div className="text-xs font-bold text-foreground">Slide Decks</div>
+                                  <div className="text-[10px] text-muted-foreground">Drive &amp; Embeds</div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabSwitch("quiz")}
+                                  className="p-3 rounded-xl bg-card border border-border hover:border-accent/50 text-left transition-all hover:-translate-y-0.5 group shadow-2xs"
+                                >
+                                  <Award size={16} className="text-accent mb-2 group-hover:scale-110 transition-transform" />
+                                  <div className="text-xs font-bold text-foreground">Assessment Quiz</div>
+                                  <div className="text-[10px] text-muted-foreground">{activeModule.quiz.length} Questions</div>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleTabSwitch("puzzles")}
+                                  className="p-3 rounded-xl bg-card border border-border hover:border-amber-500/50 text-left transition-all hover:-translate-y-0.5 group shadow-2xs col-span-2 sm:col-span-1"
+                                >
+                                  <Gamepad2 size={16} className="text-amber-500 mb-2 group-hover:scale-110 transition-transform" />
+                                  <div className="text-xs font-bold text-foreground">Word Puzzle</div>
+                                  <div className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">Live Leaderboard</div>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Complete Course Roadmap / All Modules Syllabus */}
+                          <div className="card-institutional p-6 sm:p-8 space-y-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/80 pb-4">
+                              <div>
+                                <h4 className="font-serif text-xl font-bold text-primary">
+                                  {activeDomain?.name} &bull; Full Syllabus Roadmap
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  Complete curriculum structure across all {activeDomain?.modules.length} modules.
+                                </p>
+                              </div>
+                              {isAdminPortal && (
+                                <Button
+                                  variant="hero"
+                                  size="sm"
+                                  onClick={openAddModuleModal}
+                                  className="flex items-center gap-1.5 text-xs font-semibold shadow-xs"
+                                >
+                                  <Plus size={14} /> Add Module to Syllabus
+                                </Button>
+                              )}
+                            </div>
+
+                            <div className="space-y-3 pt-2">
+                              {activeDomain?.modules.map((mod, mIndex) => {
+                                const isCurrent = mIndex === activeModuleIndex;
+                                const topics = getModuleTopics(mod);
+                                return (
+                                  <div
+                                    key={mod.id}
+                                    className={`p-4 rounded-xl border transition-all ${
+                                      isCurrent
+                                        ? "bg-accent/5 border-accent shadow-xs ring-1 ring-accent/25"
+                                        : "bg-card border-border/70 hover:border-accent/40"
+                                    }`}
+                                  >
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                      <div className="space-y-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                          <span className="text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 px-2 py-0.5 rounded">
+                                            Module {mIndex + 1}
+                                          </span>
+                                          <h5 className="font-serif text-sm sm:text-base font-bold text-foreground">
+                                            {mod.name}
+                                          </h5>
+                                        </div>
+                                        <div className="flex flex-wrap gap-1.5 pt-1">
+                                          {topics.map((t, idx) => (
+                                            <span key={idx} className="text-[11px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono">
+                                              {t}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 shrink-0">
+                                        <Button
+                                          variant={isCurrent ? "hero" : "outline"}
+                                          size="sm"
+                                          onClick={() => handleModuleSwitch(mIndex)}
+                                          className="text-xs h-8"
+                                        >
+                                          {isCurrent ? "Active Module" : "View Module"}
+                                        </Button>
+                                        {isAdminPortal && (
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => openEditModuleModal(mIndex)}
+                                            className="h-8 px-2 text-muted-foreground hover:text-accent"
+                                            title="Edit this module and syllabus"
+                                          >
+                                            <Edit3 size={14} />
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* VIDEOS TAB */}
                       {activeTab === "videos" && (
                         <div className="space-y-6">
@@ -4464,6 +5015,274 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           </div>
         </div>
       )}
+      {/* MODAL DIALOG: EDIT MODULE & SYLLABUS */}
+      {editModuleModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative bg-card border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
+            
+            <div className="p-5 border-b border-border/80 flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-lg font-semibold text-primary flex items-center gap-2">
+                  <Edit3 size={18} className="text-accent" /> Edit Module &amp; Syllabus
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Update syllabus topics, curriculum outline, and learning objectives for {activeDomain?.name}.
+                </p>
+              </div>
+              <button 
+                onClick={() => setEditModuleModalOpen(false)}
+                className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditModuleSubmit} className="p-5 space-y-4 overflow-y-auto">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Module Name / Title *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Module 1: Classical Computing Basics"
+                  value={editModuleName}
+                  onChange={(e) => setEditModuleName(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Topics / Short Summary *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Topics: Bits vs Qubits, Logic Gates, Binary Systems, Computational Thinking"
+                  value={editModuleDesc}
+                  onChange={(e) => setEditModuleDesc(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Comma-separated key terminology or concise topic summary.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Detailed Syllabus Outline &amp; Units
+                </label>
+                <textarea 
+                  rows={4}
+                  placeholder={`Unit 1: Fundamental Principles and Mathematical Formulation\nUnit 2: Logic Gates and Circuit Transformations\nUnit 3: Algorithmic Paradigms and Case Studies\nUnit 4: Practical Laboratory Synthesis`}
+                  value={editModuleSyllabus}
+                  onChange={(e) => setEditModuleSyllabus(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none resize-none font-mono text-xs"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Enter each unit or curriculum topic on a new line.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Expected Learning Outcomes (Optional)
+                </label>
+                <textarea 
+                  rows={3}
+                  placeholder={`Understand foundational paradigms and theoretical formulations\nAnalyze and verify circuit and algorithm complexity\nImplement practical solutions using industry standard tools`}
+                  value={editModuleOutcomes}
+                  onChange={(e) => setEditModuleOutcomes(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none resize-none text-xs"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  One learning objective / competency per line.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">
+                    Recommended Study Duration
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 8 Hours / 2 Weeks"
+                    value={editModuleDuration}
+                    onChange={(e) => setEditModuleDuration(e.target.value)}
+                    className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">
+                    Textbooks / Reference Materials
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Author, Title, Publisher"
+                    value={editModuleReferences}
+                    onChange={(e) => setEditModuleReferences(e.target.value)}
+                    className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3 border-t border-border/80">
+                <Button 
+                  type="button" 
+                  variant="hero-outline" 
+                  size="sm" 
+                  onClick={() => setEditModuleModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="hero" 
+                  size="sm"
+                >
+                  Save Syllabus Changes
+                </Button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DIALOG: ADD MODULE / SYLLABUS OPTION */}
+      {addModuleModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="relative bg-card border border-border w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] flex flex-col">
+            
+            <div className="p-5 border-b border-border/80 flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-lg font-semibold text-primary flex items-center gap-2">
+                  <Plus size={18} className="text-accent" /> Add Module &amp; Syllabus Option
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Expand the curriculum of {activeDomain?.name} with a new syllabus unit.
+                </p>
+              </div>
+              <button 
+                onClick={() => setAddModuleModalOpen(false)}
+                className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddModuleSubmit} className="p-5 space-y-4 overflow-y-auto">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Module Name / Title *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder={`e.g. Module ${(activeDomain?.modules.length || 0) + 1}: Advanced Architectures`}
+                  value={newModuleName}
+                  onChange={(e) => setNewModuleName(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Topics / Short Summary *
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  placeholder="e.g. Topics: Hybrid Computing, Quantum Annealing, Fault Tolerance"
+                  value={newModuleDesc}
+                  onChange={(e) => setNewModuleDesc(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2.5 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Detailed Syllabus Outline &amp; Units
+                </label>
+                <textarea 
+                  rows={4}
+                  placeholder={`Unit 1: Overview and Core Concepts\nUnit 2: Architecture and Algorithmic Design\nUnit 3: Case Studies and Hands-on Applications`}
+                  value={newModuleSyllabus}
+                  onChange={(e) => setNewModuleSyllabus(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none resize-none font-mono text-xs"
+                />
+                <p className="text-[11px] text-muted-foreground">
+                  Enter each unit or curriculum topic on a new line.
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-foreground/80">
+                  Expected Learning Outcomes (Optional)
+                </label>
+                <textarea 
+                  rows={3}
+                  placeholder={`Master core techniques and architectures\nSolve practical computational engineering challenges`}
+                  value={newModuleOutcomes}
+                  onChange={(e) => setNewModuleOutcomes(e.target.value)}
+                  className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none resize-none text-xs"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">
+                    Recommended Study Duration
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 8 Hours"
+                    value={newModuleDuration}
+                    onChange={(e) => setNewModuleDuration(e.target.value)}
+                    className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground/80">
+                    Textbooks / Reference Materials
+                  </label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Recommended Textbooks"
+                    value={newModuleReferences}
+                    onChange={(e) => setNewModuleReferences(e.target.value)}
+                    className="w-full text-sm px-3.5 py-2 rounded bg-muted/50 border border-border focus:border-accent focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-3 border-t border-border/80">
+                <Button 
+                  type="button" 
+                  variant="hero-outline" 
+                  size="sm" 
+                  onClick={() => setAddModuleModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="hero" 
+                  size="sm"
+                >
+                  Add Module to Syllabus
+                </Button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
       {/* FLOATING QUICK ACCESS PUZZLES & GAMES BUTTON ON THE RIGHT */}
       <div className="fixed right-4 sm:right-6 bottom-6 sm:bottom-8 z-40 flex flex-col items-end gap-2">
         <button
