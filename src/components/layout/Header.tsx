@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight, ShieldCheck } from "lucide-react";
+import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight, ShieldCheck, Mic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
@@ -15,6 +15,7 @@ const mainNavItems = [
 const dropdownItems = [
   { label: "Projects & Innovations", href: "/projects", desc: "Student & research prototypes", icon: FolderGit2 },
   { label: "Publications", href: "/publications", desc: "Journals and papers", icon: BookOpen },
+  { label: "Invited Talks", href: "/publications?filter=talk", desc: "Keynote addresses & guest lectures", icon: Mic },
   { label: "Achievements", href: "/achievements", desc: "National awards & honors", icon: Award },
   { label: "Scholars", href: "/scholars", desc: "Ph.D. guidance and research", icon: Users },
   { label: "Learning Symposium", href: "/learning-symposium", desc: "FDPs & workshops", icon: Sparkles },
@@ -84,7 +85,7 @@ export function Header() {
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
 
-  const isDropdownActive = dropdownItems.some(item => location.pathname === item.href);
+  const isDropdownActive = dropdownItems.some((item) => location.pathname === item.href.split("?")[0]);
   const isPuzzlesActive = location.pathname === "/qlearn" && location.search.includes("tab=puzzles");
   const isQLearnActive = location.pathname === "/qlearn" && !location.search.includes("tab=puzzles");
   const isProjectsActive = location.pathname === "/projects";
@@ -170,7 +171,9 @@ export function Header() {
                 <div className="grid grid-cols-1 gap-1.5">
                   {dropdownItems.map((item) => {
                     const ItemIcon = item.icon;
-                    const isItemActive = location.pathname === item.href;
+                    const isItemActive = item.href.includes("?")
+                      ? `${location.pathname}${location.search}` === item.href
+                      : location.pathname === item.href && !location.search.includes("filter=");
                     return (
                       <Link
                         key={item.href}
@@ -447,7 +450,9 @@ export function Header() {
                 {isMobileDropdownOpen && (
                   <div className="flex flex-col pl-6 mt-1 border-l-2 border-accent/20 space-y-0.5 animate-slide-up">
                     {dropdownItems.map((item) => {
-                      const isItemActive = location.pathname === item.href;
+                      const isItemActive = item.href.includes("?")
+                      ? `${location.pathname}${location.search}` === item.href
+                      : location.pathname === item.href && !location.search.includes("filter=");
                       return (
                         <Link
                           key={item.href}

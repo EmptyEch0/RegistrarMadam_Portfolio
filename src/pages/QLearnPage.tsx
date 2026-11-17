@@ -40,6 +40,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { WordPuzzle, WordPuzzleData } from "@/components/ui/word-puzzle";
 import { VisitorAccessModal } from "@/components/ui/VisitorAccessModal";
+import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { VisitorProfileBadge } from "@/components/ui/VisitorProfileBadge";
 import { getSavedVisitor, logVisitorAccess, VisitorProfile } from "@/lib/visitorTracking";
 const WorksheetViewer = lazy(() =>
@@ -62,6 +63,8 @@ interface NoteSnippet {
   description: string;
   docUrl?: string;
   embedUrl?: string;
+  pdfUrl?: string;
+  pdfFileName?: string;
 }
 
 interface PptItem {
@@ -1227,358 +1230,258 @@ const DEFAULT_DOMAINS: DomainData[] = [
   {
     "id": "deep-learning",
     "name": "Deep Learning",
-    "icon": "\ud83e\udde0",
-    "description": "Complete 10-module roadmap for Deep Learning.",
+    "icon": "🧠",
+    "description": "Comprehensive 5-Unit University Curriculum & Advanced Architecture Roadmap for Deep Learning.",
     "color": "from-rose-600 to-red-700",
     "glowColor": "rgba(225, 29, 72, 0.4)",
     "modules": [
       {
         "id": "mod-1",
-        "name": "Module 1: Neural Network Basics",
-        "description": "Topics: Perceptrons, Activation Functions, Forward Propagation",
+        "name": "Unit 1: Basics",
+        "description": "Topics: Introduction to Deep Learning, Biological Neurons, Perceptron, Sigmoid Neurons, Activation Functions, Loss Functions, Gradient Descent",
+        "syllabus": "1. Biological Neurons vs Artificial Neurons & The McCulloch-Pitts Model\n2. The Perceptron Learning Algorithm & Linear Separability Limits\n3. Sigmoid Neurons & Nonlinear Activation Functions (ReLU, Leaky ReLU, Tanh, ELU)\n4. Loss Functions: Mean Squared Error, Binary & Categorical Cross-Entropy\n5. Gradient Descent, Learning Rates, and Batch vs Stochastic Optimization",
+        "learningOutcomes": "Master foundational mathematical models of biological and artificial neurons\nUnderstand the limitations of single-layer perceptrons and the necessity of multilayer architectures\nFormulate and optimize loss surfaces using gradient descent algorithms",
+        "duration": "8 Hours",
+        "referenceMaterials": "Deep Learning by Ian Goodfellow, Yoshua Bengio, and Aaron Courville (MIT Press) - Chapters 1 to 5",
         "videos": [
           {
-            "id": "vid-1",
-            "title": "Neural Network Basics Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Neural Network Basics."
+            "id": "vid-dl-1",
+            "title": "Unit 1: Deep Learning Basics & Neural Foundations",
+            "url": "https://www.youtube.com/embed/aircAruvnKk",
+            "duration": "19m",
+            "description": "Comprehensive introduction to artificial neurons, perceptrons, activation functions, and gradient descent."
           }
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "Neural Network Basics Notes",
+            "id": "note-dl-1",
+            "title": "Unit 1: Neural Basics & Gradient Descent Notes",
             "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Neural Network Basics."
+            "description": "Detailed notes on biological inspiration, perceptron equations, activation functions, and cross-entropy loss."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-dl-1",
+            "title": "Unit 1: Deep Learning Basics Slide Deck",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Lecture slides covering biological neurons, perceptron models, activation curves, and loss landscapes.",
+            "slideCount": "32 Slides"
           }
         ],
         "quiz": [
           {
-            "question": "What is the core concept of Neural Network Basics?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Neural Network Basics."
+            "question": "Which of the following functions solved the vanishing gradient issue of Sigmoid in deep hidden layers?",
+            "options": ["Step Function", "Rectified Linear Unit (ReLU)", "Linear Identity", "Binary Threshold"],
+            "correctAnswer": 1,
+            "explanation": "ReLU (f(x) = max(0, x)) maintains a constant gradient of 1 for positive inputs, mitigating vanishing gradients."
+          },
+          {
+            "question": "What is the primary limitation of a single-layer perceptron?",
+            "options": ["Cannot compute linear functions", "Cannot solve non-linearly separable problems like XOR", "Requires GPU hardware", "Cannot use gradient descent"],
+            "correctAnswer": 1,
+            "explanation": "As proven by Minsky and Papert, a single perceptron can only separate linearly separable decision boundaries."
           }
         ]
       },
       {
         "id": "mod-2",
-        "name": "Module 2: TensorFlow & PyTorch",
-        "description": "Topics: Tensors, GPU Training, Model Building",
+        "name": "Unit 2: Feed Forward Networks",
+        "description": "Topics: Multilayer Perceptrons, Feed Forward Neural Networks (FFNN), Backpropagation Algorithm, Chain Rule, Weight Initialization, Representation Power",
+        "syllabus": "1. Multilayer Perceptrons & Feed Forward Network Topologies\n2. Forward Propagation Mathematics and Tensor Computation\n3. The Backpropagation Algorithm: Comprehensive Derivation via Multivariate Chain Rule\n4. Weight Initialization Paradigms: Zero, Random, Xavier/Glorot, and He Initialization\n5. Universal Approximation Theorem & Expressive Representation Power of Deep Networks\n6. Output Layers & Softmax Distribution for Multiclass Classification",
+        "learningOutcomes": "Derive and implement the backpropagation gradient computation algorithm from first principles\nSelect and implement effective weight initialization to stabilize training\nDesign and configure multilayer feed forward networks for classification and regression",
+        "duration": "8 Hours",
+        "referenceMaterials": "Neural Networks and Deep Learning by Michael Nielsen - Chapters 1 & 2",
         "videos": [
           {
-            "id": "vid-1",
-            "title": "TensorFlow & PyTorch Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on TensorFlow & PyTorch."
+            "id": "vid-dl-2",
+            "title": "Unit 2: Feed Forward Networks & Backpropagation",
+            "url": "https://www.youtube.com/embed/Ilg3gGewQ5U",
+            "duration": "18m",
+            "description": "In-depth derivation of backpropagation using the chain rule and forward tensor flow."
           }
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "TensorFlow & PyTorch Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for TensorFlow & PyTorch."
+            "id": "note-dl-2",
+            "title": "Unit 2: FFNN & Backpropagation Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
+            "description": "Mathematical derivations of error backpropagation, Jacobian matrices, and weight initialization strategies."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-dl-2",
+            "title": "Unit 2: Feed Forward Networks Slide Deck",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Detailed slides on feed forward topologies, chain rule backpropagation, and Xavier/He initialization.",
+            "slideCount": "36 Slides"
           }
         ],
         "quiz": [
           {
-            "question": "What is the core concept of TensorFlow & PyTorch?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for TensorFlow & PyTorch."
+            "question": "Why is initializing all weights to zero problematic in a feed forward neural network?",
+            "options": ["It causes immediate overflow", "All hidden neurons compute identical outputs and gradients (symmetry problem)", "It reduces learning rate to zero", "It makes activation negative"],
+            "correctAnswer": 1,
+            "explanation": "Zero initialization creates total symmetry: every hidden neuron updates identically, preventing feature specialization."
+          },
+          {
+            "question": "What mathematical principle powers the calculation of gradients in the backpropagation algorithm?",
+            "options": ["Bayes' Theorem", "Multivariate Chain Rule of Calculus", "Taylor Series Expansion", "Fourier Transform"],
+            "correctAnswer": 1,
+            "explanation": "Backpropagation recursively applies the multivariate calculus chain rule from output back to input."
           }
         ]
       },
       {
         "id": "mod-3",
-        "name": "Module 3: ANN Models",
-        "description": "Topics: Dense Networks, Loss Functions, Optimizers",
+        "name": "Unit 3: Better Training for Neural Networks",
+        "description": "Topics: Vanishing & Exploding Gradients, Regularization (L1, L2, Dropout), Batch Normalization, Advanced Optimizers (Momentum, RMSProp, Adam), Hyperparameter Tuning, Early Stopping",
+        "syllabus": "1. Challenges in Deep Neural Network Training: Vanishing and Exploding Gradients\n2. Regularization Strategies: L1/L2 Weight Decay, Dropout, and Data Augmentation\n3. Internal Covariate Shift & Batch Normalization across Mini-batches\n4. Adaptive Optimization Algorithms: Momentum, Nesterov, AdaGrad, RMSProp, and Adam\n5. Learning Rate Scheduling, Early Stopping, and Model Checkpointing\n6. Practical Hyperparameter Optimization (Grid Search, Random Search, Bayesian Optimization)",
+        "learningOutcomes": "Diagnose and remediate vanishing and exploding gradients in deep architectures\nApply regularization and batch normalization to prevent overfitting and accelerate convergence\nSelect and fine-tune modern adaptive optimizers for state-of-the-art training performance",
+        "duration": "8 Hours",
+        "referenceMaterials": "Deep Learning by Goodfellow et al. - Chapters 7 & 8 (Optimization for Training Deep Models)",
         "videos": [
           {
-            "id": "vid-1",
-            "title": "ANN Models Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on ANN Models."
+            "id": "vid-dl-3",
+            "title": "Unit 3: Better Training, Regularization & Optimizers",
+            "url": "https://www.youtube.com/embed/IHq1t7NxS8k",
+            "duration": "22m",
+            "description": "Mastering vanishing gradients, Dropout, Batch Normalization, and the Adam optimizer."
           }
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "ANN Models Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for ANN Models."
+            "id": "note-dl-3",
+            "title": "Unit 3: Optimization & Regularization Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
+            "description": "Formulas for L1/L2 regularization, dropout masks, batch norm mean/variance scaling, and Adam moment vectors."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-dl-3",
+            "title": "Unit 3: Better Training for Neural Networks Slide Deck",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Techniques for robust deep network training: vanishing gradients, batch norm, dropout, and Adam.",
+            "slideCount": "38 Slides"
           }
         ],
         "quiz": [
           {
-            "question": "What is the core concept of ANN Models?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for ANN Models."
+            "question": "What is the primary role of Batch Normalization in deep neural networks?",
+            "options": ["To increase training parameters", "To normalize layer inputs per mini-batch, stabilizing internal covariate shift", "To encrypt gradients", "To double the dataset size"],
+            "correctAnswer": 1,
+            "explanation": "Batch Normalization normalizes the activations of each layer across mini-batches, allowing higher learning rates and stabilizing training."
+          },
+          {
+            "question": "Which optimizer combines the benefits of both Momentum and RMSProp?",
+            "options": ["SGD", "AdaGrad", "Adam (Adaptive Moment Estimation)", "Hessian Free"],
+            "correctAnswer": 2,
+            "explanation": "Adam maintains both an exponentially decaying average of past gradients (Momentum) and past squared gradients (RMSProp)."
           }
         ]
       },
       {
         "id": "mod-4",
-        "name": "Module 4: CNN",
-        "description": "Topics: Image Processing, Feature Extraction, Convolution Layers",
+        "name": "Unit 4: RNN, CNN, Boltzmann Machines",
+        "description": "Topics: Convolutional Neural Networks (CNN), Convolution Layers, Pooling, Recurrent Neural Networks (RNN), Backpropagation Through Time, LSTM, GRU, Boltzmann Machines, RBM",
+        "syllabus": "1. Convolutional Neural Networks: Convolutions, Strides, Padding, and Receptive Fields\n2. Feature Maps, Pooling Layers, and Classic Architectures (LeNet, AlexNet, ResNet)\n3. Sequence Modeling & Recurrent Neural Networks (RNN) with Backpropagation Through Time\n4. Vanishing Gradients in RNNs & Long Short-Term Memory (LSTM) / Gated Recurrent Units (GRU)\n5. Energy-Based Models and Unsupervised Feature Learning\n6. Boltzmann Machines, Restricted Boltzmann Machines (RBM), and Deep Belief Networks",
+        "learningOutcomes": "Build, train, and evaluate spatial feature extraction models using Convolutional Neural Networks\nImplement sequence-to-sequence models with LSTMs and GRUs for time-series and natural language\nUnderstand energy-based probabilistic graphical representations including Boltzmann Machines and RBMs",
+        "duration": "10 Hours",
+        "referenceMaterials": "Deep Learning by Goodfellow et al. - Chapters 9, 10, and 20",
         "videos": [
           {
-            "id": "vid-1",
-            "title": "CNN Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on CNN."
+            "id": "vid-dl-4",
+            "title": "Unit 4: CNNs, RNNs, LSTMs & Boltzmann Machines",
+            "url": "https://www.youtube.com/embed/KuXjwB4LzSA",
+            "duration": "24m",
+            "description": "Comprehensive review of spatial convolutions, sequence recurrence, gating mechanisms in LSTM, and Boltzmann energy models."
           }
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "CNN Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for CNN."
+            "id": "note-dl-4",
+            "title": "Unit 4: CNN, RNN & Boltzmann Architecture Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=800",
+            "description": "Diagrams and formulas for convolution filters, pooling, LSTM forget/input/output gates, and RBM energy functions."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-dl-4",
+            "title": "Unit 4: CNN, RNN & Boltzmann Machines Slide Deck",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Visual slide deck for 2D convolutions, temporal recurrent unfoldings, LSTM memory cells, and Boltzmann thermal distributions.",
+            "slideCount": "42 Slides"
           }
         ],
         "quiz": [
           {
-            "question": "What is the core concept of CNN?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for CNN."
+            "question": "In an LSTM cell, which gate decides how much of the previous cell state should be discarded?",
+            "options": ["Input Gate", "Forget Gate", "Output Gate", "Update Gate"],
+            "correctAnswer": 1,
+            "explanation": "The Forget Gate outputs values between 0 and 1 via a sigmoid activation, regulating which past memory state is retained or erased."
+          },
+          {
+            "question": "What restriction defines a Restricted Boltzmann Machine (RBM)?",
+            "options": ["No connections between visible and hidden units", "No intra-layer connections among visible or among hidden units (bipartite graph)", "Only forward connections", "Weights must be strictly positive"],
+            "correctAnswer": 1,
+            "explanation": "In an RBM, connections exist strictly between visible and hidden layers, forming a bipartite graph with no connections within the same layer."
           }
         ]
       },
       {
         "id": "mod-5",
-        "name": "Module 5: Transfer Learning",
-        "description": "Topics: EfficientNet, ResNet, MobileNet",
+        "name": "Unit 5: VAE, Transformers",
+        "description": "Topics: Autoencoders, Variational Autoencoders (VAE), Latent Variable Models, Reparameterization Trick, Attention Mechanisms, Scaled Dot-Product Attention, Multi-Head Attention, Transformer Architecture",
+        "syllabus": "1. Deterministic Autoencoders, Undercomplete Representations, and Latent Spaces\n2. Variational Autoencoders (VAE): Probabilistic Generative Models & Evidence Lower Bound (ELBO)\n3. The Reparameterization Trick, Latent Manifold Sampling, and KL-Divergence\n4. Attention Mechanisms: Sequence-to-Sequence Modeling with Global and Local Attention\n5. The Transformer Architecture: Scaled Dot-Product Attention, Multi-Head Attention, Positional Encoding\n6. Modern Pretrained Foundation Models: Encoder-Only (BERT), Decoder-Only (GPT), and Vision Transformers (ViT)",
+        "learningOutcomes": "Formulate and implement Variational Autoencoders for generative modeling and latent representation\nUnderstand the mathematical foundations of scaled dot-product attention and multi-head attention\nImplement transformer architectures and evaluate their application across language, vision, and multimodal AI",
+        "duration": "10 Hours",
+        "referenceMaterials": "Attention Is All You Need (Vaswani et al.), Auto-Encoding Variational Bayes (Kingma & Welling)",
         "videos": [
           {
-            "id": "vid-1",
-            "title": "Transfer Learning Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Transfer Learning."
+            "id": "vid-dl-5",
+            "title": "Unit 5: Variational Autoencoders & Transformers Masterclass",
+            "url": "https://www.youtube.com/embed/wjZofJX0v4U",
+            "duration": "26m",
+            "description": "Deep dive into VAE generative latent spaces, the reparameterization trick, self-attention mechanisms, and Transformer architectures."
           }
         ],
         "notes": [
           {
-            "id": "note-1",
-            "title": "Transfer Learning Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Transfer Learning."
+            "id": "note-dl-5",
+            "title": "Unit 5: VAE & Transformer Architecture Notes",
+            "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800",
+            "description": "Formulas for VAE loss (Reconstruction + KL divergence), Scaled Dot-Product Attention, and Transformer Encoder/Decoder stacks."
+          }
+        ],
+        "ppts": [
+          {
+            "id": "ppt-dl-5",
+            "title": "Unit 5: VAE & Transformers Slide Deck",
+            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
+            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
+            "description": "Slides on probabilistic autoencoders, latent sampling, self-attention, multi-head attention, and transformer scaling.",
+            "slideCount": "44 Slides"
           }
         ],
         "quiz": [
           {
-            "question": "What is the core concept of Transfer Learning?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
+            "question": "Why is the Reparameterization Trick required during VAE training?",
+            "options": ["To speed up matrix multiplication", "To allow backpropagation gradients to flow through stochastic latent sampling", "To compress the model weights", "To calculate softmax"],
+            "correctAnswer": 1,
+            "explanation": "Direct sampling z ~ N(mu, sigma^2) is non-differentiable. The reparameterization trick expresses z = mu + sigma * epsilon, allowing gradients to backpropagate through mu and sigma."
+          },
+          {
+            "question": "What is the formula for Scaled Dot-Product Attention in Transformers?",
+            "options": ["softmax(Q * K / sqrt(d_k)) * V", "sigmoid(Q * K) + V", "tanh(Q * V) * K", "relu(Q * K * V)"],
             "correctAnswer": 0,
-            "explanation": "Option A is correct for Transfer Learning."
-          }
-        ]
-      },
-      {
-        "id": "mod-6",
-        "name": "Module 6: RNN & LSTM",
-        "description": "Topics: Sequential Data, Time Series, NLP Basics",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "RNN & LSTM Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on RNN & LSTM."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "RNN & LSTM Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for RNN & LSTM."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of RNN & LSTM?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for RNN & LSTM."
-          }
-        ]
-      },
-      {
-        "id": "mod-7",
-        "name": "Module 7: NLP with Transformers",
-        "description": "Topics: BERT, GPT, Hugging Face",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "NLP with Transformers Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on NLP with Transformers."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "NLP with Transformers Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for NLP with Transformers."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of NLP with Transformers?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for NLP with Transformers."
-          }
-        ]
-      },
-      {
-        "id": "mod-8",
-        "name": "Module 8: GANs & Diffusion",
-        "description": "Topics: Image Generation, Stable Diffusion, Generative AI",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "GANs & Diffusion Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on GANs & Diffusion."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "GANs & Diffusion Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for GANs & Diffusion."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of GANs & Diffusion?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for GANs & Diffusion."
-          }
-        ]
-      },
-      {
-        "id": "mod-9",
-        "name": "Module 9: Deployment",
-        "description": "Topics: ONNX, TensorRT, Edge AI",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Deployment Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Deployment."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Deployment Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Deployment."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Deployment?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Deployment."
-          }
-        ]
-      },
-      {
-        "id": "mod-10",
-        "name": "Module 10: Projects",
-        "description": "Topics: Face Recognition, Chatbot, AI Image Generator",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Projects Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Projects."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Projects Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Projects."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Projects?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Projects."
+            "explanation": "Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V, where sqrt(d_k) scales values to prevent extreme softmax gradient saturation."
           }
         ]
       }
@@ -2542,6 +2445,15 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const [videoDuration, setVideoDuration] = useState("");
   const [videoDesc, setVideoDesc] = useState("");
 
+  // PDF support for Lecture Notes
+  const [notePdfUrl, setNotePdfUrl] = useState("");
+  const [notePdfFileName, setNotePdfFileName] = useState("");
+  const [notePdfSize, setNotePdfSize] = useState<number | null>(null);
+  const [notePdfUploading, setNotePdfUploading] = useState(false);
+  const [previewPdfModalOpen, setPreviewPdfModalOpen] = useState(false);
+  const [previewPdfUrl, setPreviewPdfUrl] = useState<string | null>(null);
+  const [previewPdfTitle, setPreviewPdfTitle] = useState("");
+
   const [noteTitle, setNoteTitle] = useState("");
   const [noteImage, setNoteImage] = useState("");
   const [noteDesc, setNoteDesc] = useState("");
@@ -2574,6 +2486,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
         const updated = parsed.map((domain) => {
           const defaultDomain = DEFAULT_DOMAINS.find((d) => d.id === domain.id);
           if (!defaultDomain) return domain;
+          if (domain.id === "deep-learning" && domain.modules.length !== 5) {
+            return defaultDomain;
+          }
           return {
             ...defaultDomain,
             ...domain,
@@ -2973,6 +2888,33 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setVideoModalOpen(false);
   };
 
+  // PDF file picker handler
+  const handlePdfFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      alert("Please select a valid PDF document (.pdf).");
+      return;
+    }
+    setNotePdfFileName(file.name);
+    setNotePdfSize(file.size);
+    if (!noteTitle) {
+      setNoteTitle(file.name.replace(/\.[^/.]+$/, ""));
+    }
+    setNotePdfUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setNotePdfUrl(result);
+      setNotePdfUploading(false);
+    };
+    reader.onerror = () => {
+      alert("Failed to read PDF file.");
+      setNotePdfUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Note Snippet Upload submit handler
   const handleNoteUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -2987,7 +2929,10 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
       id: `note-${Date.now()}`,
       title: noteTitle,
       imageUrl: fallbackImage,
-      description: noteDesc
+      description: noteDesc,
+      pdfUrl: notePdfUrl || undefined,
+      pdfFileName: notePdfFileName || undefined,
+      docUrl: notePdfUrl || undefined
     };
 
     const updatedDomains = domains.map((d, dIdx) => {
@@ -3012,6 +2957,9 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     setNoteTitle("");
     setNoteImage("");
     setNoteDesc("");
+    setNotePdfUrl("");
+    setNotePdfFileName("");
+    setNotePdfSize(null);
     setNoteModalOpen(false);
     setActiveNoteIndex(activeModule.notes.length); 
   };
@@ -4830,6 +4778,74 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 </span>
               </div>
 
+              {/* PDF Document Upload Option */}
+              <div className="space-y-2 p-3.5 rounded-xl bg-muted/40 border border-border">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                    <FileText size={14} className="text-red-500" />
+                    <span>Attach PDF Lecture Document (Optional)</span>
+                  </label>
+                  <span className="text-[10px] bg-red-500/15 text-red-600 dark:text-red-400 font-bold px-2 py-0.5 rounded-full">
+                    PDF Document
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-card border border-border hover:border-accent text-xs font-semibold text-foreground transition-all shadow-2xs hover:scale-[1.02] active:scale-95">
+                    <Upload size={14} className="text-accent" />
+                    <span>{notePdfFileName ? "Change PDF File" : "Choose PDF File"}</span>
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      onChange={handlePdfFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  {notePdfFileName && (
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs text-foreground font-medium truncate max-w-[200px]" title={notePdfFileName}>
+                        {notePdfFileName}
+                      </span>
+                      {notePdfSize && (
+                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
+                          {(notePdfSize / 1024).toFixed(1)} KB
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNotePdfUrl("");
+                          setNotePdfFileName("");
+                          setNotePdfSize(null);
+                        }}
+                        className="text-xs text-muted-foreground hover:text-red-500 p-0.5"
+                        title="Remove PDF"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-1">
+                  <input
+                    type="url"
+                    placeholder="Or paste external PDF URL (Google Drive, Dropbox, etc.)"
+                    value={notePdfUrl.startsWith("data:") ? "" : notePdfUrl}
+                    onChange={(e) => {
+                      setNotePdfUrl(e.target.value);
+                      if (e.target.value) {
+                        setNotePdfFileName("Online_Document.pdf");
+                      }
+                    }}
+                    className="w-full text-xs px-3 py-2 rounded bg-background border border-border focus:border-accent focus:outline-none"
+                  />
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  Upload textbook chapters, reference PDFs, formula sheets, or lab handouts.
+                </p>
+              </div>
+
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground/80">
                   Concept Detail / Explanation text *
@@ -5389,6 +5405,15 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           </div>
         </div>
       )}
+
+      {/* Dedicated PDF Notes Document Viewer Modal */}
+      <PdfPreviewModal
+        isOpen={previewPdfModalOpen}
+        onClose={() => setPreviewPdfModalOpen(false)}
+        pdfUrl={previewPdfUrl || undefined}
+        fileName={previewPdfTitle ? `${previewPdfTitle.replace(/[^a-zA-Z0-9_-]/g, "_")}.pdf` : "Lecture_Notes.pdf"}
+        studentName="QLearn Student"
+      />
 
       {/* Visitor Access Identification Modal ("Login not like a login") */}
       {!isAdminPortal && (

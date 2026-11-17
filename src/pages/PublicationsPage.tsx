@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -24,10 +25,22 @@ import internationalConferencesJSON from "@/data/international_conferences.json"
 import invitedTalksJSON from "@/data/invited_talks.json";
 
 const PublicationsPage = () => {
-  const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [searchParams] = useSearchParams();
+  const initialFilter = searchParams.get("filter") || "all";
+  const [activeFilter, setActiveFilter] = useState<string>(initialFilter);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("latest");
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const f = searchParams.get("filter");
+    if (f) {
+      setActiveFilter(f);
+      setTimeout(() => {
+        window.scrollTo({ top: 380, behavior: "smooth" });
+      }, 150);
+    }
+  }, [searchParams]);
   
   // State for Supabase data
   const [journals, setJournals] = useState<any[]>([]);
