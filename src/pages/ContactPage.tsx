@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/lib/supabase";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -9,23 +11,51 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, MapPin, Phone, Clock, Send } from "lucide-react";
 
+const REQUEST_TYPES = [
+  { id: "paper", label: "Request a research paper / full text" },
+  { id: "thesis", label: "Thesis or Ph.D. guidance" },
+  { id: "collaboration", label: "Research collaboration" },
+  { id: "talk", label: "Invite for a talk or event" },
+  { id: "general", label: "General enquiry" },
+];
+
+const emptyForm = {
+  name: "",
+  email: "",
+  affiliation: "",
+  request_type: "general",
+  reference_title: "",
+  subject: "",
+  message: "",
+  website: "", // honeypot: hidden from people, bots fill it
+};
+
 const ContactPage = () => {
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState(emptyForm);
+
+  // Prefill from links like /contact?type=paper&title=Paper%20Title
+  useEffect(() => {
+    const type = searchParams.get("type");
+    const title = searchParams.get("title") || "";
+    if (!type && !title) return;
+    setFormData((prev) => ({
+      ...prev,
+      request_type: REQUEST_TYPES.some((t) => t.id === type) ? (type as string) : prev.request_type,
+      reference_title: title || prev.reference_title,
+      subject: title ? `Request for full text: ${title}`.slice(0, 200) : prev.subject,
+    }));
+  }, [searchParams]);
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -35,16 +65,32 @@ const ContactPage = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const { website, ...fields } = formData;
+    // Bots that fill the hidden field get a fake success and nothing is stored
+    const { error } = website
+      ? { error: null }
+      : await supabase.from("inquiries").insert({
+          ...fields,
+          name: fields.name.trim(),
+          email: fields.email.trim(),
+          affiliation: fields.affiliation.trim() || null,
+          reference_title: fields.reference_title.trim() || null,
+        });
 
-    toast({
-      title: "Message Sent",
-      description:
-        "Thank you for your message. We will respond within 2-3 business days.",
-    });
-
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    if (error) {
+      console.error("Inquiry submit failed", error);
+      toast({
+        variant: "destructive",
+        title: "Could not send your request",
+        description: "Please try again, or email gjsuma.it@jntugvcev.edu.in directly.",
+      });
+    } else {
+      toast({
+        title: "Request Sent",
+        description: "Thank you. We will respond to your email within 2-3 business days.",
+      });
+      setFormData(emptyForm);
+    }
     setIsSubmitting(false);
   };
 
@@ -94,7 +140,7 @@ const ContactPage = () => {
               Collaborate
             </h1>
             <p className="text-xl text-muted-foreground">
-              Connect for collaborations, consultations, or academic engagements
+              Request research papers, ask about thesis guidance, or propose a collaboration
             </p>
           </div>
         </div>
@@ -107,8 +153,8 @@ const ContactPage = () => {
             {/* Contact Form */}
             <div className="animate-fade-in-left">
               <SectionHeading
-                title="Send a Message"
-                subtitle="Fill out the form below and we will respond promptly"
+                title="Send a Request"
+                subtitle="Choose what you need and we will respond by email"
                 alignment="left"
               />
 
@@ -120,6 +166,7 @@ const ContactPage = () => {
                       id="name"
                       name="name"
                       placeholder="Your name"
+                      maxLength={120}
                       value={formData.name}
                       onChange={handleChange}
                       required
@@ -133,6 +180,7 @@ const ContactPage = () => {
                       name="email"
                       type="email"
                       placeholder="your.email@example.com"
+                      maxLength={200}
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -141,12 +189,66 @@ const ContactPage = () => {
                   </div>
                 </div>
 
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="request_type">I'd like to *</Label>
+                    <select
+                      id="request_type"
+                      name="request_type"
+                      value={formData.request_type}
+                      onChange={handleChange}
+                      required
+                      className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      {REQUEST_TYPES.map((t) => (
+                        <option key={t.id} value={t.id}>{t.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="affiliation">Institution / Affiliation</Label>
+                    <Input
+                      id="affiliation"
+                      name="affiliation"
+                      placeholder="University, college, or company"
+                      maxLength={200}
+                      value={formData.affiliation}
+                      onChange={handleChange}
+                      className="bg-card"
+                    />
+                  </div>
+                </div>
+
+                {(formData.request_type === "paper" || formData.request_type === "thesis") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reference_title">
+                      {formData.request_type === "paper" ? "Paper title" : "Thesis topic / research area"}
+                    </Label>
+                    <Input
+                      id="reference_title"
+                      name="reference_title"
+                      placeholder={formData.request_type === "paper" ? "Title of the paper you need" : "Proposed topic or area"}
+                      maxLength={300}
+                      value={formData.reference_title}
+                      onChange={handleChange}
+                      className="bg-card"
+                    />
+                  </div>
+                )}
+
+                {/* Honeypot: off-screen, skipped by keyboard and screen readers */}
+                <div aria-hidden="true" className="absolute -left-[9999px] w-px h-px overflow-hidden">
+                  <label htmlFor="website">Website</label>
+                  <input id="website" name="website" tabIndex={-1} autoComplete="off" value={formData.website} onChange={handleChange} />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject *</Label>
                   <Input
                     id="subject"
                     name="subject"
                     placeholder="Subject of your message"
+                    maxLength={200}
                     value={formData.subject}
                     onChange={handleChange}
                     required
@@ -160,6 +262,7 @@ const ContactPage = () => {
                     id="message"
                     name="message"
                     placeholder="Your message..."
+                    maxLength={5000}
                     rows={6}
                     value={formData.message}
                     onChange={handleChange}
@@ -181,7 +284,7 @@ const ContactPage = () => {
                     </>
                   ) : (
                     <>
-                      Send Message
+                      Send Request
                       <Send size={18} />
                     </>
                   )}

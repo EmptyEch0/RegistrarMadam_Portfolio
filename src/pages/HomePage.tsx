@@ -12,9 +12,12 @@ import {
   Github,
   Globe,
   ExternalLink,
-  Linkedin
+  Linkedin,
+  UserRound,
+  MessagesSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import RegistrarImage from "../assets/Registrar.jpeg";
@@ -26,9 +29,44 @@ import { useState } from "react";
 import { PortalCarousel } from "@/components/ui/PortalCarousel";
 import { GalleryCarousel } from "@/components/ui/GalleryCarousel";
 import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
+import { LAST_SECTION_KEY, type SectionId } from "@/lib/sections";
+
+const audienceCards: { id: SectionId; title: string; description: string; cta: string; link: string; icon: typeof GraduationCap }[] = [
+  {
+    id: "profile",
+    title: "Explore Full Profile",
+    description: "Experience, publications, textbooks, contributions, invited talks, scholars, awards, and media.",
+    cta: "View profile",
+    link: "/profile",
+    icon: UserRound,
+  },
+  {
+    id: "students",
+    title: "Student Learning (QLearn)",
+    description: "Course roadmaps, lecture modules, worksheets, subject puzzles, and live leaderboards.",
+    cta: "Start learning",
+    link: "/qlearn",
+    icon: GraduationCap,
+  },
+  {
+    id: "connect",
+    title: "Connect & Request",
+    description: "Request a research paper, ask about thesis or Ph.D. guidance, or propose a collaboration.",
+    cta: "Get in touch",
+    link: "/contact",
+    icon: MessagesSquare,
+  },
+];
 
 const HomePage = () => {
   const [studentModalOpen, setStudentModalOpen] = useState(false);
+  const [lastSection] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem(LAST_SECTION_KEY);
+    } catch {
+      return null;
+    }
+  });
   const highlights = [
     {
       icon: GraduationCap,
@@ -104,7 +142,7 @@ const HomePage = () => {
               {/* CTA Buttons */}
               <div className="flex flex-wrap items-center gap-3.5">
                 <Button variant="hero" size="lg" asChild>
-                  <Link to="/about">
+                  <Link to="/profile">
                     View Profile
                     <ArrowRight size={18} />
                   </Link>
@@ -163,6 +201,50 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Audience Gateway: pick a path */}
+      <section className="py-16 bg-background border-t border-border/60">
+        <div className="container-wide px-6 lg:px-12">
+          <div className="text-center mb-10">
+            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-primary mb-3">What brings you here?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">Choose a path. Every section keeps the same look, tuned to what you need.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {audienceCards.map((card) => {
+              const isLast = lastSection === card.id;
+              return (
+                // data-section re-tints --accent inside this card only (see index.css)
+                <Link
+                  key={card.id}
+                  to={card.link}
+                  data-section={card.id}
+                  className={cn(
+                    "card-institutional p-8 group flex flex-col border-t-4 border-t-accent hover:border-accent/40 relative",
+                    isLast && "ring-2 ring-accent/60"
+                  )}
+                >
+                  {isLast && (
+                    <span className="absolute top-4 right-4 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-accent text-accent-foreground">
+                      Continue here
+                    </span>
+                  )}
+                  <div className="p-3 rounded-xl bg-accent/15 text-accent w-fit mb-5">
+                    <card.icon size={26} />
+                  </div>
+                  <h3 className="font-serif text-2xl font-semibold text-primary mb-3 group-hover:text-accent transition-colors">
+                    {card.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed mb-6 flex-1">{card.description}</p>
+                  <span className="inline-flex items-center gap-2 text-accent text-sm font-semibold">
+                    {card.cta}
+                    <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Highlights Section */}
       <section className="py-20 bg-primary">
         <div className="container-wide px-6 lg:px-12">
@@ -199,7 +281,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Developer Credit Box (Placed Above Explore the Portfolio) */}
+      {/* Developer Credit Box */}
       <section className="py-10 bg-muted/20 border-b border-border/60">
         <div className="container-wide px-4 sm:px-6 lg:px-12">
           <div className="max-w-4xl mx-auto card-institutional bg-gradient-to-br from-card via-card to-accent/5 p-6 sm:p-8 rounded-2xl border border-border/80 shadow-md relative overflow-hidden group hover:border-accent/40 transition-all duration-300">
@@ -288,95 +370,6 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick Links Section ("Explore the Portfolio" - After About Developer) */}
-      <section className="section-padding">
-        <div className="container-wide">
-          <div className="text-center mb-16">
-            <h2 className="font-serif text-3xl md:text-4xl font-semibold text-primary mb-4">
-              Explore the Portfolio
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Discover decades of academic leadership, research contributions,
-              and administrative excellence.
-            </p>
-            <div className="mt-6 h-1 w-20 bg-accent mx-auto" />
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Projects & Innovations",
-                description:
-                  "Showcase of student platforms, AI tools, quantum simulators, and innovation lab projects with live URLs.",
-                link: "/projects",
-              },
-              {
-                title: "Interactive Puzzles & Hub",
-                description:
-                  "Gamified domain word connect puzzles across Quantum, Data Science, AI, and live rankings.",
-                link: "/qlearn?tab=puzzles",
-              },
-              {
-                title: "QLearn Interactive Platform",
-                description:
-                  "10-module curriculum roadmaps, interactive lecture modules, and learning resources.",
-                link: "/qlearn",
-              },
-              {
-                title: "Professional Experience",
-                description:
-                  "A comprehensive timeline of leadership roles and administrative positions across premier institutions.",
-                link: "/experience",
-              },
-              {
-                title: "Research Scholars Guidance",
-                description:
-                  "Ph.D. research guidance, candidate dissertations, patents, and scholarly mentorship.",
-                link: "/scholars",
-              },
-              {
-                title: "Awards & Recognition",
-                description:
-                  "National and institutional honors recognizing excellence in academic administration.",
-                link: "/achievements",
-              },
-              {
-                title: "Research & Publications",
-                description:
-                  "Journals, papers, and conference proceedings contributing to educational discourse.",
-                link: "/publications",
-              },
-              {
-                title: "Media Coverage",
-                description:
-                  "Newspaper features, interviews, and public addresses highlighting institutional initiatives.",
-                link: "/media",
-              },
-            ].map((item, index) => (
-              <Link
-                key={index}
-                to={item.link}
-                className="card-institutional p-8 group hover:border-accent/30"
-              >
-                <h3 className="font-serif text-xl font-semibold text-primary mb-3 group-hover:text-accent transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                  {item.description}
-                </p>
-                <span className="inline-flex items-center gap-2 text-accent text-sm font-medium">
-                  Learn more
-                  <ArrowRight
-                    size={16}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
-                </span>
-              </Link>
-            ))}
           </div>
         </div>
       </section>

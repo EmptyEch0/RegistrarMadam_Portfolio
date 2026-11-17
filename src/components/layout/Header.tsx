@@ -1,51 +1,22 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, BookOpen, Award, Users, Sparkles, Compass, Globe, ChevronDown, Gamepad2, GraduationCap, Trophy, FolderGit2, ArrowUpRight, ShieldCheck, Mic } from "lucide-react";
+import { Menu, X, ChevronDown, GraduationCap, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { StudentPortalModal } from "@/components/auth/StudentPortalModal";
 import { getCurrentStudent, StudentAccount } from "@/lib/academicsStorage";
-
-const mainNavItems = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Experience & Education", href: "/experience" },
-];
-
-const dropdownItems = [
-  { label: "Projects & Innovations", href: "/projects", desc: "Student & research prototypes", icon: FolderGit2 },
-  { label: "Publications", href: "/publications", desc: "Research papers & textbooks", icon: BookOpen },
-  { label: "Invited Talks", href: "/education#invited-talks", desc: "Keynote addresses & guest lectures", icon: Mic },
-  { label: "Achievements", href: "/achievements", desc: "National awards & honors", icon: Award },
-  { label: "Scholars", href: "/scholars", desc: "Ph.D. guidance and research", icon: Users },
-  { label: "Learning Symposium", href: "/learning-symposium", desc: "FDPs & workshops", icon: Sparkles },
-  { label: "Contributions", href: "/education", desc: "Administrative duties", icon: Compass },
-  { label: "Media", href: "/media", desc: "Press and newspaper coverage", icon: Globe },
-];
-
-const qlearnDropdownItems = [
-  { label: "Courses & Roadmaps", href: "/qlearn", desc: "10-module domains & lecture roadmaps", icon: GraduationCap },
-  { label: "All Puzzles & Hub", href: "/qlearn?tab=puzzles", desc: "Select subject, play word connect & rankings", icon: Gamepad2 },
-];
-
-const PUZZLE_SUBJECTS = [
-  { id: "quantum-computing", label: "Quantum Computing", icon: "⚛️" },
-  { id: "data-science", label: "Data Science", icon: "📊" },
-  { id: "machine-learning", label: "Machine Learning", icon: "🤖" },
-  { id: "deep-learning", label: "Deep Learning", icon: "🧠" },
-  { id: "iot-internet-of-things", label: "IoT", icon: "🌐" },
-  { id: "agentic-ai", label: "Agentic AI", icon: "⚡" },
-];
+import { SECTIONS, LAST_SECTION_KEY, sectionFor, type SectionId, type NavLinkItem } from "@/lib/sections";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileDropdownOpen, setIsMobileDropdownOpen] = useState(false);
-  const [isMobileQLearnOpen, setIsMobileQLearnOpen] = useState(false);
   const [studentModalOpen, setStudentModalOpen] = useState(false);
   const [currentStudent, setCurrentStudent] = useState<StudentAccount | null>(() => getCurrentStudent());
   const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
+
+  const section = sectionFor(location.pathname);
+  const nav = SECTIONS[section ?? "profile"]; // home shows profile links by default
 
   useEffect(() => {
     setCurrentStudent(getCurrentStudent());
@@ -56,580 +27,336 @@ export function Header() {
     }
   }, [location, studentModalOpen]);
 
+  /* ---------- Section tint + remember last section ---------- */
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!section || location.pathname.startsWith("/admin")) {
+      delete root.dataset.section;
+      return;
+    }
+    root.dataset.section = section;
+    try {
+      localStorage.setItem(LAST_SECTION_KEY, section);
+    } catch {
+      /* storage blocked: nothing to remember */
+    }
+    return () => {
+      delete root.dataset.section;
+    };
+  }, [section, location.pathname]);
+
   /* ---------- Scroll detection ---------- */
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* ---------- Close mobile menu on route change ---------- */
+  /* ---------- Close mobile menu on route change / ESC ---------- */
   useEffect(() => {
     setIsMobileMenuOpen(false);
-    setIsMobileDropdownOpen(false);
-    setIsMobileQLearnOpen(false);
   }, [location]);
 
-  /* ---------- Close mobile menu on ESC ---------- */
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsMobileMenuOpen(false);
-        setIsMobileDropdownOpen(false);
-        setIsMobileQLearnOpen(false);
-      }
+      if (e.key === "Escape") setIsMobileMenuOpen(false);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
-
-  const isDropdownActive = dropdownItems.some((item) => location.pathname === item.href.split("?")[0]);
-  const isPuzzlesActive = location.pathname === "/qlearn" && location.search.includes("tab=puzzles");
-  const isQLearnActive = location.pathname === "/qlearn" && !location.search.includes("tab=puzzles");
-  const isProjectsActive = location.pathname === "/projects";
-  const isContactActive = location.pathname === "/contact";
 
   // Hide the public header completely inside any /admin route
   if (location.pathname.startsWith("/admin")) {
     return null;
   }
 
+  /** "/qlearn?tab=puzzles" matches its sub-pages; plain paths match only without tab/hash. */
+  const isActive = (href: string) => {
+    const [path, rest = ""] = href.split(/(?=[?#])/);
+    if (path !== location.pathname) return false;
+    if (rest.startsWith("?")) return location.search.startsWith(rest);
+    if (rest.startsWith("#")) return location.hash === rest;
+    return !location.search.includes("tab=") && !location.search.includes("type=") && !location.hash;
+  };
+  const isMoreActive = !!nav.more?.some((item) => isActive(item.href));
+
+  const linkClass = (active: boolean) =>
+    cn(
+      "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
+      "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
+      "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
+      "hover:after:scale-x-100",
+      active ? "text-primary after:scale-x-100 font-semibold" : "text-muted-foreground hover:text-foreground"
+    );
+
+  const renderItemIcon = (item: NavLinkItem, active: boolean) =>
+    item.emoji ? (
+      <span className="text-base leading-none w-8 h-8 flex items-center justify-center shrink-0">{item.emoji}</span>
+    ) : item.icon ? (
+      <div
+        className={cn(
+          "p-2 rounded-lg flex-shrink-0 transition-colors",
+          active ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground group-hover/item:bg-accent/15 group-hover/item:text-accent"
+        )}
+      >
+        <item.icon size={16} />
+      </div>
+    ) : null;
+
   return (
     <>
       <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 will-change-transform no-print",
-        isScrolled
-          ? "bg-card shadow-subtle py-3 border-b border-border/40"
-          : "bg-card py-4 border-b border-border/10"
-      )}
-    >
-      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10">
-        <nav className="flex items-center justify-between">
-          {/* Logo */}
-          <Link
-            to="/"
-            className="flex flex-col transition-opacity hover:opacity-80 shrink-0 mr-2 xl:mr-4"
-            aria-label="Go to home page"
-          >
-            <span className="font-serif text-base md:text-lg xl:text-xl font-semibold text-primary tracking-wide whitespace-nowrap">
-              Dr. G. Jaya Suma
-            </span>
-            <span className="text-[10px] md:text-[11px] xl:text-xs text-muted-foreground font-medium tracking-wide whitespace-nowrap">
-              Professor of Information Technology · JNTU-GV
-            </span>
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
-            {/* Render first three items: Home, About, Experience */}
-            {mainNavItems.map((item) => {
-              const isActive = location.pathname === item.href;
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-300 will-change-transform no-print bg-card",
+          isScrolled ? "shadow-subtle border-b border-border/40" : "border-b border-border/10"
+        )}
+      >
+        {/* Audience switcher strip */}
+        <div className="bg-muted/50 border-b border-border/50">
+          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 flex items-center justify-center sm:justify-end gap-1 py-1">
+            <span className="hidden sm:inline text-[11px] font-medium text-muted-foreground mr-1.5">I'm here for:</span>
+            {(Object.keys(SECTIONS) as SectionId[]).map((id) => {
+              const s = SECTIONS[id];
+              const active = section === id;
               return (
                 <Link
-                  key={item.href}
-                  to={item.href}
-                  aria-current={isActive ? "page" : undefined}
+                  key={id}
+                  to={s.home}
+                  aria-current={active ? "true" : undefined}
                   className={cn(
-                    "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
-                    "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
-                    "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
-                    "hover:after:scale-x-100",
-                    isActive
-                      ? "text-primary after:scale-x-100 font-semibold"
-                      : "text-muted-foreground hover:text-foreground"
+                    "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-semibold transition-colors",
+                    active
+                      ? "bg-accent text-accent-foreground shadow-xs"
+                      : "text-muted-foreground hover:text-foreground hover:bg-card"
                   )}
                 >
-                  {item.href === "/experience" ? (
-                    <>
-                      <span className="hidden xl:inline">Experience & Education</span>
-                      <span className="xl:hidden">Experience</span>
-                    </>
-                  ) : (
-                    item.label
-                  )}
+                  <s.icon size={12} />
+                  {s.label}
                 </Link>
               );
             })}
-
-            {/* Academic & Contributions Dropdown */}
-            <div className="relative group py-2">
-              <button
-                className={cn(
-                  "flex items-center gap-1 px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap transition-colors text-muted-foreground hover:text-foreground",
-                  isDropdownActive && "text-accent font-semibold"
-                )}
-              >
-                Contributions
-                <ChevronDown size={15} className="transition-transform duration-300 group-hover:rotate-180" />
-              </button>
-              
-              {/* Contributions Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-80 md:w-[350px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
-                <div className="grid grid-cols-1 gap-1.5">
-                  {dropdownItems.map((item) => {
-                    const ItemIcon = item.icon;
-                    const isItemActive = item.href.includes("?")
-                      ? `${location.pathname}${location.search}` === item.href
-                      : location.pathname === item.href && !location.search.includes("filter=");
-                    return (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        className={cn(
-                          "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-muted/70 group/item",
-                          isItemActive ? "bg-accent/10 text-accent font-medium" : "text-foreground hover:text-accent"
-                        )}
-                      >
-                        <div className={cn(
-                          "p-2 rounded-lg flex-shrink-0 transition-colors",
-                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground group-hover/item:bg-accent/15 group-hover/item:text-accent"
-                        )}>
-                          <ItemIcon size={16} />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold group-hover/item:text-accent transition-colors">{item.label}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* QLearn Dropdown (Courses & Puzzles) */}
-            <div className="relative group py-2">
-              <button
-                className={cn(
-                  "flex items-center gap-1 px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap transition-colors text-muted-foreground hover:text-foreground",
-                  isQLearnActive && "text-accent font-semibold"
-                )}
-              >
-                QLearn
-                <ChevronDown size={15} className="transition-transform duration-300 group-hover:rotate-180" />
-              </button>
-              
-              {/* QLearn Dropdown Menu Overlay */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-[390px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3.5 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
-                {/* Domain banner badge */}
-                <Link
-                  to="/qlearn"
-                  className="flex items-center justify-between px-3 py-2 mb-2.5 rounded-xl bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent transition-colors text-xs font-medium"
-                >
-                  <span className="flex items-center gap-1.5 font-bold">
-                    <Globe size={13} /> jayasuma.com/qlearn
-                  </span>
-                  <span className="flex items-center gap-0.5 text-[10px] uppercase tracking-wider font-semibold">
-                    Interactive Hub <ArrowUpRight size={12} />
-                  </span>
-                </Link>
-
-                <div className="grid grid-cols-1 gap-1.5">
-                  {qlearnDropdownItems.map((item) => {
-                    const ItemIcon = item.icon;
-                    const isItemActive = location.pathname === "/qlearn" && (
-                      (item.href === "/qlearn" && !location.search.includes("tab=puzzles")) ||
-                      (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles") && !location.search.includes("subject="))
-                    );
-                    return (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        className={cn(
-                          "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-muted/70 group/item",
-                          isItemActive ? "bg-accent/10 text-accent font-medium" : "text-foreground hover:text-accent"
-                        )}
-                      >
-                        <div className={cn(
-                          "p-2 rounded-lg flex-shrink-0 transition-colors",
-                          isItemActive ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground group-hover/item:bg-accent/15 group-hover/item:text-accent"
-                        )}>
-                          <ItemIcon size={18} />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold group-hover/item:text-accent transition-colors">{item.label}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-
-                {/* Quick Subject Selectors */}
-                <div className="mt-3 pt-3 border-t border-border/70">
-                  <div className="flex items-center justify-between px-1 pb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    <span>Play Puzzle by Subject</span>
-                    <span className="text-[10px] text-amber-500 font-semibold flex items-center gap-1">
-                      <Trophy size={11} /> Live Ranks
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {PUZZLE_SUBJECTS.map((subj) => {
-                      const isSubjActive = location.pathname === "/qlearn" && location.search.includes(`subject=${subj.id}`);
-                      return (
-                        <Link
-                          key={subj.id}
-                          to={`/qlearn?tab=puzzles&subject=${subj.id}`}
-                          className={cn(
-                            "flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all duration-150",
-                            isSubjActive 
-                              ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400 border border-amber-500/30 shadow-xs" 
-                              : "text-foreground bg-muted/30 hover:bg-amber-500/10 hover:text-amber-600 border border-transparent hover:border-amber-500/20"
-                          )}
-                        >
-                          <span className="text-sm shrink-0">{subj.icon}</span>
-                          <span className="truncate text-[11px]">{subj.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Projects Link */}
-            <Link
-              to="/projects"
-              aria-current={isProjectsActive ? "page" : undefined}
-              className={cn(
-                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
-                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
-                "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
-                "hover:after:scale-x-100",
-                isProjectsActive
-                  ? "text-primary after:scale-x-100 font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Projects
-            </Link>
-
-            {/* Puzzles Link (Direct link beside Projects & Contact) */}
-            <Link
-              to="/qlearn?tab=puzzles"
-              aria-current={isPuzzlesActive ? "page" : undefined}
-              className={cn(
-                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
-                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
-                "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
-                "hover:after:scale-x-100",
-                isPuzzlesActive
-                  ? "text-primary after:scale-x-100 font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Puzzles
-            </Link>
-
-            {/* Collaborate */}
-            <Link
-              to="/contact"
-              aria-current={isContactActive ? "page" : undefined}
-              className={cn(
-                "px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap relative transition-colors",
-                "after:absolute after:left-2.5 after:right-2.5 after:-bottom-0.5 after:h-0.5 after:bg-accent",
-                "after:scale-x-0 after:origin-left after:transition-transform after:duration-300",
-                "hover:after:scale-x-100",
-                isContactActive
-                  ? "text-primary after:scale-x-100 font-semibold"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              Collaborate
-            </Link>
-
-            {/* Right-most corner: Admin Dashboard OR Student Login */}
-            <div className="ml-1 pl-2 border-l border-border/60 flex items-center shrink-0">
-              {isAdmin ? (
-                <Link
-                  to="/admin/dashboard"
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
-                  title="Open Admin Dashboard"
-                >
-                  <ShieldCheck size={15} className="text-amber-600 dark:text-amber-400" />
-                  <span>Admin Dashboard</span>
-                </Link>
-              ) : currentStudent ? (
-                <button
-                  type="button"
-                  onClick={() => setStudentModalOpen(true)}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent font-semibold text-xs transition-all shadow-xs"
-                  title="Open Student Portal"
-                >
-                  <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
-                    {currentStudent.fullName.charAt(0)}
-                  </span>
-                  <span className="max-w-[100px] truncate">{currentStudent.rollNo || currentStudent.fullName}</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setStudentModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-accent/15 via-accent/10 to-amber-500/15 hover:from-accent/25 hover:to-amber-500/25 border border-accent/40 text-primary hover:text-accent font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
-                >
-                  <GraduationCap size={15} className="text-accent" />
-                  <span>Student Login</span>
-                </button>
-              )}
-            </div>
           </div>
+        </div>
 
-          {/* Mobile Right Action Area: Admin / Student Login & Hamburger */}
-          <div className="flex items-center gap-2 lg:hidden">
-            {isAdmin ? (
-              <Link
-                to="/admin/dashboard"
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 font-semibold text-xs"
-              >
-                <ShieldCheck size={14} />
-                <span>Admin</span>
-              </Link>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setStudentModalOpen(true)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs"
-              >
-                <GraduationCap size={14} />
-                <span>{currentStudent ? (currentStudent.rollNo || "Portal") : "Student Login"}</span>
-              </button>
-            )}
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle navigation menu"
+        <div
+          className={cn(
+            "w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 transition-all duration-300",
+            isScrolled ? "py-2" : "py-3"
+          )}
+        >
+          <nav className="flex items-center justify-between">
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex flex-col transition-opacity hover:opacity-80 shrink-0 mr-2 xl:mr-4"
+              aria-label="Go to home page"
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </Button>
-          </div>
-        </nav>
+              <span className="font-serif text-base md:text-lg xl:text-xl font-semibold text-primary tracking-wide whitespace-nowrap">
+                Dr. G. Jaya Suma
+              </span>
+              <span className="text-[10px] md:text-[11px] xl:text-xs text-muted-foreground font-medium tracking-wide whitespace-nowrap">
+                Professor of Information Technology · JNTU-GV
+              </span>
+            </Link>
 
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <div className="lg:hidden mt-4 pb-4 border-t border-border animate-fade-in max-h-[80vh] overflow-y-auto">
-            <div className="flex flex-col pt-4 space-y-1">
-              {/* Main Items: Home, About, Experience */}
-              {mainNavItems.map((item) => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    to={item.href}
-                    aria-current={isActive ? "page" : undefined}
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1.5 2xl:gap-2">
+              {nav.links.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className={linkClass(isActive(item.href))}
+                >
+                  {item.label}
+                </Link>
+              ))}
+
+              {nav.more && (
+                <div className="relative group py-2">
+                  <button
                     className={cn(
-                      "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors",
-                      isActive
-                        ? "text-primary bg-muted font-semibold"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      "flex items-center gap-1 px-2.5 xl:px-3 py-2 text-[13px] xl:text-[14px] 2xl:text-[15px] font-medium whitespace-nowrap transition-colors text-muted-foreground hover:text-foreground",
+                      isMoreActive && "text-accent font-semibold"
                     )}
                   >
-                    {item.label}
-                  </Link>
-                );
-              })}
+                    {nav.moreLabel}
+                    <ChevronDown size={15} className="transition-transform duration-300 group-hover:rotate-180" />
+                  </button>
 
-              {/* Mobile Contributions Dropdown Selector */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setIsMobileDropdownOpen(!isMobileDropdownOpen)}
-                  className={cn(
-                    "flex items-center justify-between px-4 py-3 text-[17px] font-medium rounded-sm text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-                    isDropdownActive && "text-accent bg-accent/5 font-semibold"
-                  )}
-                >
-                  <span>Contributions</span>
-                  <ChevronDown size={18} className={cn("transition-transform duration-300", isMobileDropdownOpen && "rotate-180")} />
-                </button>
-
-                {/* Collapsible items */}
-                {isMobileDropdownOpen && (
-                  <div className="flex flex-col pl-6 mt-1 border-l-2 border-accent/20 space-y-0.5 animate-slide-up">
-                    {dropdownItems.map((item) => {
-                      const isItemActive = item.href.includes("?")
-                      ? `${location.pathname}${location.search}` === item.href
-                      : location.pathname === item.href && !location.search.includes("filter=");
-                      return (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          className={cn(
-                            "px-4 py-2.5 text-base font-medium rounded-sm transition-colors",
-                            isItemActive
-                              ? "text-accent bg-accent/10 font-semibold"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                          )}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Mobile QLearn Dropdown Selector */}
-              <div className="flex flex-col">
-                <button
-                  onClick={() => setIsMobileQLearnOpen(!isMobileQLearnOpen)}
-                  className={cn(
-                    "flex items-center justify-between px-4 py-3 text-[17px] font-medium rounded-sm text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors",
-                    isQLearnActive && "text-accent bg-accent/5 font-semibold"
-                  )}
-                >
-                  <span>QLearn</span>
-                  <ChevronDown size={18} className={cn("transition-transform duration-300", isMobileQLearnOpen && "rotate-180")} />
-                </button>
-
-                {/* Collapsible QLearn items */}
-                {isMobileQLearnOpen && (
-                  <div className="flex flex-col pl-6 mt-1 border-l-2 border-accent/20 space-y-1 animate-slide-up">
-                    {qlearnDropdownItems.map((item) => {
-                      const isItemActive = location.pathname === "/qlearn" && (
-                        (item.href === "/qlearn" && !location.search.includes("tab=puzzles")) ||
-                        (item.href.includes("tab=puzzles") && location.search.includes("tab=puzzles") && !location.search.includes("subject="))
-                      );
-                      return (
-                        <Link
-                          key={item.href}
-                          to={item.href}
-                          className={cn(
-                            "px-4 py-2.5 text-base font-medium rounded-sm transition-colors",
-                            isItemActive
-                              ? "text-accent bg-accent/10 font-semibold"
-                              : "text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                          )}
-                        >
-                          {item.label}
-                        </Link>
-                      );
-                    })}
-
-                    {/* Direct Domain Link */}
-                    <Link
-                      to="/qlearn"
-                      className="px-4 py-2.5 text-xs font-semibold text-accent flex items-center justify-between bg-accent/10 rounded-lg mx-1"
-                    >
-                      <span className="flex items-center gap-1.5"><Globe size={13} /> jayasuma.com/qlearn</span>
-                      <ArrowUpRight size={13} />
-                    </Link>
-
-                    <div className="pt-2 pl-2 border-t border-border/50">
-                      <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-1 flex items-center justify-between pr-2">
-                        <span>Puzzle Subjects</span>
-                        <span className="text-amber-500 font-bold text-[9px]">Live Games</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-1 pr-2">
-                        {PUZZLE_SUBJECTS.map((subj) => {
-                          const isSubjActive = location.pathname === "/qlearn" && location.search.includes(`subject=${subj.id}`);
-                          return (
-                            <Link
-                              key={subj.id}
-                              to={`/qlearn?tab=puzzles&subject=${subj.id}`}
-                              className={cn(
-                                "flex items-center gap-1.5 px-2 py-2 text-xs rounded transition-colors",
-                                isSubjActive
-                                  ? "bg-amber-500/15 text-amber-600 font-bold dark:text-amber-400"
-                                  : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                              )}
-                            >
-                              <span>{subj.icon}</span>
-                              <span className="truncate">{subj.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
+                  <div className="absolute top-full right-0 w-80 md:w-[350px] bg-card/98 backdrop-blur-md border border-border shadow-xl rounded-2xl p-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-300 transform scale-95 group-hover:scale-100 z-50">
+                    <div className={cn("grid gap-1.5", nav.more.some((i) => i.emoji) ? "grid-cols-2" : "grid-cols-1")}>
+                      {nav.more.map((item) => {
+                        const active = isActive(item.href);
+                        return (
+                          <Link
+                            key={item.href}
+                            to={item.href}
+                            className={cn(
+                              "flex items-start gap-3 p-2.5 rounded-xl transition-all duration-200 hover:bg-muted/70 group/item",
+                              active ? "bg-accent/10 text-accent font-medium" : "text-foreground hover:text-accent"
+                            )}
+                          >
+                            {renderItemIcon(item, active)}
+                            <div className="self-center">
+                              <div className="text-sm font-semibold group-hover/item:text-accent transition-colors">{item.label}</div>
+                              {item.desc && <div className="text-xs text-muted-foreground mt-0.5 leading-normal">{item.desc}</div>}
+                            </div>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
 
-              {/* Projects */}
-              <Link
-                to="/projects"
-                aria-current={isProjectsActive ? "page" : undefined}
-                className={cn(
-                  "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors",
-                  isProjectsActive
-                    ? "text-primary bg-muted font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                Projects
-              </Link>
+              {section !== "connect" && (
+                <Link to="/contact" className={linkClass(false)}>
+                  Collaborate
+                </Link>
+              )}
 
-              {/* Puzzles */}
-              <Link
-                to="/qlearn?tab=puzzles"
-                aria-current={isPuzzlesActive ? "page" : undefined}
-                className={cn(
-                  "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors",
-                  isPuzzlesActive
-                    ? "text-primary bg-muted font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                Puzzles
-              </Link>
-
-              {/* Collaborate */}
-              <Link
-                to="/contact"
-                aria-current={isContactActive ? "page" : undefined}
-                className={cn(
-                  "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors",
-                  isContactActive
-                    ? "text-primary bg-muted font-semibold"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}
-              >
-                Collaborate
-              </Link>
-
-              {/* Mobile Student / Admin Portal Button */}
-              <div className="pt-2 px-1">
+              {/* Right-most corner: Admin Dashboard OR Student Login */}
+              <div className="ml-1 pl-2 border-l border-border/60 flex items-center shrink-0">
                 {isAdmin ? (
                   <Link
                     to="/admin/dashboard"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/20 hover:from-amber-500/25 hover:to-orange-500/25 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
+                    title="Open Admin Dashboard"
                   >
-                    <ShieldCheck size={18} className="text-amber-600" />
+                    <ShieldCheck size={15} className="text-amber-600 dark:text-amber-400" />
                     <span>Admin Dashboard</span>
                   </Link>
+                ) : currentStudent ? (
+                  <button
+                    type="button"
+                    onClick={() => setStudentModalOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 hover:bg-accent/20 border border-accent/30 text-accent font-semibold text-xs transition-all shadow-xs"
+                    title="Open Student Portal"
+                  >
+                    <span className="w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center">
+                      {currentStudent.fullName.charAt(0)}
+                    </span>
+                    <span className="max-w-[100px] truncate">{currentStudent.rollNo || currentStudent.fullName}</span>
+                  </button>
                 ) : (
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setStudentModalOpen(true);
-                    }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-accent/20 to-amber-500/20 border border-accent/40 text-primary font-bold text-sm shadow-sm"
+                    onClick={() => setStudentModalOpen(true)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-accent/15 via-accent/10 to-amber-500/15 hover:from-accent/25 hover:to-amber-500/25 border border-accent/40 text-primary hover:text-accent font-semibold text-xs xl:text-sm transition-all shadow-xs transform hover:scale-105 active:scale-95"
                   >
-                    <GraduationCap size={18} className="text-accent" />
-                    <span>
-                      {currentStudent
-                        ? `Student Portal (${currentStudent.rollNo || currentStudent.fullName})`
-                        : "Student Login / Academics Portal"}
-                    </span>
+                    <GraduationCap size={15} className="text-accent" />
+                    <span>Student Login</span>
                   </button>
                 )}
               </div>
             </div>
-          </div>
-        )}
-      </div>
-    </header>
 
-    {/* Student Portal Modal */}
-    <StudentPortalModal
-      isOpen={studentModalOpen}
-      onClose={() => setStudentModalOpen(false)}
-    />
-  </>
+            {/* Mobile Right Action Area: Admin / Student Login & Hamburger */}
+            <div className="flex items-center gap-2 lg:hidden">
+              {isAdmin ? (
+                <Link
+                  to="/admin/dashboard"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 font-semibold text-xs"
+                >
+                  <ShieldCheck size={14} />
+                  <span>Admin</span>
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setStudentModalOpen(true)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-full bg-accent/10 border border-accent/30 text-accent font-semibold text-xs"
+                >
+                  <GraduationCap size={14} />
+                  <span>{currentStudent ? (currentStudent.rollNo || "Portal") : "Student Login"}</span>
+                </button>
+              )}
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle navigation menu"
+                aria-expanded={isMobileMenuOpen}
+              >
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </Button>
+            </div>
+          </nav>
+
+          {/* Mobile Navigation: current section's links, flat */}
+          {isMobileMenuOpen && (
+            <div className="lg:hidden mt-4 pb-4 border-t border-border animate-fade-in max-h-[75vh] overflow-y-auto">
+              <div className="flex flex-col pt-4 space-y-1">
+                <Link
+                  to="/"
+                  className={cn(
+                    "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors",
+                    location.pathname === "/" ? "text-primary bg-muted font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  Home
+                </Link>
+                {[...nav.links, ...(nav.more ?? [])].map((item) => (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    aria-current={isActive(item.href) ? "page" : undefined}
+                    className={cn(
+                      "px-4 py-3 text-[17px] font-medium rounded-sm transition-colors flex items-center gap-2",
+                      isActive(item.href)
+                        ? "text-primary bg-muted font-semibold"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    )}
+                  >
+                    {item.emoji && <span>{item.emoji}</span>}
+                    {item.label}
+                  </Link>
+                ))}
+                {section !== "connect" && (
+                  <Link to="/contact" className="px-4 py-3 text-[17px] font-medium rounded-sm text-muted-foreground hover:text-foreground hover:bg-muted/50">
+                    Collaborate
+                  </Link>
+                )}
+
+                {/* Mobile Student / Admin Portal Button */}
+                <div className="pt-2 px-1">
+                  {isAdmin ? (
+                    <Link
+                      to="/admin/dashboard"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-700 dark:text-amber-400 font-bold text-sm shadow-sm"
+                    >
+                      <ShieldCheck size={18} className="text-amber-600" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMobileMenuOpen(false);
+                        setStudentModalOpen(true);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-accent/20 to-amber-500/20 border border-accent/40 text-primary font-bold text-sm shadow-sm"
+                    >
+                      <GraduationCap size={18} className="text-accent" />
+                      <span>
+                        {currentStudent
+                          ? `Student Portal (${currentStudent.rollNo || currentStudent.fullName})`
+                          : "Student Login / Academics Portal"}
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Student Portal Modal */}
+      <StudentPortalModal isOpen={studentModalOpen} onClose={() => setStudentModalOpen(false)} />
+    </>
   );
 }

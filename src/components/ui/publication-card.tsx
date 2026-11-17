@@ -1,4 +1,5 @@
-import { BookOpen, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
+import { BookOpen, ExternalLink, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PublicationCardProps {
@@ -72,6 +73,7 @@ export function PublicationCard({
             <p className="text-foreground/70 text-sm mb-3">{authors}</p>
           )}
 
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
           {(doi || link) && (
             <a
               href={link || `https://doi.org/${doi}`}
@@ -83,6 +85,14 @@ export function PublicationCard({
               <ExternalLink size={14} />
             </a>
           )}
+          <Link
+            to={`/contact?type=paper&title=${encodeURIComponent(title)}`}
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-accent transition-colors"
+          >
+            <Mail size={14} />
+            Request full text
+          </Link>
+          </div>
         </div>
       </div>
     </div>

@@ -72,6 +72,25 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
+  /* Audience sections (set on <html> by Header): same layout, re-tinted accent.
+     Profile keeps the default gold. */
+  [data-section="students"] {
+    --accent: 199 80% 38%;
+    --accent-foreground: 0 0% 100%;
+  }
+  [data-section="connect"] {
+    --accent: 158 60% 30%;
+    --accent-foreground: 0 0% 100%;
+  }
+  .dark[data-section="students"] {
+    --accent: 199 80% 58%;
+    --accent-foreground: 220 20% 12%;
+  }
+  .dark[data-section="connect"] {
+    --accent: 158 50% 50%;
+    --accent-foreground: 220 20% 12%;
+  }
+
   .dark {
     --background: 220 20% 12%;
     --foreground: 40 33% 98%;
