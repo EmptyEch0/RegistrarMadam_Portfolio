@@ -43,6 +43,7 @@ import { VisitorAccessModal } from "@/components/ui/VisitorAccessModal";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { VisitorProfileBadge } from "@/components/ui/VisitorProfileBadge";
 import { getSavedVisitor, logVisitorAccess, VisitorProfile } from "@/lib/visitorTracking";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 const WorksheetViewer = lazy(() =>
   import("@/components/ui/worksheet-viewer").then((m) => ({ default: m.WorksheetViewer }))
 );
@@ -2471,22 +2472,57 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   const activeDomain = activeDomainIndex !== null ? domains[activeDomainIndex] : null;
   const activeModule = activeDomain ? activeDomain.modules[activeModuleIndex] : null;
 
-  // Update localStorage when domains change
-  const saveDomains = (updatedDomains: DomainData[]) => {
-    setDomains(updatedDomains);
-    localStorage.setItem("qlearn_domains", JSON.stringify(updatedDomains));
+  // Supabase (qlearn_content row "domains") is the source of truth so every visitor sees
+  // admin edits; localStorage is only an offline cache.
+  const cacheDomainsLocally = (data: DomainData[]) => {
+    try {
+      localStorage.setItem("qlearn_domains", JSON.stringify(data));
+    } catch (e) {
+      console.warn("QLearn local cache skipped (storage full):", e);
+    }
   };
 
-  // Load from local storage on mount and sync default PPTs
+  const pushDomainsToCloud = async (data: DomainData[]) => {
+    const { error } = await supabase
+      .from("qlearn_content")
+      .upsert({ id: "domains", data, updated_at: new Date().toISOString() });
+    if (error) {
+      console.error("Failed to publish QLearn content:", error);
+      alert(`Changes were NOT published to the portal: ${error.message}`);
+    }
+  };
+
+  const saveDomains = (updatedDomains: DomainData[]) => {
+    setDomains(updatedDomains);
+    cacheDomainsLocally(updatedDomains);
+    if (isAdminPortal) pushDomainsToCloud(updatedDomains);
+  };
+
+  // Load from Supabase on mount (fallback: local cache, then defaults) and sync default PPTs
   useEffect(() => {
-    const saved = localStorage.getItem("qlearn_domains");
+    let cancelled = false;
+    (async () => {
+    const { data: row, error: fetchErr } = await supabase
+      .from("qlearn_content")
+      .select("data")
+      .eq("id", "domains")
+      .maybeSingle();
+    if (cancelled) return;
+    if (fetchErr) console.warn("QLearn cloud load failed, using local cache:", fetchErr.message);
+    const remote = row?.data as DomainData[] | undefined;
+    const saved = remote ? JSON.stringify(remote) : localStorage.getItem("qlearn_domains");
+    // First admin visit after this change: publish the admin's existing local edits.
+    if (!remote && !fetchErr && saved && isAdminPortal) {
+      try { pushDomainsToCloud(JSON.parse(saved)); } catch { /* bad cache, handled below */ }
+    }
     if (saved) {
       try {
         const parsed: DomainData[] = JSON.parse(saved);
         const updated = parsed.map((domain) => {
           const defaultDomain = DEFAULT_DOMAINS.find((d) => d.id === domain.id);
           if (!defaultDomain) return domain;
-          if (domain.id === "deep-learning" && domain.modules.length !== 5) {
+          // Upgrade stale 4-unit caches only; never wipe modules the admin added.
+          if (domain.id === "deep-learning" && domain.modules.length < 5) {
             return defaultDomain;
           }
           return {
@@ -2509,16 +2545,18 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
           };
         });
         setDomains(updated);
-        localStorage.setItem("qlearn_domains", JSON.stringify(updated));
+        cacheDomainsLocally(updated);
       } catch (e) {
         console.error("Failed parsing QLearn domains data, resetting to defaults", e);
         setDomains(DEFAULT_DOMAINS);
-        localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
+        cacheDomainsLocally(DEFAULT_DOMAINS);
       }
     } else {
       setDomains(DEFAULT_DOMAINS);
-      localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
+      cacheDomainsLocally(DEFAULT_DOMAINS);
     }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Synchronize with URL search parameters (tab=puzzles, tab=courses, and subject)
@@ -2659,8 +2697,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
   // Reset to Defaults (admin)
   const handleResetToDefaults = () => {
     if (window.confirm("Reset all QLearn courses and learning modules to original default roadmap? Any custom uploaded items will be cleared.")) {
-      setDomains(DEFAULT_DOMAINS);
-      localStorage.setItem("qlearn_domains", JSON.stringify(DEFAULT_DOMAINS));
+      saveDomains(DEFAULT_DOMAINS);
       setActiveDomainIndex(null);
       alert("QLearn content reset to default successfully.");
     }
@@ -2901,18 +2938,23 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     if (!noteTitle) {
       setNoteTitle(file.name.replace(/\.[^/.]+$/, ""));
     }
+    // Upload to the public "qlearn" bucket; base64 data URLs only lived in the admin's browser.
     setNotePdfUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      setNotePdfUrl(result);
-      setNotePdfUploading(false);
-    };
-    reader.onerror = () => {
-      alert("Failed to read PDF file.");
-      setNotePdfUploading(false);
-    };
-    reader.readAsDataURL(file);
+    const client = supabaseAdmin || supabase;
+    const path = `notes/${Date.now()}_${file.name.replace(/[^\w.-]/g, "_")}`;
+    client.storage
+      .from("qlearn")
+      .upload(path, file, { contentType: "application/pdf", upsert: true })
+      .then(({ error }) => {
+        if (error) throw error;
+        setNotePdfUrl(client.storage.from("qlearn").getPublicUrl(path).data.publicUrl);
+      })
+      .catch((err) => {
+        alert(`PDF upload failed: ${err.message || err}`);
+        setNotePdfUrl("");
+        setNotePdfFileName("");
+      })
+      .finally(() => setNotePdfUploading(false));
   };
 
   // Note Snippet Upload submit handler
@@ -4870,11 +4912,12 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   Cancel
                 </Button>
                 <Button 
-                  type="submit" 
-                  variant="hero" 
+                  type="submit"
+                  variant="hero"
                   size="sm"
+                  disabled={notePdfUploading}
                 >
-                  Add Slide
+                  {notePdfUploading ? "Uploading PDF..." : "Add Slide"}
                 </Button>
               </div>
             </form>
