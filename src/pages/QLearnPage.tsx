@@ -1379,16 +1379,8 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
             ...domain,
             modules: domain.modules.map((mod) => {
               const defaultMod = defaultDomain.modules.find((m) => m.id === mod.id);
-              if (defaultMod) {
-                const userCustomPpts = (mod.ppts || []).filter(
-                  (p) => !defaultMod.ppts?.some((defP) => defP.id === p.id)
-                );
-                return {
-                  ...defaultMod,
-                  ...mod,
-                  ppts: [...(defaultMod.ppts || []), ...userCustomPpts]
-                };
-              }
+              // Saved content wins: re-adding default PPTs here resurrected slides the admin deleted.
+              if (defaultMod) return { ...defaultMod, ...mod };
               return mod;
             })
           };
@@ -2194,7 +2186,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                   <div>
                     <h2 className="font-serif text-3xl font-bold text-primary">Select a Domain to Explore</h2>
-                    <p className="text-muted-foreground mt-2">Each domain includes a comprehensive 10-module roadmap and interactive puzzle game.</p>
+                    <p className="text-muted-foreground mt-2">Each domain includes a structured course roadmap with notes, slides, quizzes and an interactive puzzle game.</p>
                   </div>
                   <button
                     type="button"
@@ -2229,17 +2221,17 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                         </p>
                         <div className="pt-4 border-t border-border flex items-center justify-between gap-2">
                           <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                            10 Modules
+                            {domain.modules.length} {domain.modules.every((m) => m.id.startsWith("unit-") || m.name.startsWith("Unit")) ? "Units" : "Modules"}
                           </span>
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handlePlayPuzzle(idx);
+                              handleDomainSelect(idx);
                             }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 hover:bg-amber-500 hover:text-white transition-all duration-200 border border-amber-500/30 shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-accent/10 text-accent hover:bg-accent hover:text-white transition-all duration-200 border border-accent/30 shadow-sm"
                           >
-                            <Puzzle size={13} /> Play Puzzle
+                            <BookOpen size={13} /> QLearn Hub
                           </button>
                         </div>
                       </div>
@@ -2917,7 +2909,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                          >
                                            Open Resource Document Notes <ExternalLink size={12} />
                                          </a>
-                                         {activeModule.notes[activeNoteIndex].embedUrl && (
+                                         {(activeModule.notes[activeNoteIndex].embedUrl || activeModule.notes[activeNoteIndex].pdfUrl) && (
                                            <Button
                                              variant="hero-outline"
                                              size="sm"
@@ -2925,7 +2917,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                                id: activeModule.notes[activeNoteIndex].id,
                                                title: activeModule.notes[activeNoteIndex].title,
                                                pptUrl: activeModule.notes[activeNoteIndex].docUrl || "",
-                                               embedUrl: activeModule.notes[activeNoteIndex].embedUrl || "",
+                                               embedUrl: (activeModule.notes[activeNoteIndex].embedUrl || activeModule.notes[activeNoteIndex].pdfUrl) || "",
                                                description: activeModule.notes[activeNoteIndex].description
                                              })}
                                              className="flex items-center gap-1.5 text-xs py-2"
@@ -2957,7 +2949,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                </div>
 
                                {/* Embedded Document Viewer for Resource Notes if docUrl exists */}
-                               {activeModule.notes[activeNoteIndex].embedUrl && (
+                               {(activeModule.notes[activeNoteIndex].embedUrl || activeModule.notes[activeNoteIndex].pdfUrl) && (
                                  <div className="bg-card border border-border/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-md">
                                    <div className="p-4 bg-muted/60 border-b border-border flex items-center justify-between">
                                      <div className="flex items-center gap-2">
@@ -2977,7 +2969,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                                    </div>
                                    <div className="relative w-full aspect-[16/9] min-h-[440px] md:min-h-[500px] bg-slate-950">
                                      <iframe
-                                       src={activeModule.notes[activeNoteIndex].embedUrl}
+                                       src={(activeModule.notes[activeNoteIndex].embedUrl || activeModule.notes[activeNoteIndex].pdfUrl)}
                                        title={activeModule.notes[activeNoteIndex].title}
                                        className="w-full h-full border-0"
                                        allowFullScreen
