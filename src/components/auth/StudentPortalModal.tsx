@@ -460,12 +460,16 @@ export function StudentPortalModal({
                       <label className="text-xs font-semibold text-foreground block">
                         Select Academic Program / Category *
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {(["B.Tech", "M.Tech", "Others"] as DegreeProgram[]).map((prog) => (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {(["B.Tech", "M.Tech", "MCA", "Others"] as DegreeProgram[]).map((prog) => (
                           <button
                             key={prog}
                             type="button"
-                            onClick={() => setSignupProgram(prog)}
+                            onClick={() => {
+                              setSignupProgram(prog);
+                              // MCA is a 2-year course
+                              if (prog === "MCA" && (signupYear === "3rd Year" || signupYear === "4th Year")) setSignupYear("1st Year");
+                            }}
                             className={`py-2 px-3 rounded-xl text-xs font-bold border transition-all text-center ${
                               signupProgram === prog
                                 ? "bg-accent/15 border-accent text-accent shadow-xs"
@@ -478,7 +482,7 @@ export function StudentPortalModal({
                       </div>
                     </div>
 
-                    {/* Dynamic Fields for B.Tech / M.Tech vs Others */}
+                    {/* Dynamic Fields for B.Tech / M.Tech / MCA vs Others */}
                     {signupProgram === "Others" ? (
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
@@ -529,8 +533,8 @@ export function StudentPortalModal({
                             >
                               <option value="1st Year">1st Year</option>
                               <option value="2nd Year">2nd Year</option>
-                              <option value="3rd Year">3rd Year</option>
-                              <option value="4th Year">4th Year</option>
+                              {signupProgram !== "MCA" && <option value="3rd Year">3rd Year</option>}
+                              {signupProgram !== "MCA" && <option value="4th Year">4th Year</option>}
                             </select>
                           </div>
 

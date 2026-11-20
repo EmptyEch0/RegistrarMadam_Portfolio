@@ -362,7 +362,7 @@ export default function AdminAcademics() {
                 Academics Portal & Batch Management
               </h1>
               <p className="text-xs text-[#64748B] mt-0.5">
-                Manage B.Tech / M.Tech batches, monitor student account signups, evaluate assignment PDFs & publish mid marks
+                Manage B.Tech / M.Tech / MCA batches, monitor student account signups, evaluate assignment PDFs & publish mid marks
               </p>
             </div>
           </div>
@@ -878,12 +878,16 @@ export default function AdminAcademics() {
             <form onSubmit={handleCreateBatch} className="space-y-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">Program *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["B.Tech", "M.Tech", "Others"] as DegreeProgram[]).map((p) => (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(["B.Tech", "M.Tech", "MCA", "Others"] as DegreeProgram[]).map((p) => (
                     <button
                       key={p}
                       type="button"
-                      onClick={() => setNewProgram(p)}
+                      onClick={() => {
+                        setNewProgram(p);
+                        // MCA is a 2-year course
+                        if (p === "MCA" && (newYear === "3rd Year" || newYear === "4th Year")) setNewYear("1st Year");
+                      }}
                       className={`py-2 text-xs font-bold rounded-xl border transition-all ${
                         newProgram === p
                           ? "bg-accent/15 border-accent text-accent"
@@ -906,8 +910,8 @@ export default function AdminAcademics() {
                   >
                     <option value="1st Year">1st Year</option>
                     <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
+                    {newProgram !== "MCA" && <option value="3rd Year">3rd Year</option>}
+                    {newProgram !== "MCA" && <option value="4th Year">4th Year</option>}
                   </select>
                 </div>
 

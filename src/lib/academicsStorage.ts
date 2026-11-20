@@ -1,6 +1,6 @@
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
-export type DegreeProgram = "B.Tech" | "M.Tech" | "Others";
+export type DegreeProgram = "B.Tech" | "M.Tech" | "MCA" | "Others";
 
 export interface StudentAccount {
   id: string;
@@ -8,7 +8,7 @@ export interface StudentAccount {
   fullName: string;
   email?: string;
   program: DegreeProgram;
-  rollNo?: string; // required for B.Tech / M.Tech (e.g., "23VV1A1232")
+  rollNo?: string; // required for B.Tech / M.Tech / MCA (e.g., "23VV1A1232")
   destination?: string; // required if Others: designation / role
   year?: string; // e.g., "1st Year", "2nd Year", "3rd Year", "4th Year"
   batchYear?: string; // e.g., "2026"
@@ -439,7 +439,7 @@ export function registerStudentAccount(data: {
   }
 
   const normRoll = normalizeRollNo(data.rollNo);
-  if ((data.program === "B.Tech" || data.program === "M.Tech") && !normRoll) {
+  if (data.program !== "Others" && !normRoll) {
     return { success: false, message: `Roll Number is mandatory for ${data.program} students.` };
   }
 
