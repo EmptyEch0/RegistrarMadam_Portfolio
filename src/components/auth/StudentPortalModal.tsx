@@ -36,6 +36,7 @@ import {
   getSubmissionForStudent,
   submitStudentAssignment,
   findBatchForStudent,
+  syncAcademicsFromCloud,
   BatchAssignment,
   AssignmentSubmission,
   StudentMarksRecord,
@@ -108,6 +109,14 @@ export function StudentPortalModal({
     }
   }, [isOpen]);
 
+  // Pull the latest assignments, batches and this student's marks/submissions from Supabase,
+  // then re-render (the getters below read the refreshed cache).
+  const [, setCloudVersion] = useState(0);
+  useEffect(() => {
+    if (!isOpen) return;
+    syncAcademicsFromCloud({ rollNo: student?.rollNo }).then(() => setCloudVersion((v) => v + 1));
+  }, [isOpen, student?.rollNo]);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
@@ -123,25 +132,23 @@ export function StudentPortalModal({
   if (!isOpen) return null;
 
   // Handle Login
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     setLoginLoading(true);
 
-    setTimeout(() => {
-      const res = loginStudent(loginIdentifier.trim(), loginPassword);
-      setLoginLoading(false);
-      if (res.success && res.account) {
-        setStudent(res.account);
-        setLoginPassword("");
-      } else {
-        setLoginError(res.message);
-      }
-    }, 300);
+    const res = await loginStudent(loginIdentifier.trim(), loginPassword);
+    setLoginLoading(false);
+    if (res.success && res.account) {
+      setStudent(res.account);
+      setLoginPassword("");
+    } else {
+      setLoginError(res.message);
+    }
   };
 
   // Handle Signup
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError("");
 
@@ -152,29 +159,27 @@ export function StudentPortalModal({
 
     setSignupLoading(true);
 
-    setTimeout(() => {
-      const res = registerStudentAccount({
-        username: signupUsername,
-        fullName: signupFullName,
-        email: signupEmail,
-        program: signupProgram,
-        rollNo: signupProgram === "Others" ? undefined : signupRollNo,
-        destination: signupProgram === "Others" ? signupDestination : undefined,
-        year: signupProgram === "Others" ? undefined : signupYear,
-        batchYear: signupProgram === "Others" ? undefined : signupBatchYear,
-        branch: signupProgram === "Others" ? undefined : signupBranch,
-        password: signupPassword,
-      });
+    const res = await registerStudentAccount({
+      username: signupUsername,
+      fullName: signupFullName,
+      email: signupEmail,
+      program: signupProgram,
+      rollNo: signupProgram === "Others" ? undefined : signupRollNo,
+      destination: signupProgram === "Others" ? signupDestination : undefined,
+      year: signupProgram === "Others" ? undefined : signupYear,
+      batchYear: signupProgram === "Others" ? undefined : signupBatchYear,
+      branch: signupProgram === "Others" ? undefined : signupBranch,
+      password: signupPassword,
+    });
 
-      setSignupLoading(false);
-      if (res.success && res.account) {
-        setStudent(res.account);
-        setSignupPassword("");
-        setSignupConfirmPassword("");
-      } else {
-        setSignupError(res.message);
-      }
-    }, 350);
+    setSignupLoading(false);
+    if (res.success && res.account) {
+      setStudent(res.account);
+      setSignupPassword("");
+      setSignupConfirmPassword("");
+    } else {
+      setSignupError(res.message);
+    }
   };
 
   // Handle Logout

@@ -49,6 +49,7 @@ import {
   IOT_BATCH_MID1_MARKS,
   isMarksPublished,
   setMarksPublished,
+  syncAcademicsFromCloud,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -122,6 +123,12 @@ export default function AdminAcademics() {
 
   useEffect(() => {
     loadData();
+    // Show this device's cache instantly, then replace it with the shared data from Supabase
+    syncAcademicsFromCloud({ asAdmin: true }).then(() => {
+      loadData();
+      setMarksPublishedState(isMarksPublished());
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const activeBatch = batches.find((b) => b.id === selectedBatchId) || batches[0];

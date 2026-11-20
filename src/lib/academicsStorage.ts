@@ -310,6 +310,133 @@ const DEFAULT_ASSIGNMENTS: BatchAssignment[] = [
   },
 ];
 
+// ==========================================
+// CLOUD SYNC (Supabase is the source of truth across devices; localStorage is a cache)
+// Tables: supabase/student_assignments.sql + supabase/academics.sql
+// ==========================================
+
+// Admin-edited collections, stored as rows of qlearn_content
+const CLOUD_BLOBS = {
+  academic_batches: STORAGE_KEYS.ACADEMIC_BATCHES,
+  batch_assignments: STORAGE_KEYS.BATCH_ASSIGNMENTS,
+  marks_published: STORAGE_KEYS.MARKS_PUBLISHED,
+} as const;
+const DIRECTORY_KEY = "qlearn_student_directory"; // cloud accounts, without passwords
+
+// One alert per burst (e.g. a bulk marks save), not one per student
+let lastPublishAlert = 0;
+function warnNotPublished(message: string): void {
+  if (Date.now() - lastPublishAlert < 5000) return;
+  lastPublishAlert = Date.now();
+  alert(message);
+}
+
+function publishBlob(id: keyof typeof CLOUD_BLOBS, data: unknown): void {
+  supabase
+    .from("qlearn_content")
+    .upsert({ id, data, updated_at: new Date().toISOString() })
+    .then(({ error }) => {
+      if (error) {
+        console.error(`Failed to publish ${id}:`, error);
+        warnNotPublished(`This change was saved on this device only and NOT published: ${error.message}`);
+      }
+    });
+}
+
+type SubmissionRow = {
+  id: string; assignment_id: string; batch_id: string; roll_no: string; student_name: string;
+  student_account_id: string | null; file_name: string; file_size: number; file_url: string;
+  submitted_at: string; comment: string | null;
+};
+type MarksRow = {
+  id: string; batch_id: string; roll_no: string; student_name: string | null; mid_marks: string | null;
+  mid2_marks: string | null; assignment_marks: string | null; remarks: string | null; updated_at: string;
+};
+
+const submissionToRow = (s: AssignmentSubmission): SubmissionRow => ({
+  id: s.id, assignment_id: s.assignmentId, batch_id: s.batchId, roll_no: s.rollNo, student_name: s.studentName,
+  student_account_id: s.studentAccountId ?? null, file_name: s.fileName, file_size: s.fileSize,
+  file_url: s.fileDataUrl, submitted_at: s.submittedAt, comment: s.comment ?? null,
+});
+const rowToSubmission = (r: SubmissionRow): AssignmentSubmission => ({
+  id: r.id, assignmentId: r.assignment_id, batchId: r.batch_id, rollNo: r.roll_no, studentName: r.student_name,
+  studentAccountId: r.student_account_id ?? undefined, fileName: r.file_name, fileSize: r.file_size,
+  fileDataUrl: r.file_url, submittedAt: r.submitted_at, comment: r.comment ?? undefined,
+});
+const marksToRow = (m: StudentMarksRecord): MarksRow => ({
+  id: m.id, batch_id: m.batchId, roll_no: m.rollNo, student_name: m.studentName ?? null, mid_marks: m.midMarks ?? null,
+  mid2_marks: m.mid2Marks ?? null, assignment_marks: m.assignmentMarks ?? null, remarks: m.remarks ?? null, updated_at: m.updatedAt,
+});
+const rowToMarks = (r: MarksRow): StudentMarksRecord => ({
+  id: r.id, batchId: r.batch_id, rollNo: r.roll_no, studentName: r.student_name ?? undefined, midMarks: r.mid_marks ?? undefined,
+  mid2Marks: r.mid2_marks ?? undefined, assignmentMarks: r.assignment_marks ?? undefined, remarks: r.remarks ?? undefined,
+  updatedAt: r.updated_at,
+});
+const marksKey = (m: StudentMarksRecord) => `${m.batchId}|${normalizeRollNo(m.rollNo)}`;
+
+/**
+ * Pull the latest academics data into the local cache so the synchronous getters return it.
+ * asAdmin: load everything, and publish this device's data where the cloud has none yet (one-time migration).
+ * rollNo:  for a signed-in student, load only their own submissions and marks.
+ */
+export async function syncAcademicsFromCloud(opts: { asAdmin?: boolean; rollNo?: string } = {}): Promise<void> {
+  const roll = normalizeRollNo(opts.rollNo);
+  const none = Promise.resolve({ data: null, error: null });
+  const subsQuery = supabase.from("assignment_submissions").select("*");
+  const marksQuery = supabase.from("student_marks_records").select("*");
+  try {
+    const [blobs, subs, marks, dir] = await Promise.all([
+      supabase.from("qlearn_content").select("id,data").in("id", Object.keys(CLOUD_BLOBS)),
+      opts.asAdmin ? subsQuery : roll ? subsQuery.eq("roll_no", roll) : none,
+      opts.asAdmin ? marksQuery : roll ? marksQuery.eq("roll_no", roll) : none,
+      opts.asAdmin ? supabase.rpc("student_directory") : none,
+    ]);
+
+    if (!blobs.error) {
+      for (const [id, key] of Object.entries(CLOUD_BLOBS) as [keyof typeof CLOUD_BLOBS, string][]) {
+        const row = blobs.data?.find((r) => r.id === id);
+        if (row) {
+          localStorage.setItem(key, JSON.stringify(row.data));
+        } else if (opts.asAdmin) {
+          const local = localStorage.getItem(key);
+          if (local) publishBlob(id, JSON.parse(local));
+        }
+      }
+    }
+
+    if (subs.data) {
+      const cloud = (subs.data as SubmissionRow[]).map(rowToSubmission);
+      const cloudIds = new Set(cloud.map((s) => s.id));
+      // Submissions made before cloud sync existed only live on the device that made them: upload them now.
+      const localOnly = getAllSubmissions().filter((s) => !cloudIds.has(s.id) && s.fileDataUrl);
+      if (localOnly.length) await supabase.from("assignment_submissions").upsert(localOnly.map(submissionToRow));
+      // Keep only the latest submission per student per assignment
+      const seen = new Set<string>();
+      const latest = [...cloud, ...localOnly]
+        .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
+        .filter((s) => {
+          const k = `${normalizeRollNo(s.rollNo)}|${s.assignmentId}`;
+          return seen.has(k) ? false : (seen.add(k), true);
+        });
+      saveAllSubmissions(latest);
+    }
+
+    if (marks.data) {
+      const cloud = (marks.data as MarksRow[]).map(rowToMarks);
+      const cloudKeys = new Set(cloud.map(marksKey));
+      const localOnly = getAllMarksRecords().filter((m) => !cloudKeys.has(marksKey(m)));
+      if (opts.asAdmin && localOnly.length) {
+        await supabase.from("student_marks_records").upsert(localOnly.map(marksToRow), { onConflict: "batch_id,roll_no" });
+      }
+      saveAllMarksRecords([...cloud, ...localOnly]);
+    }
+
+    if (dir.data) localStorage.setItem(DIRECTORY_KEY, JSON.stringify(dir.data));
+  } catch (err) {
+    console.warn("Academics cloud sync failed, using this device's data:", err);
+  }
+}
+
 // Helper to normalize roll numbers for reliable matching (strips spaces, hyphens, and converts to uppercase)
 export function normalizeRollNo(roll: string | undefined | null): string {
   if (!roll) return "";
@@ -380,6 +507,13 @@ export function saveAllStudentAccounts(accounts: StudentAccount[]): void {
 export function findStudentAccountByRoll(rollNo: string): StudentAccount | undefined {
   const norm = normalizeRollNo(rollNo);
   if (!norm) return undefined;
+  try {
+    const directory: StudentAccount[] = JSON.parse(localStorage.getItem(DIRECTORY_KEY) || "[]");
+    const fromCloud = directory.find((a) => normalizeRollNo(a.rollNo) === norm);
+    if (fromCloud) return fromCloud;
+  } catch {
+    /* no cloud directory cached yet */
+  }
   const accounts = getAllStudentAccounts();
   const existing = accounts.find((acc) => {
     return (
@@ -415,7 +549,7 @@ export function findStudentAccountByRoll(rollNo: string): StudentAccount | undef
   return undefined;
 }
 
-export function registerStudentAccount(data: {
+type RegisterInput = {
   username: string;
   fullName: string;
   email?: string;
@@ -426,7 +560,79 @@ export function registerStudentAccount(data: {
   batchYear?: string;
   branch?: string;
   password: string;
-}): { success: boolean; message: string; account?: StudentAccount } {
+};
+type AuthResult = { success: boolean; message: string; account?: StudentAccount };
+type CloudAuth = { status: "ok" | "not_found" | "bad_password" | "username_taken" | "roll_taken"; account?: StudentAccount };
+
+function rememberSignedIn(account: StudentAccount): void {
+  setCurrentStudent(account);
+  try {
+    localStorage.setItem(
+      "qlearn_visitor_profile",
+      JSON.stringify({ name: account.fullName, email: account.email || `${account.username}@student.portal`, savedAt: new Date().toISOString() })
+    );
+    localStorage.setItem("qlearn_puzzle_player_name", account.fullName);
+  } catch {
+    /* storage blocked */
+  }
+}
+
+/** Create the account on the server so it works on every device. */
+export async function registerStudentAccount(data: RegisterInput): Promise<AuthResult> {
+  const check = validateRegistration(data);
+  if (check) return { success: false, message: check };
+
+  const { data: res, error } = await supabase.rpc("student_register", { p: data });
+  if (error) {
+    console.warn("Cloud signup unavailable, saving on this device only:", error.message);
+    return registerLocal(data);
+  }
+  const r = res as CloudAuth;
+  if (r.status === "username_taken") {
+    return { success: false, message: `Username '${data.username.trim().toLowerCase()}' is already taken. Please choose another.` };
+  }
+  if (r.status === "roll_taken") {
+    return { success: false, message: `An account for Roll Number '${normalizeRollNo(data.rollNo)}' has already been registered. Please log in.` };
+  }
+  rememberSignedIn(r.account!);
+  return { success: true, message: "Account created successfully! Welcome to Student Portal.", account: r.account };
+}
+
+/** Check credentials on the server; accounts that only exist on this device are moved to the server on first login. */
+export async function loginStudent(usernameOrRoll: string, password: string): Promise<AuthResult> {
+  const { data: res, error } = await supabase.rpc("student_login", { p_identifier: usernameOrRoll.trim(), p_password: password });
+  if (error) {
+    console.warn("Cloud login unavailable, checking this device only:", error.message);
+    return loginLocal(usernameOrRoll, password);
+  }
+  const r = res as CloudAuth;
+  if (r.status === "ok") {
+    rememberSignedIn(r.account!);
+    return { success: true, message: `Welcome back, ${r.account!.fullName}!`, account: r.account };
+  }
+  if (r.status === "bad_password") {
+    return { success: false, message: "Incorrect password. Please verify and try again." };
+  }
+  // Not on the server yet: an account created on this device before cloud sync, or a pre-loaded IoT batch student.
+  const local = loginLocal(usernameOrRoll, password);
+  if (local.success && local.account) {
+    const a = local.account;
+    await supabase.rpc("student_register", { p: { ...a, password } });
+  }
+  return local;
+}
+
+function validateRegistration(data: RegisterInput): string | null {
+  if (!data.username.trim()) return "Username is required.";
+  if (!data.fullName.trim()) return "Full Name is required.";
+  if (!data.password || data.password.length < 4) return "Password must be at least 4 characters.";
+  if (data.program !== "Others" && !normalizeRollNo(data.rollNo)) return `Roll Number is mandatory for ${data.program} students.`;
+  if (data.program === "Others" && !data.destination?.trim()) return "Designation / Role is mandatory for 'Others'.";
+  return null;
+}
+
+// Device-only signup: used when the server is unreachable.
+function registerLocal(data: RegisterInput): AuthResult {
   const username = data.username.trim().toLowerCase();
   if (!username) {
     return { success: false, message: "Username is required." };
@@ -496,7 +702,8 @@ export function registerStudentAccount(data: {
   return { success: true, message: "Account created successfully! Welcome to Student Portal.", account: newAccount };
 }
 
-export function loginStudent(usernameOrRoll: string, password: string): { success: boolean; message: string; account?: StudentAccount } {
+// Device-only login: fallback when the server is unreachable, and the migration path for old device accounts.
+function loginLocal(usernameOrRoll: string, password: string): AuthResult {
   const rawInput = (usernameOrRoll || "").trim();
   const query = rawInput.toLowerCase();
   const normRoll = normalizeRollNo(rawInput);
@@ -693,12 +900,14 @@ export function createOrUpdateBatch(batch: Omit<AcademicBatch, "id" | "createdAt
   }
 
   saveAllBatches(newBatches);
+  publishBlob("academic_batches", newBatches);
   return updatedBatch;
 }
 
 export function deleteBatch(batchId: string): void {
   const batches = getAllBatches().filter((b) => b.id !== batchId);
   saveAllBatches(batches);
+  publishBlob("academic_batches", batches);
 }
 
 export function addStudentToBatch(batchId: string, rollNo: string, name: string, email?: string): boolean {
@@ -718,6 +927,7 @@ export function addStudentToBatch(batchId: string, rollNo: string, name: string,
   }
 
   saveAllBatches(batches);
+  publishBlob("academic_batches", batches);
   return true;
 }
 
@@ -755,6 +965,7 @@ export function addBulkStudentsToBatch(batchId: string, text: string): { added: 
   }
 
   saveAllBatches(batches);
+  publishBlob("academic_batches", batches);
   return { added, updated, errors };
 }
 
@@ -766,6 +977,7 @@ export function removeStudentFromBatch(batchId: string, rollNo: string): void {
 
   batch.students = batch.students.filter((s) => normalizeRollNo(s.rollNo) !== normRoll);
   saveAllBatches(batches);
+  publishBlob("academic_batches", batches);
 }
 
 // Find batch that a student belongs to
@@ -827,13 +1039,16 @@ export function createAssignment(assignment: Omit<BatchAssignment, "id" | "creat
     id: `assign_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
     createdAt: new Date().toISOString(),
   };
-  saveAllAssignments([newAssign, ...all]);
+  const updated = [newAssign, ...all];
+  saveAllAssignments(updated);
+  publishBlob("batch_assignments", updated);
   return newAssign;
 }
 
 export function deleteAssignment(assignmentId: string): void {
   const all = getAllAssignments().filter((a) => a.id !== assignmentId);
   saveAllAssignments(all);
+  publishBlob("batch_assignments", all);
 }
 
 // ==========================================
@@ -1042,23 +1257,14 @@ export async function submitStudentAssignment({
     await storePdfInIndexedDB(newSubmission.id, fileUrl);
   }
 
-  // Attempt database sync to 'assignment_submissions' table if available
-  try {
-    await client.from("assignment_submissions").upsert({
-      id: newSubmission.id,
-      assignment_id: newSubmission.assignmentId,
-      batch_id: newSubmission.batchId,
-      roll_no: newSubmission.rollNo,
-      student_name: newSubmission.studentName,
-      student_account_id: newSubmission.studentAccountId,
-      file_name: newSubmission.fileName,
-      file_size: newSubmission.fileSize,
-      file_url: newSubmission.fileDataUrl,
-      submitted_at: newSubmission.submittedAt,
-      comment: newSubmission.comment,
-    });
-  } catch (dbErr) {
-    console.warn("Supabase DB sync notice:", dbErr);
+  // Record the submission on the server so faculty see it on any device
+  const { error: dbErr } = await client.from("assignment_submissions").upsert(submissionToRow(newSubmission));
+  if (dbErr) {
+    console.error("Failed to record submission:", dbErr);
+    return {
+      success: false,
+      message: "Your PDF could not be recorded on the server, so faculty would not see it. Please check your connection and submit again.",
+    };
   }
 
   // Update local cache
@@ -1098,6 +1304,7 @@ export function isMarksPublished(): boolean {
 export function setMarksPublished(published: boolean): void {
   try {
     localStorage.setItem(STORAGE_KEYS.MARKS_PUBLISHED, published ? "true" : "false");
+    publishBlob("marks_published", published);
   } catch (err) {
     console.error("Failed to set marks publish status:", err);
   }
@@ -1193,18 +1400,12 @@ export function saveStudentMarks(
   try {
     const client = supabaseAdmin || supabase;
     if (client) {
-      client.from("student_marks_records").upsert({
-        id: updatedRecord.id,
-        batch_id: updatedRecord.batchId,
-        roll_no: updatedRecord.rollNo,
-        student_name: updatedRecord.studentName,
-        mid_marks: updatedRecord.midMarks,
-        mid2_marks: updatedRecord.mid2Marks,
-        assignment_marks: updatedRecord.assignmentMarks,
-        remarks: updatedRecord.remarks,
-        updated_at: updatedRecord.updatedAt,
-      }).then(({ error }) => {
-        if (error) console.warn("Supabase student_marks_records sync notice:", error.message);
+      // One record per student per batch, whichever device created it
+      client.from("student_marks_records").upsert(marksToRow(updatedRecord), { onConflict: "batch_id,roll_no" }).then(({ error }) => {
+        if (error) {
+          console.error("Failed to publish marks:", error);
+          warnNotPublished(`Marks were saved on this device only and NOT published: ${error.message}`);
+        }
       });
     }
   } catch (err) {
