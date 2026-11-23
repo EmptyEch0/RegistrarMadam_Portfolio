@@ -44,60 +44,21 @@ import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 import { VisitorProfileBadge } from "@/components/ui/VisitorProfileBadge";
 import { getSavedVisitor, logVisitorAccess, VisitorProfile } from "@/lib/visitorTracking";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
-import { QC_COURSE, DS_COURSE, IOT_COURSE } from "@/data/qlearnCourses";
+import {
+  DEFAULT_DOMAINS,
+  QC_COURSE,
+  DS_COURSE,
+  IOT_COURSE,
+  DomainData,
+  ModuleData,
+  VideoItem,
+  NoteSnippet,
+  PptItem,
+  QuizQuestion,
+} from "@/data/qlearnCourses";
 const WorksheetViewer = lazy(() =>
   import("@/components/ui/worksheet-viewer").then((m) => ({ default: m.WorksheetViewer }))
 );
-
-// Interfaces
-interface VideoItem {
-  id: string;
-  title: string;
-  url: string;
-  duration: string;
-  description: string;
-}
-
-interface NoteSnippet {
-  id: string;
-  title: string;
-  imageUrl: string;
-  description: string;
-  docUrl?: string;
-  embedUrl?: string;
-  pdfUrl?: string;
-  pdfFileName?: string;
-}
-
-interface PptItem {
-  id: string;
-  title: string;
-  pptUrl: string;
-  embedUrl: string;
-  description: string;
-  slideCount?: string;
-}
-
-interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
-
-interface ModuleData {
-  id: string;
-  name: string;
-  description: string;
-  syllabus?: string;
-  learningOutcomes?: string;
-  referenceMaterials?: string;
-  duration?: string;
-  videos: VideoItem[];
-  notes: NoteSnippet[];
-  ppts?: PptItem[];
-  quiz: QuizQuestion[];
-}
 
 const getModuleTopics = (mod: ModuleData): string[] => {
   if (mod.syllabus) {
@@ -128,1009 +89,20 @@ const getModuleOutcomes = (mod: ModuleData): string[] => {
   ];
 };
 
-interface DomainData {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
-  color: string;
-  glowColor: string;
-  modules: ModuleData[];
-}
-
-const DEFAULT_DOMAINS: DomainData[] = [
-  QC_COURSE,
-  DS_COURSE,
-  {
-    "id": "machine-learning",
-    "name": "Machine Learning",
-    "icon": "\ud83e\udd16",
-    "description": "Complete 10-module roadmap for Machine Learning.",
-    "color": "from-purple-600 to-fuchsia-700",
-    "glowColor": "rgba(168, 85, 247, 0.4)",
-    "modules": [
-      {
-        "id": "mod-1",
-        "name": "Module 1: Python + Math",
-        "description": "Topics: NumPy, Statistics, Probability, Linear Algebra",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Python + Math Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Python + Math."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Python + Math Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Python + Math."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Python + Math?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Python + Math."
-          }
-        ]
-      },
-      {
-        "id": "mod-2",
-        "name": "Module 2: Data Preprocessing",
-        "description": "Topics: Cleaning, Encoding, Scaling, Feature Engineering",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Data Preprocessing Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Data Preprocessing."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Data Preprocessing Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Data Preprocessing."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Data Preprocessing?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Data Preprocessing."
-          }
-        ]
-      },
-      {
-        "id": "mod-3",
-        "name": "Module 3: Supervised Learning",
-        "description": "Topics: Linear Regression, Logistic Regression, Decision Trees",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Supervised Learning Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Supervised Learning."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Supervised Learning Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Supervised Learning."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Supervised Learning?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Supervised Learning."
-          }
-        ]
-      },
-      {
-        "id": "mod-4",
-        "name": "Module 4: Unsupervised Learning",
-        "description": "Topics: K-Means, PCA, Clustering",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Unsupervised Learning Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Unsupervised Learning."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Unsupervised Learning Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Unsupervised Learning."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Unsupervised Learning?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Unsupervised Learning."
-          }
-        ]
-      },
-      {
-        "id": "mod-5",
-        "name": "Module 5: Model Evaluation",
-        "description": "Topics: Accuracy, Precision, Recall, Cross Validation",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Model Evaluation Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Model Evaluation."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Model Evaluation Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Model Evaluation."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Model Evaluation?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Model Evaluation."
-          }
-        ]
-      },
-      {
-        "id": "mod-6",
-        "name": "Module 6: Ensemble Learning",
-        "description": "Topics: Random Forest, XGBoost, Bagging, Boosting",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Ensemble Learning Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Ensemble Learning."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Ensemble Learning Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Ensemble Learning."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Ensemble Learning?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Ensemble Learning."
-          }
-        ]
-      },
-      {
-        "id": "mod-7",
-        "name": "Module 7: Advanced ML",
-        "description": "Topics: SVM, Naive Bayes, Recommendation Systems",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Advanced ML Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Advanced ML."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Advanced ML Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Advanced ML."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Advanced ML?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Advanced ML."
-          }
-        ]
-      },
-      {
-        "id": "mod-8",
-        "name": "Module 8: ML with Scikit-learn",
-        "description": "Topics: Pipelines, Hyperparameter Tuning, GridSearchCV",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "ML with Scikit-learn Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on ML with Scikit-learn."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "ML with Scikit-learn Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for ML with Scikit-learn."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of ML with Scikit-learn?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for ML with Scikit-learn."
-          }
-        ]
-      },
-      {
-        "id": "mod-9",
-        "name": "Module 9: ML Deployment",
-        "description": "Topics: Flask/FastAPI, Docker Basics, APIs",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "ML Deployment Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on ML Deployment."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "ML Deployment Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for ML Deployment."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of ML Deployment?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for ML Deployment."
-          }
-        ]
-      },
-      {
-        "id": "mod-10",
-        "name": "Module 10: Projects",
-        "description": "Topics: Spam Detection, House Price Prediction, Recommendation Engine",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Projects Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Projects."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Projects Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Projects."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Projects?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Projects."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "id": "deep-learning",
-    "name": "Deep Learning",
-    "icon": "🧠",
-    "description": "Comprehensive 5-Unit University Curriculum & Advanced Architecture Roadmap for Deep Learning.",
-    "color": "from-rose-600 to-red-700",
-    "glowColor": "rgba(225, 29, 72, 0.4)",
-    "modules": [
-      {
-        "id": "mod-1",
-        "name": "Unit 1: Basics",
-        "description": "Topics: Introduction to Deep Learning, Biological Neurons, Perceptron, Sigmoid Neurons, Activation Functions, Loss Functions, Gradient Descent",
-        "syllabus": "1. Biological Neurons vs Artificial Neurons & The McCulloch-Pitts Model\n2. The Perceptron Learning Algorithm & Linear Separability Limits\n3. Sigmoid Neurons & Nonlinear Activation Functions (ReLU, Leaky ReLU, Tanh, ELU)\n4. Loss Functions: Mean Squared Error, Binary & Categorical Cross-Entropy\n5. Gradient Descent, Learning Rates, and Batch vs Stochastic Optimization",
-        "learningOutcomes": "Master foundational mathematical models of biological and artificial neurons\nUnderstand the limitations of single-layer perceptrons and the necessity of multilayer architectures\nFormulate and optimize loss surfaces using gradient descent algorithms",
-        "duration": "8 Hours",
-        "referenceMaterials": "Deep Learning by Ian Goodfellow, Yoshua Bengio, and Aaron Courville (MIT Press) - Chapters 1 to 5",
-        "videos": [
-          {
-            "id": "vid-dl-1",
-            "title": "Unit 1: Deep Learning Basics & Neural Foundations",
-            "url": "https://www.youtube.com/embed/aircAruvnKk",
-            "duration": "19m",
-            "description": "Comprehensive introduction to artificial neurons, perceptrons, activation functions, and gradient descent."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-dl-1",
-            "title": "Unit 1: Neural Basics & Gradient Descent Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Detailed notes on biological inspiration, perceptron equations, activation functions, and cross-entropy loss."
-          }
-        ],
-        "ppts": [
-          {
-            "id": "ppt-dl-1",
-            "title": "Unit 1: Deep Learning Basics Slide Deck",
-            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
-            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
-            "description": "Lecture slides covering biological neurons, perceptron models, activation curves, and loss landscapes.",
-            "slideCount": "32 Slides"
-          }
-        ],
-        "quiz": [
-          {
-            "question": "Which of the following functions solved the vanishing gradient issue of Sigmoid in deep hidden layers?",
-            "options": ["Step Function", "Rectified Linear Unit (ReLU)", "Linear Identity", "Binary Threshold"],
-            "correctAnswer": 1,
-            "explanation": "ReLU (f(x) = max(0, x)) maintains a constant gradient of 1 for positive inputs, mitigating vanishing gradients."
-          },
-          {
-            "question": "What is the primary limitation of a single-layer perceptron?",
-            "options": ["Cannot compute linear functions", "Cannot solve non-linearly separable problems like XOR", "Requires GPU hardware", "Cannot use gradient descent"],
-            "correctAnswer": 1,
-            "explanation": "As proven by Minsky and Papert, a single perceptron can only separate linearly separable decision boundaries."
-          }
-        ]
-      },
-      {
-        "id": "mod-2",
-        "name": "Unit 2: Feed Forward Networks",
-        "description": "Topics: Multilayer Perceptrons, Feed Forward Neural Networks (FFNN), Backpropagation Algorithm, Chain Rule, Weight Initialization, Representation Power",
-        "syllabus": "1. Multilayer Perceptrons & Feed Forward Network Topologies\n2. Forward Propagation Mathematics and Tensor Computation\n3. The Backpropagation Algorithm: Comprehensive Derivation via Multivariate Chain Rule\n4. Weight Initialization Paradigms: Zero, Random, Xavier/Glorot, and He Initialization\n5. Universal Approximation Theorem & Expressive Representation Power of Deep Networks\n6. Output Layers & Softmax Distribution for Multiclass Classification",
-        "learningOutcomes": "Derive and implement the backpropagation gradient computation algorithm from first principles\nSelect and implement effective weight initialization to stabilize training\nDesign and configure multilayer feed forward networks for classification and regression",
-        "duration": "8 Hours",
-        "referenceMaterials": "Neural Networks and Deep Learning by Michael Nielsen - Chapters 1 & 2",
-        "videos": [
-          {
-            "id": "vid-dl-2",
-            "title": "Unit 2: Feed Forward Networks & Backpropagation",
-            "url": "https://www.youtube.com/embed/Ilg3gGewQ5U",
-            "duration": "18m",
-            "description": "In-depth derivation of backpropagation using the chain rule and forward tensor flow."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-dl-2",
-            "title": "Unit 2: FFNN & Backpropagation Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=800",
-            "description": "Mathematical derivations of error backpropagation, Jacobian matrices, and weight initialization strategies."
-          }
-        ],
-        "ppts": [
-          {
-            "id": "ppt-dl-2",
-            "title": "Unit 2: Feed Forward Networks Slide Deck",
-            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
-            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
-            "description": "Detailed slides on feed forward topologies, chain rule backpropagation, and Xavier/He initialization.",
-            "slideCount": "36 Slides"
-          }
-        ],
-        "quiz": [
-          {
-            "question": "Why is initializing all weights to zero problematic in a feed forward neural network?",
-            "options": ["It causes immediate overflow", "All hidden neurons compute identical outputs and gradients (symmetry problem)", "It reduces learning rate to zero", "It makes activation negative"],
-            "correctAnswer": 1,
-            "explanation": "Zero initialization creates total symmetry: every hidden neuron updates identically, preventing feature specialization."
-          },
-          {
-            "question": "What mathematical principle powers the calculation of gradients in the backpropagation algorithm?",
-            "options": ["Bayes' Theorem", "Multivariate Chain Rule of Calculus", "Taylor Series Expansion", "Fourier Transform"],
-            "correctAnswer": 1,
-            "explanation": "Backpropagation recursively applies the multivariate calculus chain rule from output back to input."
-          }
-        ]
-      },
-      {
-        "id": "mod-3",
-        "name": "Unit 3: Better Training for Neural Networks",
-        "description": "Topics: Vanishing & Exploding Gradients, Regularization (L1, L2, Dropout), Batch Normalization, Advanced Optimizers (Momentum, RMSProp, Adam), Hyperparameter Tuning, Early Stopping",
-        "syllabus": "1. Challenges in Deep Neural Network Training: Vanishing and Exploding Gradients\n2. Regularization Strategies: L1/L2 Weight Decay, Dropout, and Data Augmentation\n3. Internal Covariate Shift & Batch Normalization across Mini-batches\n4. Adaptive Optimization Algorithms: Momentum, Nesterov, AdaGrad, RMSProp, and Adam\n5. Learning Rate Scheduling, Early Stopping, and Model Checkpointing\n6. Practical Hyperparameter Optimization (Grid Search, Random Search, Bayesian Optimization)",
-        "learningOutcomes": "Diagnose and remediate vanishing and exploding gradients in deep architectures\nApply regularization and batch normalization to prevent overfitting and accelerate convergence\nSelect and fine-tune modern adaptive optimizers for state-of-the-art training performance",
-        "duration": "8 Hours",
-        "referenceMaterials": "Deep Learning by Goodfellow et al. - Chapters 7 & 8 (Optimization for Training Deep Models)",
-        "videos": [
-          {
-            "id": "vid-dl-3",
-            "title": "Unit 3: Better Training, Regularization & Optimizers",
-            "url": "https://www.youtube.com/embed/IHq1t7NxS8k",
-            "duration": "22m",
-            "description": "Mastering vanishing gradients, Dropout, Batch Normalization, and the Adam optimizer."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-dl-3",
-            "title": "Unit 3: Optimization & Regularization Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=800",
-            "description": "Formulas for L1/L2 regularization, dropout masks, batch norm mean/variance scaling, and Adam moment vectors."
-          }
-        ],
-        "ppts": [
-          {
-            "id": "ppt-dl-3",
-            "title": "Unit 3: Better Training for Neural Networks Slide Deck",
-            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
-            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
-            "description": "Techniques for robust deep network training: vanishing gradients, batch norm, dropout, and Adam.",
-            "slideCount": "38 Slides"
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the primary role of Batch Normalization in deep neural networks?",
-            "options": ["To increase training parameters", "To normalize layer inputs per mini-batch, stabilizing internal covariate shift", "To encrypt gradients", "To double the dataset size"],
-            "correctAnswer": 1,
-            "explanation": "Batch Normalization normalizes the activations of each layer across mini-batches, allowing higher learning rates and stabilizing training."
-          },
-          {
-            "question": "Which optimizer combines the benefits of both Momentum and RMSProp?",
-            "options": ["SGD", "AdaGrad", "Adam (Adaptive Moment Estimation)", "Hessian Free"],
-            "correctAnswer": 2,
-            "explanation": "Adam maintains both an exponentially decaying average of past gradients (Momentum) and past squared gradients (RMSProp)."
-          }
-        ]
-      },
-      {
-        "id": "mod-4",
-        "name": "Unit 4: RNN, CNN, Boltzmann Machines",
-        "description": "Topics: Convolutional Neural Networks (CNN), Convolution Layers, Pooling, Recurrent Neural Networks (RNN), Backpropagation Through Time, LSTM, GRU, Boltzmann Machines, RBM",
-        "syllabus": "1. Convolutional Neural Networks: Convolutions, Strides, Padding, and Receptive Fields\n2. Feature Maps, Pooling Layers, and Classic Architectures (LeNet, AlexNet, ResNet)\n3. Sequence Modeling & Recurrent Neural Networks (RNN) with Backpropagation Through Time\n4. Vanishing Gradients in RNNs & Long Short-Term Memory (LSTM) / Gated Recurrent Units (GRU)\n5. Energy-Based Models and Unsupervised Feature Learning\n6. Boltzmann Machines, Restricted Boltzmann Machines (RBM), and Deep Belief Networks",
-        "learningOutcomes": "Build, train, and evaluate spatial feature extraction models using Convolutional Neural Networks\nImplement sequence-to-sequence models with LSTMs and GRUs for time-series and natural language\nUnderstand energy-based probabilistic graphical representations including Boltzmann Machines and RBMs",
-        "duration": "10 Hours",
-        "referenceMaterials": "Deep Learning by Goodfellow et al. - Chapters 9, 10, and 20",
-        "videos": [
-          {
-            "id": "vid-dl-4",
-            "title": "Unit 4: CNNs, RNNs, LSTMs & Boltzmann Machines",
-            "url": "https://www.youtube.com/embed/KuXjwB4LzSA",
-            "duration": "24m",
-            "description": "Comprehensive review of spatial convolutions, sequence recurrence, gating mechanisms in LSTM, and Boltzmann energy models."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-dl-4",
-            "title": "Unit 4: CNN, RNN & Boltzmann Architecture Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80&w=800",
-            "description": "Diagrams and formulas for convolution filters, pooling, LSTM forget/input/output gates, and RBM energy functions."
-          }
-        ],
-        "ppts": [
-          {
-            "id": "ppt-dl-4",
-            "title": "Unit 4: CNN, RNN & Boltzmann Machines Slide Deck",
-            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
-            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
-            "description": "Visual slide deck for 2D convolutions, temporal recurrent unfoldings, LSTM memory cells, and Boltzmann thermal distributions.",
-            "slideCount": "42 Slides"
-          }
-        ],
-        "quiz": [
-          {
-            "question": "In an LSTM cell, which gate decides how much of the previous cell state should be discarded?",
-            "options": ["Input Gate", "Forget Gate", "Output Gate", "Update Gate"],
-            "correctAnswer": 1,
-            "explanation": "The Forget Gate outputs values between 0 and 1 via a sigmoid activation, regulating which past memory state is retained or erased."
-          },
-          {
-            "question": "What restriction defines a Restricted Boltzmann Machine (RBM)?",
-            "options": ["No connections between visible and hidden units", "No intra-layer connections among visible or among hidden units (bipartite graph)", "Only forward connections", "Weights must be strictly positive"],
-            "correctAnswer": 1,
-            "explanation": "In an RBM, connections exist strictly between visible and hidden layers, forming a bipartite graph with no connections within the same layer."
-          }
-        ]
-      },
-      {
-        "id": "mod-5",
-        "name": "Unit 5: VAE, Transformers",
-        "description": "Topics: Autoencoders, Variational Autoencoders (VAE), Latent Variable Models, Reparameterization Trick, Attention Mechanisms, Scaled Dot-Product Attention, Multi-Head Attention, Transformer Architecture",
-        "syllabus": "1. Deterministic Autoencoders, Undercomplete Representations, and Latent Spaces\n2. Variational Autoencoders (VAE): Probabilistic Generative Models & Evidence Lower Bound (ELBO)\n3. The Reparameterization Trick, Latent Manifold Sampling, and KL-Divergence\n4. Attention Mechanisms: Sequence-to-Sequence Modeling with Global and Local Attention\n5. The Transformer Architecture: Scaled Dot-Product Attention, Multi-Head Attention, Positional Encoding\n6. Modern Pretrained Foundation Models: Encoder-Only (BERT), Decoder-Only (GPT), and Vision Transformers (ViT)",
-        "learningOutcomes": "Formulate and implement Variational Autoencoders for generative modeling and latent representation\nUnderstand the mathematical foundations of scaled dot-product attention and multi-head attention\nImplement transformer architectures and evaluate their application across language, vision, and multimodal AI",
-        "duration": "10 Hours",
-        "referenceMaterials": "Attention Is All You Need (Vaswani et al.), Auto-Encoding Variational Bayes (Kingma & Welling)",
-        "videos": [
-          {
-            "id": "vid-dl-5",
-            "title": "Unit 5: Variational Autoencoders & Transformers Masterclass",
-            "url": "https://www.youtube.com/embed/wjZofJX0v4U",
-            "duration": "26m",
-            "description": "Deep dive into VAE generative latent spaces, the reparameterization trick, self-attention mechanisms, and Transformer architectures."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-dl-5",
-            "title": "Unit 5: VAE & Transformer Architecture Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=800",
-            "description": "Formulas for VAE loss (Reconstruction + KL divergence), Scaled Dot-Product Attention, and Transformer Encoder/Decoder stacks."
-          }
-        ],
-        "ppts": [
-          {
-            "id": "ppt-dl-5",
-            "title": "Unit 5: VAE & Transformers Slide Deck",
-            "pptUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/edit",
-            "embedUrl": "https://docs.google.com/presentation/d/e/2PACX-1vT17xY_m1v9X0k0b2_H0P93P9Q/embed?start=false&loop=false&delayms=3000",
-            "description": "Slides on probabilistic autoencoders, latent sampling, self-attention, multi-head attention, and transformer scaling.",
-            "slideCount": "44 Slides"
-          }
-        ],
-        "quiz": [
-          {
-            "question": "Why is the Reparameterization Trick required during VAE training?",
-            "options": ["To speed up matrix multiplication", "To allow backpropagation gradients to flow through stochastic latent sampling", "To compress the model weights", "To calculate softmax"],
-            "correctAnswer": 1,
-            "explanation": "Direct sampling z ~ N(mu, sigma^2) is non-differentiable. The reparameterization trick expresses z = mu + sigma * epsilon, allowing gradients to backpropagate through mu and sigma."
-          },
-          {
-            "question": "What is the formula for Scaled Dot-Product Attention in Transformers?",
-            "options": ["softmax(Q * K / sqrt(d_k)) * V", "sigmoid(Q * K) + V", "tanh(Q * V) * K", "relu(Q * K * V)"],
-            "correctAnswer": 0,
-            "explanation": "Attention(Q, K, V) = softmax(Q * K^T / sqrt(d_k)) * V, where sqrt(d_k) scales values to prevent extreme softmax gradient saturation."
-          }
-        ]
-      }
-    ]
-  },
-  IOT_COURSE,
-  {
-    "id": "agentic-ai",
-    "name": "Agentic AI",
-    "icon": "\ud83e\udde9",
-    "description": "Complete 10-module roadmap for Agentic AI.",
-    "color": "from-amber-500 to-orange-600",
-    "glowColor": "rgba(245, 158, 11, 0.4)",
-    "modules": [
-      {
-        "id": "mod-1",
-        "name": "Module 1: AI Foundations",
-        "description": "Topics: LLM Basics, Prompt Engineering, Transformers",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "AI Foundations Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on AI Foundations."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "AI Foundations Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for AI Foundations."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of AI Foundations?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for AI Foundations."
-          }
-        ]
-      },
-      {
-        "id": "mod-2",
-        "name": "Module 2: Python for AI Agents",
-        "description": "Topics: APIs, Async Programming, JSON Handling",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Python for AI Agents Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Python for AI Agents."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Python for AI Agents Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Python for AI Agents."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Python for AI Agents?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Python for AI Agents."
-          }
-        ]
-      },
-      {
-        "id": "mod-3",
-        "name": "Module 3: LangChain Basics",
-        "description": "Topics: Chains, Memory, Tools, Agents",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "LangChain Basics Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on LangChain Basics."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "LangChain Basics Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for LangChain Basics."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of LangChain Basics?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for LangChain Basics."
-          }
-        ]
-      },
-      {
-        "id": "mod-4",
-        "name": "Module 4: Retrieval-Augmented Generation",
-        "description": "Topics: Vector Databases, Embeddings, RAG Pipelines",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Retrieval-Augmented Generation Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Retrieval-Augmented Generation."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Retrieval-Augmented Generation Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Retrieval-Augmented Generation."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Retrieval-Augmented Generation?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Retrieval-Augmented Generation."
-          }
-        ]
-      },
-      {
-        "id": "mod-5",
-        "name": "Module 5: Autonomous Agents",
-        "description": "Topics: Planning, Reflection, Multi-step Reasoning",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Autonomous Agents Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Autonomous Agents."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Autonomous Agents Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Autonomous Agents."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Autonomous Agents?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Autonomous Agents."
-          }
-        ]
-      },
-      {
-        "id": "mod-6",
-        "name": "Module 6: Multi-Agent Systems",
-        "description": "Topics: Agent Collaboration, Communication, Task Delegation",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Multi-Agent Systems Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Multi-Agent Systems."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Multi-Agent Systems Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Multi-Agent Systems."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Multi-Agent Systems?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Multi-Agent Systems."
-          }
-        ]
-      },
-      {
-        "id": "mod-7",
-        "name": "Module 7: AI Tool Use",
-        "description": "Topics: Web Search, Code Execution, File Handling",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "AI Tool Use Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on AI Tool Use."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "AI Tool Use Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for AI Tool Use."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of AI Tool Use?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for AI Tool Use."
-          }
-        ]
-      },
-      {
-        "id": "mod-8",
-        "name": "Module 8: AI Workflows",
-        "description": "Topics: CrewAI, AutoGen, LangGraph",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "AI Workflows Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on AI Workflows."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "AI Workflows Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for AI Workflows."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of AI Workflows?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for AI Workflows."
-          }
-        ]
-      },
-      {
-        "id": "mod-9",
-        "name": "Module 9: Production AI Agents",
-        "description": "Topics: Deployment, Monitoring, Safety, Memory Systems",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Production AI Agents Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Production AI Agents."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Production AI Agents Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Production AI Agents."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Production AI Agents?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Production AI Agents."
-          }
-        ]
-      },
-      {
-        "id": "mod-10",
-        "name": "Module 10: Projects",
-        "description": "Topics: AI Research Assistant, AI Coding Agent, AI Campus Assistant Bot",
-        "videos": [
-          {
-            "id": "vid-1",
-            "title": "Projects Overview",
-            "url": "https://www.youtube.com/embed/j13YmZ9uUeQ",
-            "duration": "15m",
-            "description": "An introductory video on Projects."
-          }
-        ],
-        "notes": [
-          {
-            "id": "note-1",
-            "title": "Projects Notes",
-            "imageUrl": "https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=800",
-            "description": "Key concepts and takeaways for Projects."
-          }
-        ],
-        "quiz": [
-          {
-            "question": "What is the core concept of Projects?",
-            "options": [
-              "Option A",
-              "Option B",
-              "Option C",
-              "Option D"
-            ],
-            "correctAnswer": 0,
-            "explanation": "Option A is correct for Projects."
-          }
-        ]
-      }
-    ]
-  }
-];
-
 // Puzzles per domain (shown in the Puzzles tab of every module in that domain)
 const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
-  "quantum-computing": [
+  "ai": [
     {
-      id: "quantum-computing-key-words",
-      title: "Figure out the Key Words in Quantum Computing",
-      words: ["Qubit", "Superposition", "Entanglement", "Hadamard", "Teleportation", "Interference", "Decoherence"],
+      id: "ai-key-words",
+      title: "Figure out the Key Words in Artificial Intelligence",
+      words: ["Heuristics", "Knowledge Base", "Inference", "Search", "Perception", "Robotics", "Turing Test"],
+    },
+  ],
+  "machine-learning": [
+    {
+      id: "machine-learning-key-words",
+      title: "Figure out the Key Words in Machine Learning",
+      words: ["Supervised", "Clustering", "Overfitting", "Gradient Descent", "Classification", "Validation"],
     },
   ],
   "data-science": [
@@ -1165,18 +137,18 @@ const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
       words: ["Analytics", "Regression", "Wrangling", "Visualization", "Statistics", "Hypothesis", "Pipeline"],
     },
   ],
-  "machine-learning": [
-    {
-      id: "machine-learning-key-words",
-      title: "Figure out the Key Words in Machine Learning",
-      words: ["Supervised", "Clustering", "Overfitting", "Gradient Descent", "Classification", "Validation"],
-    },
-  ],
   "deep-learning": [
     {
       id: "deep-learning-key-words",
       title: "Figure out the Key Words in Deep Learning",
       words: ["Neural Network", "Backpropagation", "Convolution", "Transformer", "Activation", "Tensor"],
+    },
+  ],
+  "agentic-ai": [
+    {
+      id: "agentic-ai-key-words",
+      title: "Figure out the Key Words in Agentic AI",
+      words: ["Autonomous", "Reasoning", "Planning", "Memory", "Multi Agent", "Tool Use", "Reflection"],
     },
   ],
   "iot-internet-of-things": [
@@ -1186,11 +158,32 @@ const DOMAIN_PUZZLES: Record<string, WordPuzzleData[]> = {
       words: ["Connectivity", "Sensing", "Data Processing", "Automation", "Control", "Intelligence"],
     },
   ],
-  "agentic-ai": [
+  "aiot": [
     {
-      id: "agentic-ai-key-words",
-      title: "Figure out the Key Words in Agentic AI",
-      words: ["Autonomous", "Reasoning", "Planning", "Memory", "Multi Agent", "Tool Use", "Reflection"],
+      id: "aiot-key-words",
+      title: "Figure out the Key Words in AIoT (AI of Things)",
+      words: ["Edge Computing", "Sensors", "Microcontrollers", "Embedded ML", "Telemetry", "Actuators", "Real Time"],
+    },
+  ],
+  "ai-security": [
+    {
+      id: "ai-security-key-words",
+      title: "Figure out the Key Words in AI Security",
+      words: ["Adversarial", "Poisoning", "Evasion", "Model Inversion", "Differential Privacy", "Watermarking", "Robustness"],
+    },
+  ],
+  "quantum-computing": [
+    {
+      id: "quantum-computing-key-words",
+      title: "Figure out the Key Words in Quantum Computing",
+      words: ["Qubit", "Superposition", "Entanglement", "Hadamard", "Teleportation", "Interference", "Decoherence"],
+    },
+  ],
+  "quantum-ai": [
+    {
+      id: "quantum-ai-key-words",
+      title: "Figure out the Key Words in Quantum AI",
+      words: ["Quantum Circuit", "Variational", "QNN", "Quantum Kernel", "Superposition", "Hamiltonian", "Entanglement"],
     },
   ],
 };
@@ -1363,31 +356,34 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
     if (saved) {
       try {
         const parsed: DomainData[] = JSON.parse(saved);
-        const updated = parsed.map((domain) => {
-          const defaultDomain = DEFAULT_DOMAINS.find((d) => d.id === domain.id);
-          if (!defaultDomain) return domain;
+        // Preserve existing user courses while ensuring all 10 curated courses appear in canonical order
+        const updated = DEFAULT_DOMAINS.map((defaultDomain) => {
+          const userDomain = parsed.find((d) => d.id === defaultDomain.id);
+          if (!userDomain) return defaultDomain;
           // Upgrade stale 4-unit caches only; never wipe modules the admin added.
-          if (domain.id === "deep-learning" && domain.modules.length < 5) {
+          if (userDomain.id === "deep-learning" && userDomain.modules.length < 5) {
             return defaultDomain;
           }
           // Course was rebuilt with new module ids (e.g. old 10-module roadmap → real 5-unit course).
-          if (!domain.modules.some((m) => defaultDomain.modules.some((dm) => dm.id === m.id))) {
+          if (!userDomain.modules.some((m) => defaultDomain.modules.some((dm) => dm.id === m.id))) {
             return defaultDomain;
           }
           return {
             ...defaultDomain,
-            ...domain,
-            modules: domain.modules.map((mod) => {
+            ...userDomain,
+            modules: userDomain.modules.map((mod) => {
               const defaultMod = defaultDomain.modules.find((m) => m.id === mod.id);
-              // Saved content wins: re-adding default PPTs here resurrected slides the admin deleted.
               if (defaultMod) return { ...defaultMod, ...mod };
               return mod;
             })
           };
         });
-        setDomains(updated);
-        cacheDomainsLocally(updated);
-        if (seedCloud) pushDomainsToCloud(updated);
+        // Retain any user-created custom courses that are not in DEFAULT_DOMAINS
+        const extraDomains = parsed.filter((d) => !DEFAULT_DOMAINS.some((dd) => dd.id === d.id));
+        const finalDomains = [...updated, ...extraDomains];
+        setDomains(finalDomains);
+        cacheDomainsLocally(finalDomains);
+        if (seedCloud) pushDomainsToCloud(finalDomains);
       } catch (e) {
         console.error("Failed parsing QLearn domains data, resetting to defaults", e);
         setDomains(DEFAULT_DOMAINS);
@@ -2125,7 +1121,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                   </button>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
                   {domains.map((domain, idx) => {
                     const puzzle = DOMAIN_PUZZLES[domain.id]?.[0];
                     return (
@@ -2189,6 +1185,16 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                     <p className="text-muted-foreground mt-2">Each domain includes a structured course roadmap with notes, slides, quizzes and an interactive puzzle game.</p>
                   </div>
                   <button
+                          type="button"
+                          onClick={() => {
+                            setActiveTab("videos");
+                            window.scrollTo({ top: 460, behavior: "smooth" });
+                          }}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-xs sm:text-sm font-bold transition-all duration-200 border border-white/30 shadow-lg hover:scale-[1.02] whitespace-nowrap active:scale-95"
+                        >
+                          <Video size={16} /> <span>Watch Videos</span>
+                        </button>
+                        <button
                     type="button"
                     onClick={() => {
                       setActiveTab("puzzles");
@@ -2201,7 +1207,7 @@ export default function QLearnPage({ isAdminPortal = false }: { isAdminPortal?: 
                     <Trophy size={16} className="text-amber-500" />
                   </button>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-5">
                   {domains.map((domain, idx) => (
                     <div
                       key={domain.id}

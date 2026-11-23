@@ -42,6 +42,7 @@ import {
   StudentMarksRecord,
   isMarksPublished,
   getPdfFromIndexedDB,
+  getAllBatches,
 } from "@/lib/academicsStorage";
 import { PdfPreviewModal } from "@/components/ui/PdfPreviewModal";
 
@@ -60,6 +61,7 @@ export function StudentPortalModal({
   const [student, setStudent] = useState<StudentAccount | null>(null);
 
   // Login form state
+  const [loginProgram, setLoginProgram] = useState<DegreeProgram>("B.Tech");
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -195,6 +197,9 @@ export function StudentPortalModal({
     : undefined;
   const marksPublished = isMarksPublished();
 
+  // Batches (synced from Supabase) supply the roll-number list for the selected login program
+  const loginBatches = getAllBatches().filter((b) => b.program === loginProgram && b.students.length > 0);
+
   // Assignments query
   const allAssignments = getAllAssignments();
   const studentBatch = student?.rollNo ? findBatchForStudent(student.rollNo) : undefined;
@@ -294,11 +299,13 @@ export function StudentPortalModal({
   return createPortal(
     <>
       <div
-        className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+        className={`fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-fade-in ${student ? "p-3 sm:p-6" : ""}`}
         onClick={onClose}
       >
         <div
-          className="bg-card border border-border w-full max-w-2xl max-h-[90vh] my-auto rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-slide-up"
+          className={`bg-card border border-border w-full shadow-2xl overflow-hidden flex flex-col animate-slide-up ${
+            student ? "max-w-2xl max-h-[90vh] my-auto rounded-2xl" : "h-full"
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* ================= MODAL HEADER ================= */}
@@ -337,7 +344,7 @@ export function StudentPortalModal({
           <div className="flex-1 overflow-y-auto p-4 sm:p-6">
             {/* If NOT logged in: Show Login / Signup forms */}
             {!student ? (
-              <div className="space-y-5">
+              <div className="space-y-5 w-full max-w-xl mx-auto sm:pt-8">
                 {/* Auth Switcher Tabs */}
                 <div className="grid grid-cols-2 p-1 bg-muted/60 rounded-xl border border-border/70">
                   <button
@@ -381,26 +388,74 @@ export function StudentPortalModal({
                     )}
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-semibold text-foreground flex items-center justify-between">
-                        <span className="flex items-center gap-1.5">
-                          <User size={13} className="text-accent" /> Username or Roll Number *
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-mono">
-                          (23VV1A1232 or 23vv1a1232)
-                        </span>
+                      <label htmlFor="login-program" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                        <GraduationCap size={13} className="text-accent" /> Program / Category *
                       </label>
-                      <input
-                        type="text"
-                        required
-                        value={loginIdentifier}
-                        onChange={(e) => setLoginIdentifier(e.target.value)}
-                        placeholder="e.g. 23VV1A1232 or 23vv1a1232"
-                        className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all font-mono"
-                        autoCapitalize="none"
-                        autoCorrect="off"
-                        spellCheck="false"
-                      />
+                      <select
+                        id="login-program"
+                        value={loginProgram}
+                        onChange={(e) => {
+                          setLoginProgram(e.target.value as DegreeProgram);
+                          setLoginIdentifier("");
+                        }}
+                        className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all"
+                      >
+                        {(["B.Tech", "M.Tech", "MCA", "Others"] as DegreeProgram[]).map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
                     </div>
+
+                    {loginProgram === "Others" ? (
+                      <div className="space-y-1.5">
+                        <label htmlFor="login-identifier" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <User size={13} className="text-accent" /> Username *
+                        </label>
+                        <input
+                          id="login-identifier"
+                          type="text"
+                          required
+                          value={loginIdentifier}
+                          onChange={(e) => setLoginIdentifier(e.target.value)}
+                          placeholder="Your username"
+                          className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all"
+                          autoCapitalize="none"
+                          autoCorrect="off"
+                          spellCheck="false"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5">
+                        <label htmlFor="login-identifier" className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                          <Hash size={13} className="text-accent" /> Roll Number *
+                        </label>
+                        {loginBatches.length > 0 ? (
+                          <select
+                            id="login-identifier"
+                            required
+                            value={loginIdentifier}
+                            onChange={(e) => setLoginIdentifier(e.target.value)}
+                            className="w-full text-sm px-3.5 py-2.5 rounded-xl bg-muted/40 border border-border focus:border-accent focus:bg-card focus:outline-none transition-all font-mono"
+                          >
+                            <option value="" disabled>Select your roll number</option>
+                            {loginBatches.map((b) => (
+                              <optgroup key={b.id} label={b.name}>
+                                {b.students.map((s) => (
+                                  <option key={s.rollNo} value={s.rollNo}>
+                                    {s.rollNo}
+                                    {s.name && !s.name.startsWith("Student ") ? ` — ${s.name}` : ""}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                        ) : (
+                          <p className="text-xs text-muted-foreground p-3 rounded-xl bg-muted/40 border border-border">
+                            No {loginProgram} batches have been added yet.
+                          </p>
+                        )}
+                      </div>
+                    )}
 
                     <div className="space-y-1.5">
                       <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
