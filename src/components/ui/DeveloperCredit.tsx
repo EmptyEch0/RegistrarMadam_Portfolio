@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { AnimatePresence, MotionConfig, motion, type Variants } from "framer-motion";
+import { AnimatePresence, MotionConfig, motion, useReducedMotion, type Variants } from "framer-motion";
 import { Code2, ExternalLink, Github, Globe, Linkedin, Mail } from "lucide-react";
 import DeveloperPhoto from "@/assets/developer-photo.jpg";
+import DeveloperCartoon from "@/assets/developer-cartoon.webp";
 
 const ROLES = ["AI/ML Engineer", "Full-Stack Developer", "LLM & Agentic AI Builder"];
-const SKILLS = ["LLMs", "Agentic AI", "RAG Pipelines", "React + TypeScript", "Supabase"];
 const LINKS = [
   { href: "https://github.com/EmptyEch0", label: "GitHub", icon: Github },
   { href: "https://likhith.online", label: "Portfolio", icon: Globe },
@@ -19,6 +19,8 @@ const item: Variants = {
 
 export function DeveloperCredit() {
   const [role, setRole] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const reduceMotion = useReducedMotion();
   useEffect(() => {
     const id = setInterval(() => setRole((r) => (r + 1) % ROLES.length), 2600);
     return () => clearInterval(id);
@@ -54,13 +56,47 @@ export function DeveloperCredit() {
                 className="relative"
               >
                 <div className="absolute -inset-1.5 rounded-[1.25rem] bg-gradient-to-tr from-accent/60 via-accent/10 to-primary/40 blur-md opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-accent/50 bg-muted/40">
+                {/* Cartoon by default; hover/tap pours the real photo in with a liquid edge */}
+                <div
+                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-accent/50 bg-muted/40 cursor-pointer"
+                  onMouseEnter={() => setRevealed(true)}
+                  onMouseLeave={() => setRevealed(false)}
+                  onClick={() => setRevealed((r) => !r)}
+                >
                   <img
-                    src={DeveloperPhoto}
-                    alt="M Likhith Kumar - Website Designer & Developer"
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                    src={DeveloperCartoon}
+                    alt="Illustrated portrait of M Likhith Kumar"
+                    className="absolute inset-0 w-full h-full object-cover"
                     loading="lazy"
                   />
+                  <svg className="absolute w-0 h-0" aria-hidden="true">
+                    <filter id="dev-liquid">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.015 0.04" numOctaves="2" seed="3" />
+                      <motion.feDisplacementMap
+                        key={String(revealed)}
+                        in="SourceGraphic"
+                        xChannelSelector="R"
+                        yChannelSelector="G"
+                        initial={{ scale: 45 }}
+                        animate={{ scale: 0 }}
+                        transition={{ duration: 1.1, ease: "easeOut" }}
+                      />
+                    </filter>
+                  </svg>
+                  <div className="absolute inset-0" style={reduceMotion ? undefined : { filter: "url(#dev-liquid)" }}>
+                    <motion.img
+                      src={DeveloperPhoto}
+                      alt="M Likhith Kumar - Website Designer & Developer"
+                      className="w-full h-full object-cover object-top"
+                      loading="lazy"
+                      initial={false}
+                      animate={{
+                        clipPath: revealed ? "circle(80% at 50% 100%)" : "circle(0% at 50% 100%)",
+                        scale: revealed ? 1.05 : 1.15,
+                      }}
+                      transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  </div>
                 </div>
                 <span className="absolute -bottom-2 -right-2 flex" title="Platform Developer">
                   <span className="absolute inset-0 rounded-full bg-accent/60 motion-safe:animate-ping" />
@@ -104,19 +140,6 @@ export function DeveloperCredit() {
               <motion.p variants={item} className="text-xs sm:text-sm text-foreground/80 leading-relaxed max-w-2xl">
                 Architected this digital portfolio, the QLearn interactive platform, course puzzles, and the academic governance systems.
               </motion.p>
-
-              <motion.ul variants={container} className="flex flex-wrap justify-center md:justify-start gap-1.5">
-                {SKILLS.map((s) => (
-                  <motion.li
-                    key={s}
-                    variants={item}
-                    whileHover={{ y: -2 }}
-                    className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-accent/10 text-foreground/80 border border-accent/25 hover:border-accent/60 hover:bg-accent/20 transition-colors cursor-default"
-                  >
-                    {s}
-                  </motion.li>
-                ))}
-              </motion.ul>
 
               <motion.div variants={item} className="pt-2 flex flex-wrap items-center justify-center md:justify-start gap-2.5">
                 <motion.a
