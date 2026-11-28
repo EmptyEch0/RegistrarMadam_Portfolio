@@ -343,3 +343,39 @@
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
 }
 
+
+/* Glowing border: two light streaks travel around the edge (DeveloperCredit card).
+   @property lets the conic angle animate; browsers without it show a static glow. */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes border-spin {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
+.glow-border {
+  background:
+    conic-gradient(
+      from var(--border-angle),
+      transparent 0deg 100deg,
+      hsl(var(--accent) / 0.35) 130deg,
+      hsl(var(--accent)) 165deg,
+      transparent 180deg 280deg,
+      hsl(var(--accent) / 0.35) 310deg,
+      hsl(var(--accent)) 345deg,
+      transparent 360deg
+    ),
+    hsl(var(--accent) / 0.25);
+  animation: border-spin 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-border {
+    animation: none;
+  }
+}

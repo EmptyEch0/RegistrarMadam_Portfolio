@@ -56,12 +56,15 @@ export function DeveloperCredit() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="group relative max-w-4xl mx-auto rounded-2xl p-[1.5px] overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-500"
+        className="group relative max-w-4xl mx-auto"
       >
-        {/* Rotating gradient border */}
-        <div className="absolute inset-[-60%] bg-[conic-gradient(from_0deg,transparent_0deg,hsl(var(--accent))_70deg,transparent_140deg,transparent_360deg)] opacity-50 group-hover:opacity-100 transition-opacity duration-500 motion-safe:animate-[spin_7s_linear_infinite]" />
+        {/* Soft halo: same travelling light as the border, blurred outward */}
+        <div aria-hidden="true" className="glow-border absolute -inset-1 rounded-[1.25rem] blur-lg opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
 
-        <div className="relative rounded-[calc(1rem-1.5px)] bg-gradient-to-br from-card via-card to-accent/5 p-6 sm:p-8 overflow-hidden">
+        {/* Crisp glowing border: light streaks travel around the edge */}
+        <div className="glow-border relative rounded-2xl p-[2px] shadow-md group-hover:shadow-xl transition-shadow duration-500">
+        <div className="relative rounded-[calc(1rem-2px)] bg-card p-6 sm:p-8 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-accent/10 pointer-events-none" />
           <div className="absolute -top-16 -right-16 w-64 h-64 bg-accent/10 rounded-full blur-3xl pointer-events-none motion-safe:animate-pulse" />
 
           <motion.div
@@ -137,6 +140,8 @@ export function DeveloperCredit() {
                   M Likhith Kumar
                 </h3>
                 <div className="mt-1 flex flex-wrap items-center justify-center md:justify-start gap-x-2 gap-y-1 text-sm font-medium">
+                  <span className="text-xs text-muted-foreground">JNTU-GV IT (2023–2027)</span>
+                  <span className="text-muted-foreground/60 hidden sm:inline">·</span>
                   <span className="relative inline-flex h-5 min-w-[11rem] overflow-hidden text-accent">
                     <AnimatePresence mode="wait">
                       <motion.span
@@ -151,8 +156,6 @@ export function DeveloperCredit() {
                       </motion.span>
                     </AnimatePresence>
                   </span>
-                  <span className="text-muted-foreground/60 hidden sm:inline">·</span>
-                  <span className="text-xs text-muted-foreground">JNTU-GV IT (2023–2027)</span>
                 </div>
               </motion.div>
 
@@ -189,6 +192,7 @@ export function DeveloperCredit() {
               </motion.div>
             </div>
           </motion.div>
+        </div>
         </div>
       </motion.div>
     </MotionConfig>
