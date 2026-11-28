@@ -1,10 +1,56 @@
-import { Link } from "react-router-dom";
-import { Mail, MapPin, Phone, Github, ExternalLink, Globe, Sparkles, FolderGit2, BookOpen, Award, GraduationCap } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Mail, MapPin, Phone, Github, ExternalLink, Globe, Sparkles, FolderGit2, BookOpen, Award, GraduationCap, Users, MessagesSquare, ArrowRight } from "lucide-react";
+
+/* Cross-links shown above the footer; the current page is skipped and the first 3 left are shown. */
+const RECOMMENDATIONS = [
+  { href: "/projects", label: "View our Guided Projects", desc: "Live student applications & developer credits", icon: FolderGit2 },
+  { href: "/education", label: "View our Contributions", desc: "Textbooks, talks, workshops & governance", icon: BookOpen },
+  { href: "/qlearn", label: "Explore QLearn", desc: "10-module courses, videos & puzzle games", icon: GraduationCap },
+  { href: "/publications", label: "Read our Publications", desc: "Journals, conferences & research papers", icon: Award },
+  { href: "/scholars", label: "Meet our Scholars", desc: "Ph.D. guidance and research", icon: Users },
+  { href: "/discuss", label: "Join the Discussions", desc: "Ask questions and share ideas", icon: MessagesSquare },
+];
+
+function ExploreMore() {
+  const { pathname } = useLocation();
+  const picks = RECOMMENDATIONS.filter((r) => !pathname.startsWith(r.href)).slice(0, 3);
+
+  return (
+    <section className="no-print bg-muted/40 border-t border-border">
+      <div className="container-wide px-6 lg:px-12 py-12">
+        <h4 className="text-xs font-bold uppercase tracking-widest text-accent mb-6 flex items-center gap-2">
+          <Sparkles size={14} />
+          <span>Explore More</span>
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {picks.map(({ href, label, desc, icon: Icon }) => (
+            <Link
+              key={href}
+              to={href}
+              className="group flex items-center gap-4 p-5 rounded-2xl bg-card border border-border hover:border-accent/50 hover:shadow-md transition-all duration-300"
+            >
+              <span className="p-3 rounded-xl bg-accent/15 text-accent shrink-0 group-hover:scale-110 transition-transform">
+                <Icon size={20} />
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block font-semibold text-foreground">{label}</span>
+                <span className="block text-xs text-muted-foreground mt-0.5">{desc}</span>
+              </span>
+              <ArrowRight size={16} className="text-muted-foreground group-hover:text-accent group-hover:translate-x-1 transition-all shrink-0" />
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
+    <>
+    <ExploreMore />
     <footer className="bg-primary text-primary-foreground no-print border-t border-primary-foreground/10">
       {/* Top Banner / Bio Section */}
       <div className="container-wide px-6 lg:px-12 pt-16 pb-12">
@@ -223,5 +269,6 @@ export function Footer() {
         </div>
       </div>
     </footer>
+    </>
   );
 }
