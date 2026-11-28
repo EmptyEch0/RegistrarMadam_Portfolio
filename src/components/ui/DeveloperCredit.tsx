@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
-import { AnimatePresence, MotionConfig, motion, useReducedMotion, type Variants } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useReducedMotion, type Variants } from "framer-motion";
 import { Code2, ExternalLink, Github, Globe, Linkedin, Mail } from "lucide-react";
-import DeveloperPhoto from "@/assets/developer-photo.jpg";
+// Both avatars are cropped/warped to the same landmarks so they overlay exactly.
+import DeveloperPhoto from "@/assets/developer-photo-avatar.webp";
 import DeveloperCartoon from "@/assets/developer-cartoon.webp";
 
 const ROLES = ["AI/ML Engineer", "Full-Stack Developer", "LLM & Agentic AI Builder"];
@@ -21,6 +22,28 @@ export function DeveloperCredit() {
   const [role, setRole] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const reduceMotion = useReducedMotion();
+  const pointer = useRef("mouse");
+  const dispRef = useRef<SVGFEDisplacementMapElement>(null);
+  const turbRef = useRef<SVGFETurbulenceElement>(null);
+  const firstRun = useRef(true);
+
+  // Liquid wobble: displacement swells then settles on every reveal/hide.
+  useEffect(() => {
+    if (firstRun.current) {
+      firstRun.current = false;
+      return;
+    }
+    if (reduceMotion) return;
+    const ctrl = animate(0, 1, {
+      duration: 1.3,
+      ease: "easeInOut",
+      onUpdate: (t) => {
+        dispRef.current?.setAttribute("scale", String(Math.sin(Math.PI * t) * 16));
+        turbRef.current?.setAttribute("baseFrequency", `${0.018 + 0.02 * t} ${0.05 - 0.02 * t}`);
+      },
+    });
+    return () => ctrl.stop();
+  }, [revealed, reduceMotion]);
   useEffect(() => {
     const id = setInterval(() => setRole((r) => (r + 1) % ROLES.length), 2600);
     return () => clearInterval(id);
@@ -56,48 +79,44 @@ export function DeveloperCredit() {
                 className="relative"
               >
                 <div className="absolute -inset-1.5 rounded-[1.25rem] bg-gradient-to-tr from-accent/60 via-accent/10 to-primary/40 blur-md opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-                {/* Cartoon by default; hover/tap pours the real photo in with a liquid edge */}
-                <div
-                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-accent/50 bg-muted/40 cursor-pointer"
-                  onMouseEnter={() => setRevealed(true)}
-                  onMouseLeave={() => setRevealed(false)}
-                  onClick={() => setRevealed((r) => !r)}
+                {/* Cartoon by default; hover/focus/tap pours the real photo in with a liquid ripple */}
+                <button
+                  type="button"
+                  aria-pressed={revealed}
+                  aria-label="Show real photo of M Likhith Kumar"
+                  title="Hover to see the real me"
+                  className="relative block w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden border-2 border-accent/50 bg-muted/40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2"
+                  onPointerDown={(e) => (pointer.current = e.pointerType)}
+                  onPointerEnter={(e) => e.pointerType === "mouse" && setRevealed(true)}
+                  onPointerLeave={(e) => e.pointerType === "mouse" && setRevealed(false)}
+                  onFocus={() => pointer.current === "mouse" && setRevealed(true)}
+                  onBlur={() => setRevealed(false)}
+                  onClick={() => pointer.current !== "mouse" && setRevealed((r) => !r)}
                 >
-                  <img
-                    src={DeveloperCartoon}
-                    alt="Illustrated portrait of M Likhith Kumar"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    loading="lazy"
-                  />
                   <svg className="absolute w-0 h-0" aria-hidden="true">
-                    <filter id="dev-liquid">
-                      <feTurbulence type="fractalNoise" baseFrequency="0.015 0.04" numOctaves="2" seed="3" />
-                      <motion.feDisplacementMap
-                        key={String(revealed)}
-                        in="SourceGraphic"
-                        xChannelSelector="R"
-                        yChannelSelector="G"
-                        initial={{ scale: 45 }}
-                        animate={{ scale: 0 }}
-                        transition={{ duration: 1.1, ease: "easeOut" }}
-                      />
+                    <filter id="dev-liquid" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+                      <feTurbulence ref={turbRef} type="fractalNoise" baseFrequency="0.018 0.05" numOctaves="2" seed="7" />
+                      <feDisplacementMap ref={dispRef} in="SourceGraphic" scale="0" xChannelSelector="R" yChannelSelector="G" />
                     </filter>
                   </svg>
                   <div className="absolute inset-0" style={reduceMotion ? undefined : { filter: "url(#dev-liquid)" }}>
+                    <img
+                      src={DeveloperCartoon}
+                      alt="Illustrated portrait of M Likhith Kumar"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      loading="lazy"
+                    />
                     <motion.img
                       src={DeveloperPhoto}
                       alt="M Likhith Kumar - Website Designer & Developer"
-                      className="w-full h-full object-cover object-top"
+                      className="absolute inset-0 w-full h-full object-cover"
                       loading="lazy"
                       initial={false}
-                      animate={{
-                        clipPath: revealed ? "circle(80% at 50% 100%)" : "circle(0% at 50% 100%)",
-                        scale: revealed ? 1.05 : 1.15,
-                      }}
-                      transition={{ duration: reduceMotion ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
+                      animate={{ clipPath: revealed ? "circle(135% at 50% 115%)" : "circle(0% at 50% 115%)" }}
+                      transition={{ duration: reduceMotion ? 0 : 1.1, ease: "easeInOut" }}
                     />
                   </div>
-                </div>
+                </button>
                 <span className="absolute -bottom-2 -right-2 flex" title="Platform Developer">
                   <span className="absolute inset-0 rounded-full bg-accent/60 motion-safe:animate-ping" />
                   <span className="relative bg-accent text-accent-foreground p-1.5 rounded-full shadow-md border-2 border-card">
